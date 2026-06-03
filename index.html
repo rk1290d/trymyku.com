@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,35 +7,48 @@
 <title>Myku — Your Mechanic, On Demand</title>
 <meta name="description" content="Vetted mobile mechanics who come to you. Post a job or describe the problem, and someone shows up to fix it. No shops, no waiting rooms. Launching soon on iOS." />
 
-<!-- Open Graph / social -->
 <meta property="og:title" content="Myku — Your Mechanic, On Demand" />
 <meta property="og:description" content="Vetted mobile mechanics who come to you. No shops, no waiting rooms, no friend-of-a-friend required." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/" />
 
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230a0a0a'/%3E%3Ctext x='50' y='73' font-family='Inter,Arial,sans-serif' font-size='66' font-weight='900' fill='%23f97316' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+<script>document.documentElement.className = 'js';</script>
 
 <style>
   :root {
     --bg: #0a0a0a;
     --surface: #141414;
     --surface-2: #1b1b1b;
-    --border: #262626;
+    --surface-3: #202020;
+    --border: #232323;
+    --border-2: #2e2e2e;
     --accent: #f97316;
-    --accent-soft: rgba(249, 115, 22, 0.12);
-    --accent-glow: rgba(249, 115, 22, 0.35);
+    --accent-2: #ffb877;
+    --accent-soft: rgba(249,115,22,0.12);
+    --accent-line: rgba(249,115,22,0.22);
+    --accent-glow: rgba(249,115,22,0.38);
     --teal: #2DD4BF;
-    --teal-soft: rgba(45, 212, 191, 0.10);
+    --teal-2: #7af0e0;
+    --teal-soft: rgba(45,212,191,0.12);
+    --teal-glow: rgba(45,212,191,0.30);
     --text: #ffffff;
+    --text-2: #d4d4d8;
     --muted: #9ca3af;
-    --maxw: 1120px;
+    --muted-2: #6b7280;
+    --maxw: 1140px;
+    --radius: 18px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; }
+  html.js { scroll-behavior: smooth; }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -45,543 +58,415 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01';
   }
 
+  ::selection { background: rgba(249,115,22,0.28); color: #fff; }
+
   a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 
   .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
 
-  /* ── Wordmark ─────────────────────────────────────────── */
-  .wordmark {
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    color: var(--accent);
-  }
+  .wordmark { font-weight: 900; letter-spacing: -0.045em; color: var(--accent); }
   .wordmark .dot { color: var(--text); }
 
-  /* ── Header ───────────────────────────────────────────── */
+  .grad { background: linear-gradient(120deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .grad-teal { background: linear-gradient(120deg, var(--teal), var(--teal-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* ── Scroll progress ─────────────────────────────────── */
+  .progress {
+    position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    z-index: 100; transition: width 0.1s linear;
+  }
+
+  /* ── Header ──────────────────────────────────────────── */
   header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(10, 10, 10, 0.72);
-    backdrop-filter: saturate(160%) blur(14px);
-    -webkit-backdrop-filter: saturate(160%) blur(14px);
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(10,10,10,0.6);
+    backdrop-filter: saturate(160%) blur(16px);
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
     border-bottom: 1px solid transparent;
     transition: border-color 0.3s ease, background 0.3s ease;
   }
-  header.scrolled { border-bottom-color: var(--border); }
-  .nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-  }
-  .nav .wordmark { font-size: 26px; }
+  header.scrolled { border-bottom-color: var(--border); background: rgba(10,10,10,0.82); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+  .nav .wordmark { font-size: 25px; }
+  .nav-links { display: none; gap: 30px; }
+  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color 0.18s ease; }
+  .nav-links a:hover { color: var(--text); }
   .btn-notify {
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    padding: 10px 18px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--border-2);
+    padding: 10px 18px; border-radius: 999px; cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   }
   .btn-notify:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
 
-  /* ── Buttons ──────────────────────────────────────────── */
+  /* ── Buttons ─────────────────────────────────────────── */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 16px;
-    padding: 16px 26px;
-    border-radius: 14px;
-    cursor: pointer;
-    border: 2px solid transparent;
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-weight: 700; font-size: 15.5px;
+    padding: 15px 24px; border-radius: 13px; cursor: pointer;
+    border: 1.5px solid transparent; white-space: nowrap;
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-    white-space: nowrap;
   }
-  .btn-primary {
-    background: var(--accent);
-    color: #0a0a0a;
-    box-shadow: 0 10px 30px -8px var(--accent-glow);
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -8px var(--accent-glow); }
-  .btn-outline {
-    background: transparent;
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-  .btn-outline:hover { background: var(--accent-soft); transform: translateY(-2px); }
-  .btn-teal {
-    background: var(--teal);
-    color: #062b27;
-    box-shadow: 0 10px 30px -8px rgba(45, 212, 191, 0.35);
-  }
-  .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 16px 40px -8px rgba(45, 212, 191, 0.4); }
+  .btn svg { width: 18px; height: 18px; }
+  .btn-primary { background: var(--accent); color: #0a0a0a; box-shadow: 0 12px 34px -10px var(--accent-glow); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--accent-glow); }
+  .btn-outline { background: rgba(255,255,255,0.02); color: var(--text); border-color: var(--border-2); }
+  .btn-outline:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
+  .btn-teal { background: var(--teal); color: #062b27; box-shadow: 0 12px 34px -10px var(--teal-glow); }
+  .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--teal-glow); }
 
-  /* ── Hero ─────────────────────────────────────────────── */
-  .hero {
-    position: relative;
-    min-height: calc(100vh - 64px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 60px 0 80px;
-    overflow: hidden;
-  }
+  /* ── Hero ────────────────────────────────────────────── */
+  .hero { position: relative; padding: clamp(48px, 8vw, 96px) 0 clamp(56px, 8vw, 104px); overflow: hidden; }
   .hero::before {
-    content: '';
-    position: absolute;
-    top: -20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 900px;
-    max-width: 140vw;
-    height: 600px;
-    background: radial-gradient(ellipse at center, var(--accent-glow), transparent 62%);
-    opacity: 0.5;
-    pointer-events: none;
-    filter: blur(20px);
+    content: ''; position: absolute; top: -240px; left: 8%;
+    width: 720px; max-width: 120vw; height: 620px;
+    background: radial-gradient(ellipse at center, var(--accent-glow), transparent 60%);
+    opacity: 0.55; filter: blur(8px); pointer-events: none;
   }
   .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    right: -10%;
-    width: 520px;
-    max-width: 90vw;
-    height: 520px;
-    background: radial-gradient(circle at center, var(--teal-soft), transparent 65%);
-    pointer-events: none;
+    content: ''; position: absolute; bottom: -260px; right: -120px;
+    width: 620px; max-width: 100vw; height: 620px;
+    background: radial-gradient(circle at center, var(--teal-glow), transparent 62%);
+    opacity: 0.5; pointer-events: none;
   }
-  .hero-inner { position: relative; z-index: 1; }
-  .hero .wordmark { font-size: clamp(40px, 11vw, 80px); line-height: 1; margin-bottom: 26px; }
-  .badge-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 7px 14px;
-    border-radius: 999px;
-    margin-bottom: 26px;
+  .dotgrid {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 30%, transparent 75%);
   }
-  .badge-pill .pulse {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--teal);
-    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.6);
-    animation: pulse 2s infinite;
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr; gap: clamp(48px, 8vw, 64px); align-items: center; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600;
+    color: var(--text-2); background: var(--surface); border: 1px solid var(--border-2);
+    padding: 7px 14px; border-radius: 999px; margin-bottom: 26px;
   }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.5); }
-    70% { box-shadow: 0 0 0 9px rgba(45, 212, 191, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); }
-  }
-  h1.hero-title {
-    font-size: clamp(38px, 9.5vw, 76px);
-    font-weight: 900;
-    letter-spacing: -0.035em;
-    line-height: 1.02;
-    margin-bottom: 22px;
-  }
-  h1.hero-title .grad {
-    background: linear-gradient(120deg, var(--accent), #ffb877);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .hero-sub {
-    font-size: clamp(16px, 2.3vw, 20px);
-    color: var(--muted);
-    max-width: 620px;
-    margin: 0 auto 38px;
-  }
-  .hero-ctas {
-    display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .hero-ctas .btn { flex: 0 1 auto; }
-  .hero-note {
-    margin-top: 22px;
-    font-size: 14px;
-    color: var(--muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .eyebrow .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45,212,191,0.5);} 70% { box-shadow: 0 0 0 9px rgba(45,212,191,0);} 100% { box-shadow: 0 0 0 0 rgba(45,212,191,0);} }
+  h1.hero-title { font-size: clamp(42px, 8.4vw, 70px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.0; margin-bottom: 22px; }
+  .hero-sub { font-size: clamp(16px, 2.3vw, 19px); color: var(--muted); max-width: 540px; margin-bottom: 34px; }
+  .hero-ctas { display: flex; gap: 13px; flex-wrap: wrap; }
+  .hero-note { margin-top: 22px; font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: 9px; }
+  .hero-note svg { width: 16px; height: 16px; stroke: var(--teal); flex-shrink: 0; }
 
-  /* ── Section scaffolding ──────────────────────────────── */
-  section { padding: 86px 0; }
-  .section-tag {
-    display: inline-block;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
+  /* ── Phone mockup ────────────────────────────────────── */
+  .phone-wrap { display: flex; justify-content: center; perspective: 1600px; }
+  .phone {
+    position: relative; width: 300px; max-width: 84vw; aspect-ratio: 300 / 620;
+    background: #050505; border-radius: 46px; padding: 12px;
+    border: 1px solid #2a2a2a;
+    box-shadow: 0 50px 90px -40px rgba(0,0,0,0.9), 0 0 0 2px rgba(255,255,255,0.02) inset, 0 30px 60px -30px var(--accent-glow);
+    animation: floaty 7s ease-in-out infinite;
   }
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotateX(2deg) rotateY(-4deg); } 50% { transform: translateY(-14px) rotateX(2deg) rotateY(-4deg); } }
+  .phone-screen { position: relative; width: 100%; height: 100%; background: linear-gradient(180deg, #101010, #0b0b0b); border-radius: 36px; overflow: hidden; }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 92px; height: 26px; background: #000; border-radius: 999px; z-index: 5; }
+  .app { padding: 46px 16px 18px; height: 100%; display: flex; flex-direction: column; gap: 11px; }
+  .app-top { display: flex; align-items: center; justify-content: space-between; }
+  .app-top .am { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .app-top .am .dot { color: #fff; }
+  .app-top .bell { width: 30px; height: 30px; border-radius: 9px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; }
+  .app-top .bell svg { width: 15px; height: 15px; stroke: var(--muted); }
+  .jobcard { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 14px; padding: 12px; }
+  .jobcard .jl { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  .jobcard .jt { font-size: 14px; font-weight: 800; color: #fff; margin-top: 3px; letter-spacing: -0.01em; }
+  .jobcard .jd { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .bids-label { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .bids-label .live { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
+  .bid {
+    background: var(--surface); border: 1px solid var(--border-2); border-radius: 13px; padding: 10px 11px;
+    display: flex; align-items: center; gap: 10px;
+    opacity: 0; transform: translateY(10px);
+    animation: bidin 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  .bid:nth-of-type(1) { animation-delay: 0.5s; }
+  .bid:nth-of-type(2) { animation-delay: 1.1s; }
+  .bid:nth-of-type(3) { animation-delay: 1.7s; }
+  @keyframes bidin { to { opacity: 1; transform: none; } }
+  .bid .av { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 800; color: #0a0a0a; }
+  .bid .av.a { background: linear-gradient(135deg, #f97316, #fb923c); }
+  .bid .av.b { background: linear-gradient(135deg, #2DD4BF, #5eead4); }
+  .bid .av.c { background: linear-gradient(135deg, #a78bfa, #c4b5fd); }
+  .bid .info { flex: 1; min-width: 0; }
+  .bid .nm { font-size: 12.5px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 5px; }
+  .bid .vbadge { display: inline-flex; align-items: center; gap: 2px; font-size: 8.5px; font-weight: 800; color: var(--teal); background: var(--teal-soft); padding: 1px 5px; border-radius: 999px; }
+  .bid .vbadge svg { width: 8px; height: 8px; stroke: var(--teal); }
+  .bid .meta { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .bid .meta .star { color: #fbbf24; }
+  .bid .price { text-align: right; flex-shrink: 0; }
+  .bid .price .p { font-size: 14px; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
+  .bid .price .eta { font-size: 9.5px; color: var(--muted); }
+  .accept { margin-top: auto; background: var(--accent); color: #0a0a0a; font-size: 12.5px; font-weight: 800; text-align: center; padding: 11px; border-radius: 12px; box-shadow: 0 10px 24px -10px var(--accent-glow); }
+
+  /* ── Trust strip ─────────────────────────────────────── */
+  .trust { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.012); }
+  .trust-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 30px; padding: 22px 0; }
+  .trust-item { display: inline-flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; color: var(--text-2); }
+  .trust-item svg { width: 17px; height: 17px; stroke: var(--accent); flex-shrink: 0; }
+
+  /* ── Sections ────────────────────────────────────────── */
+  section { padding: clamp(70px, 11vw, 116px) 0; scroll-margin-top: 80px; }
+  .section-tag { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
   .section-tag.teal { color: var(--teal); }
-  h2.section-title {
-    font-size: clamp(28px, 5.5vw, 44px);
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
-    margin-bottom: 16px;
-  }
-  .section-lead {
-    font-size: clamp(16px, 2.2vw, 19px);
-    color: var(--muted);
-    max-width: 600px;
-  }
+  h2.section-title { font-size: clamp(28px, 5.2vw, 44px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.08; margin-bottom: 16px; }
+  .section-lead { font-size: clamp(16px, 2.1vw, 18.5px); color: var(--muted); max-width: 580px; }
   .center { text-align: center; }
   .center .section-lead { margin-left: auto; margin-right: auto; }
 
-  /* ── Problem ──────────────────────────────────────────── */
+  /* ── Problem ─────────────────────────────────────────── */
   .problem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .problem-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
-    align-items: center;
-  }
-  .problem-quote {
-    font-size: clamp(22px, 4.4vw, 34px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
-  }
+  .problem-grid { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; }
+  .problem-quote { position: relative; padding-left: 22px; font-size: clamp(23px, 4.4vw, 33px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.22; }
+  .problem-quote::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; border-radius: 4px; background: linear-gradient(var(--accent), var(--accent-2)); }
   .problem-quote .hl { color: var(--accent); }
-  .problem-body { font-size: clamp(15px, 2.1vw, 18px); color: var(--muted); }
+  .problem-body { font-size: clamp(15px, 2vw, 17.5px); color: var(--muted); }
   .problem-body p { margin-bottom: 16px; }
   .problem-body p:last-child { margin-bottom: 0; }
   .problem-body strong { color: var(--text); font-weight: 700; }
 
-  /* ── How it works ─────────────────────────────────────── */
-  .steps {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    margin-top: 48px;
-  }
-  .step-card {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 30px 26px;
-    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
-  }
-  .step-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent);
-    box-shadow: 0 18px 40px -20px var(--accent-glow);
-  }
-  .step-num {
-    position: absolute;
-    top: 22px;
-    right: 24px;
-    font-size: 46px;
-    font-weight: 900;
-    color: var(--surface-2);
-    line-height: 1;
-  }
-  .step-icon {
-    width: 54px; height: 54px;
-    border-radius: 14px;
-    background: var(--accent-soft);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px;
-  }
-  .step-icon svg { width: 26px; height: 26px; stroke: var(--accent); }
-  .step-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
-  .step-card p { color: var(--muted); font-size: 15px; }
+  /* ── How it works ────────────────────────────────────── */
+  .steps { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
+  .step-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; }
+  .step-card:hover { transform: translateY(-5px); border-color: var(--accent-line); box-shadow: 0 22px 48px -26px var(--accent-glow); }
+  .step-num { position: absolute; top: 20px; right: 22px; font-size: 42px; font-weight: 900; color: rgba(255,255,255,0.05); line-height: 1; }
+  .step-icon { width: 50px; height: 50px; border-radius: 13px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+  .step-icon svg { width: 24px; height: 24px; stroke: var(--accent); }
+  .step-card h3 { font-size: 19px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
+  .step-card p { color: var(--muted); font-size: 14.5px; }
 
-  /* ── Why Myku ─────────────────────────────────────────── */
+  /* ── Why ─────────────────────────────────────────────── */
   .why { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .value-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    margin-top: 48px;
-  }
-  .value-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 30px 26px;
-    transition: transform 0.22s ease, border-color 0.22s ease;
-  }
-  .value-card:hover { transform: translateY(-4px); border-color: #3a3a3a; }
-  .value-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    background: var(--accent-soft);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 18px;
-  }
-  .value-icon svg { width: 26px; height: 26px; stroke: var(--accent); }
-  .value-card h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
-  .value-card p { color: var(--muted); font-size: 15px; }
+  .value-grid { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
+  .value-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: transform 0.22s ease, border-color 0.22s ease; }
+  .value-card:hover { transform: translateY(-5px); border-color: var(--border-2); }
+  .value-icon { width: 50px; height: 50px; border-radius: 13px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 17px; }
+  .value-icon svg { width: 24px; height: 24px; stroke: var(--accent); }
+  .value-card h3 { font-size: 18.5px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
+  .value-card p { color: var(--muted); font-size: 14.5px; }
 
-  /* ── For Mechanics ────────────────────────────────────── */
-  .mechanics {
-    position: relative;
-    overflow: hidden;
-  }
-  .mechanics::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 800px; max-width: 130vw; height: 500px;
-    background: radial-gradient(ellipse at center, var(--teal-soft), transparent 65%);
-    pointer-events: none;
-  }
-  .mechanics-card {
-    position: relative;
-    background: linear-gradient(160deg, rgba(45,212,191,0.08), rgba(20,20,20,0.4));
-    border: 1px solid rgba(45, 212, 191, 0.3);
-    border-radius: 28px;
-    padding: clamp(34px, 6vw, 64px);
-    text-align: center;
-  }
-  .mechanics-card h2 {
-    font-size: clamp(28px, 5.5vw, 46px);
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.06;
-    margin-bottom: 18px;
-  }
-  .mechanics-card h2 .grad-teal {
-    background: linear-gradient(120deg, var(--teal), #7af0e0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .mechanics-card .lead {
-    font-size: clamp(16px, 2.3vw, 19px);
-    color: var(--muted);
-    max-width: 620px;
-    margin: 0 auto 30px;
-  }
-  .mech-stats {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 14px;
-    margin-bottom: 36px;
-  }
-  .mech-stat {
-    flex: 1 1 150px;
-    max-width: 220px;
-    background: rgba(10,10,10,0.45);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 14px;
-  }
-  .mech-stat .big { font-size: 22px; font-weight: 900; color: var(--teal); letter-spacing: -0.02em; }
-  .mech-stat .small { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  /* ── For Mechanics ───────────────────────────────────── */
+  .mechanics { position: relative; overflow: hidden; }
+  .mechanics::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 820px; max-width: 130vw; height: 520px; background: radial-gradient(ellipse at center, var(--teal-soft), transparent 64%); pointer-events: none; }
+  .mech-card { position: relative; background: linear-gradient(160deg, rgba(45,212,191,0.08), rgba(20,20,20,0.35)); border: 1px solid rgba(45,212,191,0.28); border-radius: 26px; padding: clamp(32px, 6vw, 60px); }
+  .mech-grid { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; }
+  .mech-card h2 { font-size: clamp(28px, 5.2vw, 44px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.06; margin-bottom: 16px; }
+  .mech-card .lead { font-size: clamp(15.5px, 2.2vw, 18px); color: var(--muted); margin-bottom: 26px; }
+  .mech-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 30px; }
+  .mech-stat { flex: 1 1 130px; background: rgba(10,10,10,0.4); border: 1px solid var(--border-2); border-radius: 14px; padding: 16px 14px; }
+  .mech-stat .big { font-size: 18px; font-weight: 900; color: var(--teal); letter-spacing: -0.02em; }
+  .mech-stat .small { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  /* job-alert mini card */
+  .alert-card { background: var(--surface); border: 1px solid rgba(45,212,191,0.3); border-radius: 18px; padding: 16px; box-shadow: 0 30px 60px -30px rgba(0,0,0,0.8); max-width: 340px; margin: 0 auto; }
+  .alert-top { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
+  .alert-top .live { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
+  .alert-row { display: flex; align-items: center; gap: 12px; }
+  .alert-ic { width: 42px; height: 42px; border-radius: 12px; background: var(--teal-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .alert-ic svg { width: 20px; height: 20px; stroke: var(--teal); }
+  .alert-row .at { font-size: 14px; font-weight: 800; color: #fff; }
+  .alert-row .ad { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .alert-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--border); }
+  .alert-foot .est { font-size: 12px; color: var(--muted); }
+  .alert-foot .est b { color: #fff; font-size: 15px; }
+  .alert-foot .go { background: var(--teal); color: #062b27; font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 10px; }
 
-  /* ── Waitlist ─────────────────────────────────────────── */
-  .waitlist { background: var(--surface); border-top: 1px solid var(--border); }
-  .waitlist-card {
-    max-width: 560px;
-    margin: 0 auto;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 26px;
-    padding: clamp(28px, 6vw, 48px);
-    text-align: center;
-  }
-  .tabs {
-    display: flex;
-    gap: 6px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 6px;
-    margin: 26px auto 24px;
-    max-width: 380px;
-  }
-  .tab {
-    flex: 1;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--muted);
-    background: transparent;
-    border: none;
-    padding: 12px 10px;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease;
-  }
-  .tab.active { color: #0a0a0a; background: var(--accent); }
-  .tab.active.teal { background: var(--teal); color: #062b27; }
-  .role-hint { font-size: 14px; color: var(--muted); margin-bottom: 18px; min-height: 20px; }
+  /* ── Waitlist ────────────────────────────────────────── */
+  .waitlist { background: var(--surface); border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+  .waitlist::before { content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%); width: 700px; max-width: 120vw; height: 460px; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 65%); pointer-events: none; }
+  .waitlist-card { position: relative; max-width: 540px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border-2); border-radius: 24px; padding: clamp(28px, 6vw, 44px); text-align: center; box-shadow: 0 40px 90px -50px rgba(0,0,0,0.9); }
+  .seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 13px; padding: 5px; margin: 24px auto 18px; max-width: 360px; }
+  .seg .thumb { position: absolute; top: 5px; left: 5px; width: calc(50% - 5px); height: calc(100% - 10px); background: var(--accent); border-radius: 9px; transition: transform 0.28s cubic-bezier(0.16,1,0.3,1), background 0.28s ease; box-shadow: 0 6px 16px -6px var(--accent-glow); }
+  .seg.mech .thumb { transform: translateX(100%); background: var(--teal); box-shadow: 0 6px 16px -6px var(--teal-glow); }
+  .seg .tab { position: relative; z-index: 1; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted); background: none; border: none; padding: 11px 8px; border-radius: 9px; cursor: pointer; transition: color 0.2s ease; }
+  .seg .tab.active { color: #0a0a0a; }
+  .role-hint { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; min-height: 19px; }
   .role-hint b { color: var(--text); }
-  .signup-form { display: flex; flex-direction: column; gap: 12px; }
-  .signup-form .field-row { display: flex; flex-direction: column; gap: 12px; }
-  .email-input {
-    font-family: inherit;
-    font-size: 16px;
-    color: var(--text);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px 18px;
-    width: 100%;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .email-input::placeholder { color: #6b7280; }
+  .signup-form { display: flex; flex-direction: column; gap: 11px; }
+  .email-input { font-family: inherit; font-size: 16px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 13px; padding: 15px 17px; width: 100%; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .email-input::placeholder { color: var(--muted-2); }
   .email-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .email-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
   .form-error { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; text-align: left; }
   .signup-form .btn { width: 100%; }
-  .confirm {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 0;
-    animation: rise 0.5s ease;
-  }
-  .confirm.show { display: flex; }
-  .confirm .check {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: var(--accent-soft);
-    display: flex; align-items: center; justify-content: center;
-  }
+  .legal-note { font-size: 12px; color: var(--muted-2); margin-top: 6px; }
+  .confirm { display: none; flex-direction: column; align-items: center; gap: 13px; padding: 8px 0; }
+  .confirm.show { display: flex; animation: rise 0.5s ease; }
+  .confirm .check { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
   .confirm.teal .check { background: var(--teal-soft); }
-  .confirm .check svg { width: 32px; height: 32px; stroke: var(--accent); }
+  .confirm .check svg { width: 30px; height: 30px; stroke: var(--accent); }
   .confirm.teal .check svg { stroke: var(--teal); }
-  .confirm h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
-  .confirm p { color: var(--muted); font-size: 15px; max-width: 360px; }
-  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .confirm h3 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; }
+  .confirm p { color: var(--muted); font-size: 14.5px; max-width: 360px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-  /* ── Footer ───────────────────────────────────────────── */
-  footer.site-footer {
-    border-top: 1px solid var(--border);
-    padding: 54px 0 40px;
-    text-align: center;
-  }
-  footer .wordmark { font-size: 28px; margin-bottom: 22px; display: inline-block; }
-  .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px 26px;
-    margin-bottom: 22px;
-  }
-  .footer-links a { color: var(--muted); font-size: 15px; font-weight: 500; transition: color 0.18s ease; }
+  /* ── Footer ──────────────────────────────────────────── */
+  footer.site-footer { border-top: 1px solid var(--border); padding: 56px 0 42px; text-align: center; }
+  footer .wordmark { font-size: 27px; display: inline-block; margin-bottom: 12px; }
+  .foot-tag { color: var(--muted); font-size: 14.5px; margin-bottom: 26px; }
+  .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-bottom: 20px; }
+  .footer-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
   .footer-links a:hover { color: var(--accent); }
-  .footer-email { display: inline-block; color: var(--muted); font-size: 15px; margin-bottom: 18px; transition: color 0.18s ease; }
+  .footer-email { display: inline-block; color: var(--text-2); font-size: 14.5px; font-weight: 600; margin-bottom: 22px; transition: color 0.18s ease; }
   .footer-email:hover { color: var(--accent); }
-  .footer-copy { color: #6b7280; font-size: 13px; }
+  .foot-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; border-top: 1px solid var(--border); padding-top: 22px; }
+  .footer-copy { color: var(--muted-2); font-size: 13px; }
+  .foot-badge { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; }
+  .foot-badge .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
 
-  /* ── Scroll reveal ────────────────────────────────────── */
-  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-  .reveal.in { opacity: 1; transform: none; }
+  /* ── Reveal (progressive enhancement) ────────────────── */
+  html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  html.js .reveal.in { opacity: 1; transform: none; }
   .reveal.d1 { transition-delay: 0.08s; }
   .reveal.d2 { transition-delay: 0.16s; }
   .reveal.d3 { transition-delay: 0.24s; }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .reveal { opacity: 1; transform: none; transition: none; }
-    .badge-pill .pulse { animation: none; }
+    html.js { scroll-behavior: auto; }
+    html.js .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+    .phone, .bid, .pulse, .eyebrow .pulse, .live { animation: none !important; }
+    .bid { opacity: 1 !important; transform: none !important; }
   }
 
-  /* ── Responsive ───────────────────────────────────────── */
-  @media (min-width: 720px) {
+  /* ── Responsive ──────────────────────────────────────── */
+  @media (min-width: 680px) {
     .steps { grid-template-columns: repeat(3, 1fr); }
     .value-grid { grid-template-columns: repeat(3, 1fr); }
-    .problem-grid { grid-template-columns: 0.9fr 1.1fr; gap: 56px; }
-    section { padding: 104px 0; }
   }
-  @media (max-width: 380px) {
-    .hero-ctas { flex-direction: column; align-items: stretch; }
+  @media (min-width: 900px) {
+    .nav-links { display: flex; }
+    .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 40px; }
+    .problem-grid { grid-template-columns: 0.85fr 1.15fr; gap: 56px; }
+    .mech-grid { grid-template-columns: 1.15fr 0.85fr; gap: 52px; }
+  }
+  @media (max-width: 400px) {
+    .hero-ctas { flex-direction: column; }
     .hero-ctas .btn { width: 100%; }
   }
 </style>
 </head>
 <body>
+  <div class="progress" id="progress"></div>
 
-  <!-- ── Header ─────────────────────────────────────────── -->
+  <!-- ── Header ──────────────────────────────────────── -->
   <header id="site-header">
     <div class="container nav">
       <a href="#top" class="wordmark" aria-label="Myku home">Myku<span class="dot">.</span></a>
+      <nav class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#why">Why Myku</a>
+        <a href="#mechanics">For mechanics</a>
+      </nav>
       <button class="btn-notify" data-scroll="#waitlist">Notify Me</button>
     </div>
   </header>
 
   <main id="top">
 
-    <!-- ── 1. Hero ──────────────────────────────────────── -->
+    <!-- ── 1. Hero ───────────────────────────────────── -->
     <section class="hero">
-      <div class="container hero-inner">
-        <div class="wordmark reveal">Myku<span class="dot">.</span></div>
-        <div class="badge-pill reveal d1"><span class="pulse"></span> Launching soon on iOS</div>
-        <h1 class="hero-title reveal d1">Your mechanic. <span class="grad">On demand.</span></h1>
-        <p class="hero-sub reveal d2">
-          Vetted mobile mechanics who come to you. Post a job or describe the problem,
-          and someone shows up to fix it. No shops, no waiting rooms, no
-          friend-of-a-friend required.
-        </p>
-        <div class="hero-ctas reveal d2">
-          <button class="btn btn-primary" data-scroll="#waitlist" data-role="customer">I Need a Mechanic</button>
-          <button class="btn btn-outline" data-scroll="#waitlist" data-role="mechanic">I'm a Mechanic</button>
+      <div class="dotgrid"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow reveal"><span class="pulse"></span> Launching soon on iOS</div>
+          <h1 class="hero-title reveal d1">Your mechanic.<br><span class="grad">On demand.</span></h1>
+          <p class="hero-sub reveal d1">
+            Vetted mobile mechanics who come to you. Post a job or describe the problem —
+            and someone shows up to fix it. No shops, no waiting rooms, no
+            friend-of-a-friend required.
+          </p>
+          <div class="hero-ctas reveal d2">
+            <button class="btn btn-primary" data-scroll="#waitlist" data-role="customer">I Need a Mechanic</button>
+            <button class="btn btn-outline" data-scroll="#waitlist" data-role="mechanic">I'm a Mechanic</button>
+          </div>
+          <div class="hero-note reveal d3">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Be first in line — we'll email you the moment we launch.
+          </div>
         </div>
-        <div class="hero-note reveal d3">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-          Be first in line when we go live
+
+        <!-- Phone mockup -->
+        <div class="phone-wrap reveal d2" aria-hidden="true">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="island"></div>
+              <div class="app">
+                <div class="app-top">
+                  <div class="am">Myku<span class="dot">.</span></div>
+                  <div class="bell"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+                </div>
+                <div class="jobcard">
+                  <div class="jl">Your job</div>
+                  <div class="jt">2019 Honda Civic · Won't start</div>
+                  <div class="jd">Driveway · posted 2 min ago</div>
+                </div>
+                <div class="bids-label"><span class="live"></span> 3 mechanics responded</div>
+
+                <div class="bid">
+                  <div class="av a">MJ</div>
+                  <div class="info">
+                    <div class="nm">Marcus J. <span class="vbadge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Verified</span></div>
+                    <div class="meta"><span class="star">★</span> 4.9 · 2.1 mi away</div>
+                  </div>
+                  <div class="price"><div class="p">$120</div><div class="eta">ETA 25 min</div></div>
+                </div>
+
+                <div class="bid">
+                  <div class="av b">SK</div>
+                  <div class="info">
+                    <div class="nm">Sara K. <span class="vbadge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Verified</span></div>
+                    <div class="meta"><span class="star">★</span> 5.0 · 3.4 mi away</div>
+                  </div>
+                  <div class="price"><div class="p">$135</div><div class="eta">ETA 40 min</div></div>
+                </div>
+
+                <div class="bid">
+                  <div class="av c">DW</div>
+                  <div class="info">
+                    <div class="nm">Devon W. <span class="vbadge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Verified</span></div>
+                    <div class="meta"><span class="star">★</span> 4.8 · 1.2 mi away</div>
+                  </div>
+                  <div class="price"><div class="p">$110</div><div class="eta">ETA 20 min</div></div>
+                </div>
+
+                <div class="accept">Accept &amp; book Devon</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 2. The Problem ───────────────────────────────── -->
+    <!-- ── 2. Trust strip ────────────────────────────── -->
+    <div class="trust">
+      <div class="container trust-row reveal">
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg> ID-verified mechanics</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Upfront quotes</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> They come to you</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg> iOS at launch</span>
+      </div>
+    </div>
+
+    <!-- ── 3. The Problem ────────────────────────────── -->
     <section class="problem">
       <div class="container">
         <div class="problem-grid">
-          <div class="reveal">
-            <p class="problem-quote">
-              It's a random morning. The car <span class="hl">just won't start.</span>
-            </p>
-          </div>
+          <p class="problem-quote reveal">It's a random morning. The car <span class="hl">just won't start.</span></p>
           <div class="problem-body reveal d1">
-            <p>
-              Everything looks fine. No warning lights, no obvious clue. And your only real
-              move is texting around, hoping someone knows a mechanic you can actually trust.
-            </p>
-            <p>
-              Most people don't have that friend. So they get <strong>stranded, towed, or
-              quietly overcharged</strong> by whoever they could find first.
-            </p>
-            <p>
-              Myku is the friend-of-a-friend — for everyone. A vetted mechanic in your pocket,
-              ready to come to you.
-            </p>
+            <p>Everything looks fine. No warning lights, no obvious clue. Your only real move is texting around, hoping someone knows a mechanic you can actually trust.</p>
+            <p>Most people don't have that friend. So they get <strong>stranded, towed, or quietly overcharged</strong> by whoever they could find first.</p>
+            <p>Myku is the friend-of-a-friend — for everyone. A vetted mechanic in your pocket, ready to come to you.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 3. How It Works ──────────────────────────────── -->
-    <section>
+    <!-- ── 4. How it works ───────────────────────────── -->
+    <section id="how">
       <div class="container center">
         <span class="section-tag reveal">How it works</span>
         <h2 class="section-title reveal">Fixed in three steps</h2>
@@ -590,92 +475,85 @@
         <div class="steps">
           <div class="step-card reveal" style="text-align:left">
             <span class="step-num">1</span>
-            <div class="step-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.3L3 18l3 3 6.4-6.3a4 4 0 0 0 5.3-5.4l-2.6 2.6-2.1-.5-.5-2.1 2.7-2.6z"/></svg>
-            </div>
+            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.3L3 18l3 3 6.4-6.3a4 4 0 0 0 5.3-5.4l-2.6 2.6-2.1-.5-.5-2.1 2.7-2.6z"/></svg></div>
             <h3>Post or describe it</h3>
-            <p>Know the repair? Post the job. Not sure what's wrong? Just describe the symptoms and request a diagnosis.</p>
+            <p>Know the repair? Post the job. Not sure what's wrong? Describe the symptoms and request a diagnosis.</p>
           </div>
-
           <div class="step-card reveal d1" style="text-align:left">
             <span class="step-num">2</span>
-            <div class="step-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            </div>
-            <h3>Nearby mechanics respond</h3>
-            <p>Mechanics close to you send quotes and availability. Compare prices and reviews side by side.</p>
+            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <h3>Mechanics respond</h3>
+            <p>Nearby mechanics send quotes and availability. Compare prices and reviews side by side.</p>
           </div>
-
           <div class="step-card reveal d2" style="text-align:left">
             <span class="step-num">3</span>
-            <div class="step-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-            </div>
-            <h3>Pick who comes to you</h3>
-            <p>Choose the mechanic you trust. They show up where you are and get the job done.</p>
+            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></div>
+            <h3>They come to you</h3>
+            <p>Pick the mechanic you trust. They show up where you are and get the job done.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 4. Why Myku ──────────────────────────────────── -->
-    <section class="why">
+    <!-- ── 5. Why Myku ───────────────────────────────── -->
+    <section class="why" id="why">
       <div class="container center">
         <span class="section-tag reveal">Why Myku</span>
         <h2 class="section-title reveal">Built around your day, not theirs</h2>
-        <p class="section-lead reveal d1">The repair shop model is broken. Myku flips it — the mechanic comes to you, on your terms.</p>
+        <p class="section-lead reveal d1">The repair-shop model is broken. Myku flips it — the mechanic comes to you, on your terms.</p>
 
         <div class="value-grid">
           <div class="value-card reveal" style="text-align:left">
-            <div class="value-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>
-            </div>
+            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
             <h3>They come to you</h3>
             <p>No towing, no dropping your car off for days. Your driveway, your office lot, the roadside — wherever you're stuck.</p>
           </div>
-
           <div class="value-card reveal d1" style="text-align:left">
-            <div class="value-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            </div>
+            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <h3>Transparent pricing</h3>
             <p>See quotes upfront before anyone touches your car. Compare, choose, and know the price going in — no surprises.</p>
           </div>
-
           <div class="value-card reveal d2" style="text-align:left">
-            <div class="value-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>
-            </div>
+            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
             <h3>Real, vetted mechanics</h3>
-            <p>Every mechanic is ID-verified and reviewed by the Myku team. You see ratings from real customers before you book.</p>
+            <p>Every mechanic is ID-verified and reviewed by the Myku team. See ratings from real customers before you book.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 5. For Mechanics ─────────────────────────────── -->
-    <section class="mechanics">
+    <!-- ── 6. For Mechanics ──────────────────────────── -->
+    <section class="mechanics" id="mechanics">
       <div class="container">
-        <div class="mechanics-card reveal">
-          <span class="section-tag teal">For mechanics</span>
-          <h2>Turn your skills into <span class="grad-teal">a business</span></h2>
-          <p class="lead">
-            You're the talent. Myku is the platform. Set your own hours, name your own prices,
-            and skip the shop overhead entirely — customers come to you. The way ride-sharing
-            turned drivers into earners, Myku turns mechanics into entrepreneurs building a real,
-            full-time income.
-          </p>
-          <div class="mech-stats">
-            <div class="mech-stat"><div class="big">Your hours</div><div class="small">Work when you want</div></div>
-            <div class="mech-stat"><div class="big">Your prices</div><div class="small">You set every quote</div></div>
-            <div class="mech-stat"><div class="big">$0 overhead</div><div class="small">No shop, no lease</div></div>
+        <div class="mech-card reveal">
+          <div class="mech-grid">
+            <div>
+              <span class="section-tag teal">For mechanics</span>
+              <h2>Turn your skills into <span class="grad-teal">a business</span></h2>
+              <p class="lead">You're the talent. Myku is the platform. Set your own hours, name your own prices, and skip the shop overhead entirely — customers come to you. The way ride-sharing turned drivers into earners, Myku turns mechanics into entrepreneurs building a real, full-time income.</p>
+              <div class="mech-stats">
+                <div class="mech-stat"><div class="big">Your hours</div><div class="small">Work when you want</div></div>
+                <div class="mech-stat"><div class="big">Your prices</div><div class="small">You set every quote</div></div>
+                <div class="mech-stat"><div class="big">$0 overhead</div><div class="small">No shop, no lease</div></div>
+              </div>
+              <button class="btn btn-teal" data-scroll="#waitlist" data-role="mechanic">Join as a Mechanic</button>
+            </div>
+            <div>
+              <div class="alert-card">
+                <div class="alert-top"><span class="live"></span> New job nearby</div>
+                <div class="alert-row">
+                  <div class="alert-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-3.3a2 2 0 0 0-.4-1.2L18 9h-3M3 17h1m11 0H8m-5 0V7a2 2 0 0 1 2-2h7v12M15 9V5"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></svg></div>
+                  <div style="flex:1"><div class="at">Brake pads &amp; rotors</div><div class="ad">Toyota Camry · 1.8 mi away</div></div>
+                </div>
+                <div class="alert-foot"><div class="est">Your quote: <b>$240</b></div><div class="go">Send quote</div></div>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-teal" data-scroll="#waitlist" data-role="mechanic">Join as a Mechanic</button>
         </div>
       </div>
     </section>
 
-    <!-- ── 6. Waitlist ──────────────────────────────────── -->
+    <!-- ── 7. Waitlist ───────────────────────────────── -->
     <section class="waitlist" id="waitlist">
       <div class="container center">
         <span class="section-tag reveal">Get early access</span>
@@ -683,28 +561,23 @@
         <p class="section-lead reveal d1">Myku launches soon on iOS. Drop your email and we'll tell you the moment it's live.</p>
 
         <div class="waitlist-card reveal d1">
-          <!-- Form -->
           <div id="signup-wrap">
-            <div class="tabs" role="tablist" aria-label="Choose your role">
+            <div class="seg" id="seg" role="tablist" aria-label="Choose your role">
+              <span class="thumb" aria-hidden="true"></span>
               <button class="tab active" id="tab-customer" role="tab" aria-selected="true" data-role="customer">I'm a Customer</button>
               <button class="tab" id="tab-mechanic" role="tab" aria-selected="false" data-role="mechanic">I'm a Mechanic</button>
             </div>
             <p class="role-hint" id="role-hint">Joining the <b>customer</b> waitlist — get a mechanic the day we launch.</p>
             <form class="signup-form" id="signup-form" novalidate>
-              <div class="field-row">
-                <input class="email-input" id="email" type="email" inputmode="email" autocomplete="email"
-                       placeholder="you@email.com" aria-label="Email address" />
-                <button class="btn btn-primary" id="submit-btn" type="submit">Notify Me at Launch</button>
-              </div>
+              <input class="email-input" id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="Email address" />
+              <button class="btn btn-primary" id="submit-btn" type="submit">Notify Me at Launch</button>
               <div class="form-error" id="form-error" role="alert"></div>
             </form>
+            <p class="legal-note">No spam. One email when we launch — that's it.</p>
           </div>
 
-          <!-- Confirmation -->
           <div class="confirm" id="confirm">
-            <div class="check">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-            </div>
+            <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
             <h3>You're on the list.</h3>
             <p id="confirm-msg">We'll email you the moment Myku goes live.</p>
           </div>
@@ -714,17 +587,21 @@
 
   </main>
 
-  <!-- ── 7. Footer ──────────────────────────────────────── -->
+  <!-- ── 8. Footer ─────────────────────────────────── -->
   <footer class="site-footer">
     <div class="container">
       <a href="#top" class="wordmark">Myku<span class="dot">.</span></a>
+      <p class="foot-tag">The mechanic in your pocket — for everyone.</p>
       <div class="footer-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>
         <a href="support.html">Support</a>
       </div>
       <a class="footer-email" href="mailto:support@trymyku.com">support@trymyku.com</a>
-      <div class="footer-copy">© 2026 Myku. All rights reserved.</div>
+      <div class="foot-bottom">
+        <span class="footer-copy">© 2026 Myku. All rights reserved.</span>
+        <span class="foot-badge"><span class="pulse"></span> Launching soon on iOS</span>
+      </div>
     </div>
   </footer>
 
@@ -732,44 +609,46 @@
     (function () {
       'use strict';
 
-      /* ── Smooth-scroll for any element with data-scroll ── */
+      /* Smooth-scroll + optional role preselect */
       document.querySelectorAll('[data-scroll]').forEach(function (el) {
         el.addEventListener('click', function () {
           var target = document.querySelector(el.getAttribute('data-scroll'));
-          if (!target) return;
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // If a role was specified on the trigger, preselect that waitlist tab.
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           var role = el.getAttribute('data-role');
           if (role) setRole(role);
         });
       });
 
-      /* ── Sticky header border on scroll ── */
+      /* Header border + scroll progress */
       var header = document.getElementById('site-header');
+      var progress = document.getElementById('progress');
       function onScroll() {
-        if (window.scrollY > 8) header.classList.add('scrolled');
-        else header.classList.remove('scrolled');
+        var y = window.scrollY || document.documentElement.scrollTop;
+        header.classList.toggle('scrolled', y > 8);
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
       }
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
 
-      /* ── Scroll reveal ── */
+      /* Scroll reveal — with a hard failsafe so content is NEVER stuck hidden */
       var reveals = document.querySelectorAll('.reveal');
+      function revealAll() { reveals.forEach(function (r) { r.classList.add('in'); }); }
       if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (entries) {
           entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('in');
-              io.unobserve(entry.target);
-            }
+            if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
           });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
         reveals.forEach(function (r) { io.observe(r); });
+        // Safety net: if anything hasn't revealed shortly after load, show it.
+        setTimeout(revealAll, 1600);
       } else {
-        reveals.forEach(function (r) { r.classList.add('in'); });
+        revealAll();
       }
 
-      /* ── Waitlist role tabs ── */
+      /* Role segmented control */
+      var seg = document.getElementById('seg');
       var tabCustomer = document.getElementById('tab-customer');
       var tabMechanic = document.getElementById('tab-mechanic');
       var roleHint = document.getElementById('role-hint');
@@ -779,27 +658,21 @@
       function setRole(role) {
         currentRole = role === 'mechanic' ? 'mechanic' : 'customer';
         var isMech = currentRole === 'mechanic';
-
+        seg.classList.toggle('mech', isMech);
         tabCustomer.classList.toggle('active', !isMech);
         tabMechanic.classList.toggle('active', isMech);
-        tabCustomer.classList.toggle('teal', false);
-        tabMechanic.classList.toggle('teal', isMech);
         tabCustomer.setAttribute('aria-selected', String(!isMech));
         tabMechanic.setAttribute('aria-selected', String(isMech));
-
-        // Recolor the submit button to match the active list (teal for mechanics).
         submitBtn.classList.toggle('btn-primary', !isMech);
         submitBtn.classList.toggle('btn-teal', isMech);
-
         roleHint.innerHTML = isMech
           ? 'Joining the <b>mechanic</b> waitlist — start earning on day one.'
           : 'Joining the <b>customer</b> waitlist — get a mechanic the day we launch.';
       }
-
       tabCustomer.addEventListener('click', function () { setRole('customer'); });
       tabMechanic.addEventListener('click', function () { setRole('mechanic'); });
 
-      /* ── Form validation + confirmation (no backend) ── */
+      /* Form validation + confirmation (no backend) */
       var form = document.getElementById('signup-form');
       var email = document.getElementById('email');
       var formError = document.getElementById('form-error');
@@ -808,10 +681,7 @@
       var confirmMsg = document.getElementById('confirm-msg');
       var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      email.addEventListener('input', function () {
-        email.classList.remove('invalid');
-        formError.textContent = '';
-      });
+      email.addEventListener('input', function () { email.classList.remove('invalid'); formError.textContent = ''; });
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -830,9 +700,6 @@
         signupWrap.style.display = 'none';
         confirm.classList.add('show');
       });
-
-      // Expose for data-scroll handlers that preselect a role.
-      window.__mykuSetRole = setRole;
     })();
   </script>
 </body>
