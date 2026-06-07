@@ -4,11 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
-<title>Myku: Your Mechanic, On Demand</title>
-<meta name="description" content="Trusted local mechanics, mobile and independent. Post a job or describe the problem, then choose a mechanic who comes to you or one with their own shop to drop off or wait at. Launching soon on iOS." />
+<title>Myku Auto — Join the Mechanic Waitlist</title>
+<meta name="description" content="Myku Auto connects mechanics with customers in their area. Set your own hours, set your own prices, work mobile or from your shop. Join the waitlist and be first in your city." />
 
-<meta property="og:title" content="Myku: Your Mechanic, On Demand" />
-<meta property="og:description" content="Trusted local mechanics, mobile and independent. Choose one who comes to you, or one with their own shop. No friend-of-a-friend required." />
+<meta property="og:title" content="Myku Auto — For Mechanics" />
+<meta property="og:description" content="Myku Auto connects mechanics with customers in their area. Set your own hours, set your own prices, work mobile or from your shop. Join the waitlist and be first in your city." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/" />
 
@@ -69,7 +69,7 @@
   .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
 
   .wordmark { font-weight: 900; letter-spacing: -0.045em; color: var(--accent); }
-  .wordmark .dot { color: var(--text); }
+  .wordmark .auto { color: var(--text); font-weight: 800; }
 
   .grad { background: linear-gradient(120deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   .grad-teal { background: linear-gradient(120deg, var(--teal), var(--teal-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
@@ -92,17 +92,15 @@
   }
   header.scrolled { border-bottom-color: var(--border); background: rgba(10,10,10,0.82); }
   .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-  .nav .wordmark { font-size: 25px; }
-  .nav-links { display: none; gap: 30px; }
-  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color 0.18s ease; }
-  .nav-links a:hover { color: var(--text); }
+  .nav .wordmark { font-size: 23px; }
   .btn-notify {
-    font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text);
-    background: var(--surface-2); border: 1px solid var(--border-2);
-    padding: 10px 18px; border-radius: 999px; cursor: pointer;
-    transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    font-family: inherit; font-size: 14px; font-weight: 700; color: #0a0a0a;
+    background: var(--accent); border: 1px solid var(--accent);
+    padding: 10px 20px; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 10px 26px -12px var(--accent-glow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
-  .btn-notify:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .btn-notify:hover { transform: translateY(-1px); box-shadow: 0 16px 34px -12px var(--accent-glow); }
 
   /* ── Buttons ─────────────────────────────────────────── */
   .btn {
@@ -115,113 +113,42 @@
   .btn svg { width: 18px; height: 18px; }
   .btn-primary { background: var(--accent); color: #0a0a0a; box-shadow: 0 12px 34px -10px var(--accent-glow); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--accent-glow); }
-  .btn-outline { background: rgba(255,255,255,0.02); color: var(--text); border-color: var(--border-2); }
-  .btn-outline:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
-  .btn-teal { background: var(--teal); color: #062b27; box-shadow: 0 12px 34px -10px var(--teal-glow); }
-  .btn-teal:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--teal-glow); }
 
   /* ── Hero ────────────────────────────────────────────── */
-  .hero { position: relative; padding: clamp(48px, 8vw, 96px) 0 clamp(56px, 8vw, 104px); overflow: hidden; }
+  .hero { position: relative; min-height: calc(100vh - 66px); display: flex; align-items: center; padding: clamp(48px, 8vw, 80px) 0; overflow: hidden; }
   .hero::before {
-    content: ''; position: absolute; top: -240px; left: 8%;
-    width: 720px; max-width: 120vw; height: 620px;
+    content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 760px; max-width: 130vw; height: 600px;
     background: radial-gradient(ellipse at center, var(--accent-glow), transparent 60%);
-    opacity: 0.55; filter: blur(8px); pointer-events: none;
+    opacity: 0.5; filter: blur(8px); pointer-events: none;
   }
   .hero::after {
     content: ''; position: absolute; bottom: -260px; right: -120px;
-    width: 620px; max-width: 100vw; height: 620px;
+    width: 600px; max-width: 100vw; height: 600px;
     background: radial-gradient(circle at center, var(--teal-glow), transparent 62%);
-    opacity: 0.5; pointer-events: none;
+    opacity: 0.4; pointer-events: none;
   }
   .dotgrid {
     position: absolute; inset: 0; pointer-events: none; z-index: 0;
     background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
     background-size: 30px 30px;
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 30%, transparent 75%);
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 75%);
   }
-  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr; gap: clamp(48px, 8vw, 64px); align-items: center; }
+  .hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; text-align: center; }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600;
-    color: var(--text-2); background: var(--surface); border: 1px solid var(--border-2);
-    padding: 7px 14px; border-radius: 999px; margin-bottom: 26px;
+    color: var(--teal-2); background: var(--teal-soft); border: 1px solid rgba(45,212,191,0.28);
+    padding: 7px 15px; border-radius: 999px; margin-bottom: 26px;
   }
   .eyebrow .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45,212,191,0.5);} 70% { box-shadow: 0 0 0 9px rgba(45,212,191,0);} 100% { box-shadow: 0 0 0 0 rgba(45,212,191,0);} }
-  h1.hero-title { font-size: clamp(42px, 8.4vw, 70px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.0; margin-bottom: 22px; }
-  .hero-sub { font-size: clamp(16px, 2.3vw, 19px); color: var(--muted); max-width: 540px; margin-bottom: 34px; }
-  .hero-ctas { display: flex; gap: 13px; flex-wrap: wrap; }
+  h1.hero-title { font-size: clamp(40px, 8.4vw, 68px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.02; margin-bottom: 22px; }
+  .hero-sub { font-size: clamp(16px, 2.3vw, 19px); color: var(--muted); max-width: 560px; margin: 0 auto 34px; }
+  .hero-ctas { display: flex; justify-content: center; }
+  .hero-ctas .btn { min-width: 280px; }
   .hero-note { margin-top: 22px; font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: 9px; }
   .hero-note svg { width: 16px; height: 16px; stroke: var(--teal); flex-shrink: 0; }
-
-  /* ── Phone mockup ────────────────────────────────────── */
-  .phone-wrap { display: flex; justify-content: center; perspective: 1600px; }
-  .phone {
-    position: relative; width: 300px; max-width: 84vw; aspect-ratio: 300 / 620;
-    background: #050505; border-radius: 46px; padding: 12px;
-    border: 1px solid #2a2a2a;
-    box-shadow: 0 50px 90px -40px rgba(0,0,0,0.9), 0 0 0 2px rgba(255,255,255,0.02) inset, 0 30px 60px -30px var(--accent-glow);
-    animation: floaty 7s ease-in-out infinite;
-  }
-  @keyframes floaty { 0%,100% { transform: translateY(0) rotateX(2deg) rotateY(-4deg); } 50% { transform: translateY(-14px) rotateX(2deg) rotateY(-4deg); } }
-  .phone-screen { position: relative; width: 100%; height: 100%; background: linear-gradient(180deg, #101010, #0b0b0b); border-radius: 36px; overflow: hidden; }
-  .island { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 84px; height: 24px; background: #000; border-radius: 999px; z-index: 6; }
-  .statusbar { position: absolute; top: 0; left: 0; right: 0; height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 5; }
-  .statusbar .time { font-size: 11px; font-weight: 800; color: #fff; }
-  .statusbar .sig { display: flex; align-items: center; gap: 5px; }
-  .statusbar .sig svg { height: 10px; width: auto; display: block; }
-  .app { padding: 46px 13px 0; height: 100%; display: flex; flex-direction: column; gap: 9px; }
-  .appbar { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; }
-  .appbar .am { font-size: 17px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
-  .appbar .am .dot { color: #fff; }
-  .appbar .ab-actions { display: flex; gap: 7px; }
-  .appbar .ico { position: relative; width: 30px; height: 30px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
-  .appbar .ico svg { width: 15px; height: 15px; stroke: var(--text-2); }
-  .appbar .ico .nd { position: absolute; top: 6px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); border: 1.5px solid var(--surface-2); }
-  .jobcard { background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 14px; padding: 12px 13px; }
-  .jobcard .jhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-  .jobcard .jt { font-size: 14px; font-weight: 800; color: #fff; letter-spacing: -0.01em; white-space: nowrap; }
-  .jobcard .jd { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .pill { flex-shrink: 0; font-size: 9px; font-weight: 700; color: var(--teal); background: var(--teal-soft); padding: 4px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-  .pill .live { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: pulse 2.2s infinite; }
-  .quotes-label { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; font-weight: 800; color: #fff; padding: 0 2px; margin-top: 1px; }
-  .quotes-label .muted { color: var(--muted); font-weight: 600; font-size: 10.5px; }
-  .bid {
-    background: var(--surface); border: 1px solid var(--border-2); border-radius: 14px; padding: 11px;
-    opacity: 0; transform: translateY(10px);
-    animation: bidin 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
-  }
-  .bid.best { border-color: var(--accent-line); box-shadow: 0 0 0 1px var(--accent-line), 0 12px 28px -18px var(--accent-glow); }
-  .bid:nth-of-type(1) { animation-delay: 0.5s; }
-  .bid:nth-of-type(2) { animation-delay: 1.05s; }
-  @keyframes bidin { to { opacity: 1; transform: none; } }
-  .bid .brow { display: flex; align-items: center; gap: 10px; }
-  .bid .av { width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #0a0a0a; }
-  .bid .av.a { background: linear-gradient(135deg, #f97316, #fb923c); }
-  .bid .av.b { background: linear-gradient(135deg, #2DD4BF, #5eead4); }
-  .bid .info { flex: 1; min-width: 0; }
-  .bid .nm { font-size: 13px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 5px; }
-  .bid .vbadge { display: inline-flex; align-items: center; }
-  .bid .vbadge svg { width: 13px; height: 13px; }
-  .bid .meta { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
-  .bid .meta .star { color: #fbbf24; }
-  .bid .price { text-align: right; flex-shrink: 0; }
-  .bid .price .p { font-size: 15px; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
-  .bid .price .when { font-size: 9.5px; color: var(--muted); margin-top: 1px; }
-  .bid .bfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border); }
-  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 9.5px; font-weight: 700; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border-2); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
-  .chip svg { width: 11px; height: 11px; stroke: var(--muted); }
-  .chip.match { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
-  .chip.match svg { stroke: var(--accent); }
-  .chip.teal { color: var(--teal); background: var(--teal-soft); border-color: rgba(45,212,191,0.28); }
-  .chip.teal svg { stroke: var(--teal); }
-  .tabbar { margin-top: auto; display: flex; align-items: center; justify-content: space-around; padding: 9px 4px 12px; border-top: 1px solid var(--border); background: rgba(8,8,8,0.55); }
-  .tabbar .tb { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-  .tabbar .tb svg { width: 19px; height: 19px; stroke: var(--muted-2); }
-  .tabbar .tb span { font-size: 8px; font-weight: 700; color: var(--muted-2); letter-spacing: 0.01em; }
-  .tabbar .tb.on svg { stroke: var(--accent); }
-  .tabbar .tb.on span { color: var(--accent); }
 
   /* ── Trust strip ─────────────────────────────────────── */
   .trust { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.012); }
@@ -238,7 +165,7 @@
   .center { text-align: center; }
   .center .section-lead { margin-left: auto; margin-right: auto; }
 
-  /* ── Problem ─────────────────────────────────────────── */
+  /* ── Demand story ────────────────────────────────────── */
   .problem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .problem-grid { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; }
   .problem-quote { position: relative; padding-left: 22px; font-size: clamp(23px, 4.4vw, 33px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.22; }
@@ -269,64 +196,63 @@
   .value-card h3 { font-size: 18.5px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
   .value-card p { color: var(--muted); font-size: 14.5px; }
 
-  /* ── For Mechanics ───────────────────────────────────── */
-  .mechanics { position: relative; overflow: hidden; }
-  .mechanics::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 820px; max-width: 130vw; height: 520px; background: radial-gradient(ellipse at center, var(--teal-soft), transparent 64%); pointer-events: none; }
-  .mech-card { position: relative; background: linear-gradient(160deg, rgba(45,212,191,0.08), rgba(20,20,20,0.35)); border: 1px solid rgba(45,212,191,0.28); border-radius: 26px; padding: clamp(32px, 6vw, 60px); }
-  .mech-grid { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; }
-  .mech-card h2 { font-size: clamp(28px, 5.2vw, 44px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.06; margin-bottom: 16px; }
-  .mech-card .lead { font-size: clamp(15.5px, 2.2vw, 18px); color: var(--muted); margin-bottom: 26px; }
-  .mech-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 30px; }
-  .mech-stat { flex: 1 1 130px; background: rgba(10,10,10,0.4); border: 1px solid var(--border-2); border-radius: 14px; padding: 16px 14px; }
-  .mech-stat .big { font-size: 18px; font-weight: 900; color: var(--teal); letter-spacing: -0.02em; }
-  .mech-stat .small { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
-  /* job-alert mini card */
-  .alert-card { background: var(--surface); border: 1px solid rgba(45,212,191,0.3); border-radius: 18px; padding: 16px; box-shadow: 0 30px 60px -30px rgba(0,0,0,0.8); max-width: 340px; margin: 0 auto; }
-  .alert-top { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
-  .alert-top .live { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
-  .alert-row { display: flex; align-items: center; gap: 12px; }
-  .alert-ic { width: 42px; height: 42px; border-radius: 12px; background: var(--teal-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .alert-ic svg { width: 20px; height: 20px; stroke: var(--teal); }
-  .alert-row .at { font-size: 14px; font-weight: 800; color: #fff; }
-  .alert-row .ad { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .alert-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--border); }
-  .alert-foot .est { font-size: 12px; color: var(--muted); }
-  .alert-foot .est b { color: #fff; font-size: 15px; }
-  .alert-foot .go { background: var(--teal); color: #062b27; font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 10px; }
+  /* ── Trust / social proof ────────────────────────────── */
+  .assure { position: relative; overflow: hidden; }
+  .assure::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 820px; max-width: 130vw; height: 520px; background: radial-gradient(ellipse at center, var(--teal-soft), transparent 64%); pointer-events: none; }
+  .assure-card { position: relative; max-width: 760px; margin: 50px auto 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .assure-item { display: flex; align-items: flex-start; gap: 15px; background: var(--surface); border: 1px solid rgba(45,212,191,0.22); border-radius: 16px; padding: 22px 22px; text-align: left; }
+  .assure-ic { width: 44px; height: 44px; border-radius: 12px; background: var(--teal-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .assure-ic svg { width: 22px; height: 22px; stroke: var(--teal); }
+  .assure-item h3 { font-size: 16.5px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.01em; }
+  .assure-item p { color: var(--muted); font-size: 14px; }
 
   /* ── Waitlist ────────────────────────────────────────── */
   .waitlist { background: var(--surface); border-top: 1px solid var(--border); position: relative; overflow: hidden; }
   .waitlist::before { content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%); width: 700px; max-width: 120vw; height: 460px; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 65%); pointer-events: none; }
   .waitlist-card { position: relative; max-width: 540px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border-2); border-radius: 24px; padding: clamp(28px, 6vw, 44px); text-align: center; box-shadow: 0 40px 90px -50px rgba(0,0,0,0.9); }
-  .seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 13px; padding: 5px; margin: 24px auto 18px; max-width: 360px; }
-  .seg .thumb { position: absolute; top: 5px; left: 5px; width: calc(50% - 5px); height: calc(100% - 10px); background: var(--accent); border-radius: 9px; transition: transform 0.28s cubic-bezier(0.16,1,0.3,1), background 0.28s ease; box-shadow: 0 6px 16px -6px var(--accent-glow); }
-  .seg.mech .thumb { transform: translateX(100%); background: var(--teal); box-shadow: 0 6px 16px -6px var(--teal-glow); }
-  .seg .tab { position: relative; z-index: 1; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted); background: none; border: none; padding: 11px 8px; border-radius: 9px; cursor: pointer; transition: color 0.2s ease; }
-  .seg .tab.active { color: #0a0a0a; }
-  .role-hint { font-size: 13.5px; color: var(--muted); margin-bottom: 18px; min-height: 19px; }
-  .role-hint b { color: var(--text); }
-  .signup-form { display: flex; flex-direction: column; gap: 11px; }
-  .email-input { font-family: inherit; font-size: 16px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 13px; padding: 15px 17px; width: 100%; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-  .email-input::placeholder { color: var(--muted-2); }
-  .email-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  .email-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
-  .form-error { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; text-align: left; }
-  .signup-form .btn { width: 100%; }
-  .legal-note { font-size: 12px; color: var(--muted-2); margin-top: 6px; }
+  .signup-form { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; text-align: left; }
+  .field-label { font-size: 12.5px; font-weight: 700; color: var(--text-2); margin-bottom: -4px; letter-spacing: 0.01em; }
+  .field-label .opt { color: var(--muted-2); font-weight: 500; }
+  .field-input { font-family: inherit; font-size: 16px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 13px; padding: 15px 17px; width: 100%; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .field-input::placeholder { color: var(--muted-2); }
+  .field-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .field-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+  select.field-input { appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px; padding-right: 44px; }
+  .form-error { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; }
+  .signup-form .btn { width: 100%; margin-top: 4px; }
   .confirm { display: none; flex-direction: column; align-items: center; gap: 13px; padding: 8px 0; }
   .confirm.show { display: flex; animation: rise 0.5s ease; }
   .confirm .check { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
-  .confirm.teal .check { background: var(--teal-soft); }
   .confirm .check svg { width: 30px; height: 30px; stroke: var(--accent); }
-  .confirm.teal .check svg { stroke: var(--teal); }
   .confirm h3 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; }
-  .confirm p { color: var(--muted); font-size: 14.5px; max-width: 360px; }
+  .confirm p { color: var(--muted); font-size: 14.5px; max-width: 380px; }
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  /* ── FAQ ─────────────────────────────────────────────── */
+  .faq-list { max-width: 720px; margin: 44px auto 0; display: flex; flex-direction: column; gap: 12px; text-align: left; }
+  .faq { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s ease; }
+  .faq[open] { border-color: var(--accent-line); }
+  .faq summary { list-style: none; cursor: pointer; padding: 20px 22px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary .ic { flex-shrink: 0; width: 22px; height: 22px; position: relative; transition: transform 0.25s ease; }
+  .faq summary .ic::before, .faq summary .ic::after { content: ''; position: absolute; background: var(--accent); border-radius: 2px; }
+  .faq summary .ic::before { top: 10px; left: 3px; right: 3px; height: 2px; }
+  .faq summary .ic::after { left: 10px; top: 3px; bottom: 3px; width: 2px; transition: opacity 0.25s ease; }
+  .faq[open] summary .ic { transform: rotate(180deg); }
+  .faq[open] summary .ic::after { opacity: 0; }
+  .faq .faq-body { padding: 0 22px 20px; color: var(--muted); font-size: 14.5px; }
+
+  /* ── Founding badge ──────────────────────────────────── */
+  .founders-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--teal); background: var(--teal-soft); border: 1px solid rgba(45,212,191,0.3); padding: 7px 14px; border-radius: 999px; margin-bottom: 18px; }
+  .founders-badge svg { width: 14px; height: 14px; stroke: var(--teal); }
 
   /* ── Footer ──────────────────────────────────────────── */
   footer.site-footer { border-top: 1px solid var(--border); padding: 56px 0 42px; text-align: center; }
-  footer .wordmark { font-size: 27px; display: inline-block; margin-bottom: 12px; }
-  .foot-tag { color: var(--muted); font-size: 14.5px; margin-bottom: 26px; }
+  .foot-cross { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; color: var(--accent); border: 1px solid var(--accent-line); background: var(--accent-soft); padding: 9px 16px; border-radius: 999px; margin-bottom: 28px; transition: transform 0.18s ease; }
+  .foot-cross:hover { transform: translateY(-1px); }
+  .foot-cross svg { width: 15px; height: 15px; stroke: var(--accent); }
+  footer .wordmark { font-size: 25px; display: inline-block; margin-bottom: 12px; }
+  .foot-tag { color: var(--muted); font-size: 14.5px; max-width: 420px; margin: 0 auto 26px; }
   .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-bottom: 20px; }
   .footer-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
   .footer-links a:hover { color: var(--accent); }
@@ -334,8 +260,6 @@
   .footer-email:hover { color: var(--accent); }
   .foot-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; border-top: 1px solid var(--border); padding-top: 22px; }
   .footer-copy { color: var(--muted-2); font-size: 13px; }
-  .foot-badge { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; }
-  .foot-badge .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
 
   /* ── Reveal (progressive enhancement) ────────────────── */
   html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
@@ -347,8 +271,7 @@
   @media (prefers-reduced-motion: reduce) {
     html.js { scroll-behavior: auto; }
     html.js .reveal { opacity: 1 !important; transform: none !important; transition: none; }
-    .phone, .bid, .pulse, .eyebrow .pulse, .live { animation: none !important; }
-    .bid { opacity: 1 !important; transform: none !important; }
+    .pulse, .eyebrow .pulse { animation: none !important; }
   }
 
   /* ── Responsive ──────────────────────────────────────── */
@@ -357,14 +280,10 @@
     .value-grid { grid-template-columns: repeat(3, 1fr); }
   }
   @media (min-width: 900px) {
-    .nav-links { display: flex; }
-    .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 40px; }
     .problem-grid { grid-template-columns: 0.85fr 1.15fr; gap: 56px; }
-    .mech-grid { grid-template-columns: 1.15fr 0.85fr; gap: 52px; }
   }
-  @media (max-width: 400px) {
-    .hero-ctas { flex-direction: column; }
-    .hero-ctas .btn { width: 100%; }
+  @media (max-width: 420px) {
+    .hero-ctas .btn { min-width: 0; width: 100%; }
   }
 </style>
 </head>
@@ -374,13 +293,8 @@
   <!-- ── Header ──────────────────────────────────────── -->
   <header id="site-header">
     <div class="container nav">
-      <a href="#top" class="wordmark" aria-label="Myku home">Myku<span class="dot">.</span></a>
-      <nav class="nav-links">
-        <a href="#how">How it works</a>
-        <a href="#why">Why Myku</a>
-        <a href="#mechanics">For mechanics</a>
-      </nav>
-      <button class="btn-notify" data-scroll="#waitlist">Notify Me</button>
+      <a href="#top" class="wordmark" aria-label="Myku Auto home">Myku <span class="auto">Auto</span></a>
+      <button class="btn-notify" data-scroll="#waitlist">Join Waitlist</button>
     </div>
   </header>
 
@@ -389,95 +303,20 @@
     <!-- ── 1. Hero ───────────────────────────────────── -->
     <section class="hero">
       <div class="dotgrid"></div>
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow reveal"><span class="pulse"></span> Launching soon on iOS</div>
-          <h1 class="hero-title reveal d1">Your mechanic.<br><span class="grad">On demand.</span></h1>
+      <div class="container">
+        <div class="hero-inner">
+          <div class="eyebrow reveal"><span class="pulse"></span> Now recruiting mechanics in DuPage County, IL</div>
+          <h1 class="hero-title reveal d1">Get paid to fix cars.<br><span class="grad">On your schedule.</span></h1>
           <p class="hero-sub reveal d1">
-            Trusted local mechanics, mobile and independent. Post a job or describe the
-            problem, then choose a mechanic who comes to you, or one with their own shop
-            to drop off or wait at.
+            Myku Auto connects you with customers who need a mechanic in your area. You set
+            the price, you set the hours, you choose the jobs. Free to join during launch.
           </p>
           <div class="hero-ctas reveal d2">
-            <button class="btn btn-primary" data-scroll="#waitlist" data-role="customer">I Need a Mechanic</button>
-            <button class="btn btn-outline" data-scroll="#waitlist" data-role="mechanic">I'm a Mechanic</button>
+            <button class="btn btn-primary" data-scroll="#waitlist">Join the Mechanic Waitlist</button>
           </div>
           <div class="hero-note reveal d3">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            Be first in line. We'll email you the moment we launch.
-          </div>
-        </div>
-
-        <!-- Phone mockup -->
-        <div class="phone-wrap reveal d2" aria-hidden="true">
-          <div class="phone">
-            <div class="phone-screen">
-              <div class="statusbar">
-                <span class="time">9:41</span>
-                <span class="sig">
-                  <svg viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0.5" width="3" height="11.5" rx="1"/></svg>
-                  <svg viewBox="0 0 16 12" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.4a9 9 0 0 1 12 0"/><path d="M4.4 7a5.5 5.5 0 0 1 7.2 0"/><circle cx="8" cy="9.7" r="0.9" fill="#fff" stroke="none"/></svg>
-                  <svg viewBox="0 0 26 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="#fff" stroke-width="1.1" opacity="0.5"/><rect x="3" y="3" width="16" height="6" rx="1.5" fill="#fff"/><rect x="23.5" y="4" width="1.8" height="4" rx="0.9" fill="#fff" opacity="0.5"/></svg>
-                </span>
-              </div>
-              <div class="app">
-                <div class="appbar">
-                  <div class="am">Myku<span class="dot">.</span></div>
-                  <div class="ab-actions">
-                    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
-                    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="nd"></span></div>
-                  </div>
-                </div>
-
-                <div class="jobcard">
-                  <div class="jhead">
-                    <div>
-                      <div class="jt">2019 Honda Civic</div>
-                      <div class="jd">Won't start · Diagnosis requested</div>
-                    </div>
-                    <span class="pill"><span class="live"></span> Getting quotes</span>
-                  </div>
-                </div>
-
-                <div class="quotes-label"><span>Quotes</span><span class="muted">3 nearby</span></div>
-
-                <div class="bid best">
-                  <div class="brow">
-                    <div class="av a">MR</div>
-                    <div class="info">
-                      <div class="nm">Marcus R. <span class="vbadge"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#2DD4BF"/><path d="m8 12 2.6 2.6L16 9" fill="none" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-                      <div class="meta"><span class="star">★</span> 4.9 (128)</div>
-                    </div>
-                    <div class="price"><div class="p">$120</div><div class="when">Today, 3:30pm</div></div>
-                  </div>
-                  <div class="bfoot">
-                    <span class="chip match"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9z"/></svg> Best match</span>
-                    <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17l1.4-4.2A2 2 0 0 1 8.3 11h7.4a2 2 0 0 1 1.9 1.4L19 17M6.5 17v2M17.5 17v2"/></svg> Mobile</span>
-                  </div>
-                </div>
-
-                <div class="bid">
-                  <div class="brow">
-                    <div class="av b">SK</div>
-                    <div class="info">
-                      <div class="nm">Sara K. <span class="vbadge"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#2DD4BF"/><path d="m8 12 2.6 2.6L16 9" fill="none" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
-                      <div class="meta"><span class="star">★</span> 5.0 (96)</div>
-                    </div>
-                    <div class="price"><div class="p">$135</div><div class="when">Tomorrow</div></div>
-                  </div>
-                  <div class="bfoot">
-                    <span class="chip teal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg> Drop-off · their shop</span>
-                  </div>
-                </div>
-
-                <div class="tabbar">
-                  <div class="tb"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>Home</span></div>
-                  <div class="tb on"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>Jobs</span></div>
-                  <div class="tb"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.3 7.6L3 21l1.9-5.7A8.5 8.5 0 1 1 21 11.5z"/></svg><span>Messages</span></div>
-                  <div class="tb"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Profile</span></div>
-                </div>
-              </div>
-            </div>
+            Launching on iOS — currently building our mechanic network
           </div>
         </div>
       </div>
@@ -486,142 +325,176 @@
     <!-- ── 2. Trust strip ────────────────────────────── -->
     <div class="trust">
       <div class="container trust-row reveal">
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg> ID-verified mechanics</span>
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Upfront quotes</span>
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Mobile or in-shop</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Free during launch</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Your hours, your prices</span>
+        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Mobile or your shop</span>
         <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg> iOS at launch</span>
       </div>
     </div>
 
-    <!-- ── 3. The Problem ────────────────────────────── -->
+    <!-- ── 3. The Demand Story ───────────────────────── -->
     <section class="problem">
       <div class="container">
         <div class="problem-grid">
-          <p class="problem-quote reveal">It's a random morning. The car <span class="hl">just won't start.</span></p>
+          <p class="problem-quote reveal">There's a customer near you whose car <span class="hl">just won't start.</span></p>
           <div class="problem-body reveal d1">
-            <p>Everything looks fine. No warning lights, no obvious clue. Your only real move is texting around, hoping someone knows a mechanic you can actually trust.</p>
-            <p>Most people don't have that friend. So they get <strong>stranded, towed, or quietly overcharged</strong> by whoever they could find first.</p>
-            <p>Myku is the friend-of-a-friend, for everyone. A vetted mechanic in your pocket, whether they come to you or you bring the car to them.</p>
+            <p>One random morning a car won't start. Everything looks fine, and the only real option is hunting for a mechanic through a friend of a friend. <strong>Most people don't have that connection.</strong></p>
+            <p>So right now there are thousands of people in your area who need a mechanic and have no good way to find one — and you're the one they're looking for.</p>
+            <p><strong>Myku puts you in front of them.</strong></p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 4. How it works ───────────────────────────── -->
+    <!-- ── 4. How it works for mechanics ─────────────── -->
     <section id="how">
       <div class="container center">
         <span class="section-tag reveal">How it works</span>
-        <h2 class="section-title reveal">Fixed in three steps</h2>
-        <p class="section-lead reveal d1">Know exactly what's wrong, or have no idea at all. Either way, Myku connects you with the right mechanic.</p>
+        <h2 class="section-title reveal">From sign-up to paid in three steps</h2>
+        <p class="section-lead reveal d1">No bidding wars for leads, no monthly fee during launch. Just jobs from customers near you.</p>
 
         <div class="steps">
           <div class="step-card reveal" style="text-align:left">
             <span class="step-num">1</span>
-            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.3L3 18l3 3 6.4-6.3a4 4 0 0 0 5.3-5.4l-2.6 2.6-2.1-.5-.5-2.1 2.7-2.6z"/></svg></div>
-            <h3>Post or describe it</h3>
-            <p>Know the repair? Post the job. Not sure what's wrong? Describe the symptoms and request a diagnosis.</p>
+            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+            <h3>Create your profile</h3>
+            <p>Set your services, hourly rate, diagnostic fee, and service area. Takes 5 minutes.</p>
           </div>
           <div class="step-card reveal d1" style="text-align:left">
             <span class="step-num">2</span>
-            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-            <h3>Mechanics respond</h3>
-            <p>Nearby mechanics send quotes and availability. Compare prices and reviews side by side.</p>
+            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+            <h3>Jobs come to you</h3>
+            <p>Customers in your area post jobs and request diagnostics. You see them in real time and respond with your price and availability.</p>
           </div>
           <div class="step-card reveal d2" style="text-align:left">
             <span class="step-num">3</span>
-            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></div>
-            <h3>Choose who fixes it</h3>
-            <p>Pick the mechanic you trust. They come to you, or you drop off at their shop. Your call.</p>
+            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3>You get paid</h3>
+            <p>Customer picks you, you show up, job done. Build your reviews and grow your client base on Myku.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 5. Why Myku ───────────────────────────────── -->
+    <!-- ── 5. Why join Myku ──────────────────────────── -->
     <section class="why" id="why">
       <div class="container center">
-        <span class="section-tag reveal">Why Myku</span>
-        <h2 class="section-title reveal">Built around your day, not theirs</h2>
-        <p class="section-lead reveal d1">You choose the mechanic, the price, and whether they come to you or you visit their shop. On your terms, every time.</p>
+        <span class="section-tag reveal">Why join Myku</span>
+        <h2 class="section-title reveal">Built around your work, not a boss</h2>
+        <p class="section-lead reveal d1">You're the talent. Myku is the platform that brings the customers to you and stays out of your way.</p>
 
         <div class="value-grid">
           <div class="value-card reveal" style="text-align:left">
-            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
-            <h3>Mobile or independent</h3>
-            <p>Choose a mobile mechanic who drives to you, or an independent one with their own shop for easy drop-off or a waiting area. Whatever fits your day.</p>
+            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <h3>Your schedule, your rules</h3>
+            <p>Work mornings, evenings, weekends. Accept only the jobs you want. No boss, no shop politics.</p>
           </div>
           <div class="value-card reveal d1" style="text-align:left">
             <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <h3>Transparent pricing</h3>
-            <p>See quotes upfront before anyone touches your car. Compare, choose, and know the price going in. No surprises.</p>
+            <h3>Free during launch</h3>
+            <p>No subscription fee while we build the network. Be first in your area and get the best jobs before anyone else.</p>
           </div>
           <div class="value-card reveal d2" style="text-align:left">
-            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
-            <h3>Real, vetted mechanics</h3>
-            <p>Every mechanic is ID-verified and reviewed by the Myku team. See ratings from real customers before you book.</p>
+            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
+            <h3>Mobile or your shop</h3>
+            <p>Go to the customer or have them come to you. Work however fits your setup.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 6. For Mechanics ──────────────────────────── -->
-    <section class="mechanics" id="mechanics">
-      <div class="container">
-        <div class="mech-card reveal">
-          <div class="mech-grid">
-            <div>
-              <span class="section-tag teal">For mechanics</span>
-              <h2>Turn your skills into <span class="grad-teal">a business</span></h2>
-              <p class="lead">You're the talent. Myku is the platform. Whether you go mobile or run your own shop, set your own hours, name your own prices, and let new customers find you. The way ride-sharing turned drivers into earners, Myku turns mechanics into entrepreneurs building a real, full-time income.</p>
-              <div class="mech-stats">
-                <div class="mech-stat"><div class="big">Your hours</div><div class="small">Work when you want</div></div>
-                <div class="mech-stat"><div class="big">Your prices</div><div class="small">You set every quote</div></div>
-                <div class="mech-stat"><div class="big">Your setup</div><div class="small">Mobile or your own shop</div></div>
-              </div>
-              <button class="btn btn-teal" data-scroll="#waitlist" data-role="mechanic">Join as a Mechanic</button>
-            </div>
-            <div>
-              <div class="alert-card">
-                <div class="alert-top"><span class="live"></span> New job nearby</div>
-                <div class="alert-row">
-                  <div class="alert-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2v-3.3a2 2 0 0 0-.4-1.2L18 9h-3M3 17h1m11 0H8m-5 0V7a2 2 0 0 1 2-2h7v12M15 9V5"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/></svg></div>
-                  <div style="flex:1"><div class="at">Brake pads &amp; rotors</div><div class="ad">Toyota Camry · 1.8 mi away</div></div>
-                </div>
-                <div class="alert-foot"><div class="est">Your quote: <b>$240</b></div><div class="go">Send quote</div></div>
-              </div>
-            </div>
+    <!-- ── 6. Trust / social proof ───────────────────── -->
+    <section class="assure">
+      <div class="container center">
+        <span class="section-tag teal reveal">Built for mechanics</span>
+        <h2 class="section-title reveal">No surprises. No sketchy leads.</h2>
+        <p class="section-lead reveal d1">We know your time is money. Here's how Myku keeps the jobs real and the customers serious.</p>
+
+        <div class="assure-card">
+          <div class="assure-item reveal">
+            <div class="assure-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <div><h3>ID-verified customers only</h3><p>Every customer is verified on the platform before they can post a job, so you know who you're dealing with.</p></div>
+          </div>
+          <div class="assure-item reveal d1">
+            <div class="assure-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div><h3>You always see the job details first</h3><p>The vehicle, the problem, and the location are all there before you respond. No surprises, no wasted trips.</p></div>
+          </div>
+          <div class="assure-item reveal d2">
+            <div class="assure-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+            <div><h3>Built by someone who needed you</h3><p>Myku was built by someone who couldn't find a mechanic when they needed one — and knew there had to be a better way.</p></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ── 7. Waitlist ───────────────────────────────── -->
+    <!-- ── 7. FAQ ────────────────────────────────────── -->
+    <section id="faq">
+      <div class="container center">
+        <span class="section-tag reveal">Straight answers</span>
+        <h2 class="section-title reveal">What mechanics ask us</h2>
+
+        <div class="faq-list">
+          <details class="faq reveal">
+            <summary>What does it cost to be on Myku?<span class="ic"></span></summary>
+            <div class="faq-body">Nothing during launch. No subscription, no sign-up fee while we build the network in your area. Founding mechanics keep that head start and get first pick of jobs as demand ramps up.</div>
+          </details>
+          <details class="faq reveal">
+            <summary>Are there really customers, or is this just another lead list?<span class="ic"></span></summary>
+            <div class="faq-body">That's exactly why we recruit mechanics first. We're building real supply in DuPage County before we drive customer demand, so the jobs that show up are real people in your area — not recycled leads sold to ten shops at once.</div>
+          </details>
+          <details class="faq reveal">
+            <summary>How and when do I get paid?<span class="ic"></span></summary>
+            <div class="faq-body">You set your price on every quote. The customer picks you, you do the work, and you get paid for the job — no bidding your rate into the ground and no monthly fee eating your margin.</div>
+          </details>
+          <details class="faq reveal">
+            <summary>Do I need my own shop?<span class="ic"></span></summary>
+            <div class="faq-body">No. Work fully mobile and go to the customer, run everything out of your own shop, or do both. You set your service area and the kinds of jobs you take.</div>
+          </details>
+          <details class="faq reveal">
+            <summary>Do I have to accept every job?<span class="ic"></span></summary>
+            <div class="faq-body">Never. You see the vehicle, the problem, and the location before you respond, and you only quote the jobs you actually want. Your schedule stays yours.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 8. Waitlist ───────────────────────────────── -->
     <section class="waitlist" id="waitlist">
       <div class="container center">
-        <span class="section-tag reveal">Get early access</span>
-        <h2 class="section-title reveal">Be first in line</h2>
-        <p class="section-lead reveal d1">Myku launches soon on iOS. Drop your email and we'll tell you the moment it's live.</p>
+        <span class="section-tag reveal">Join the waitlist</span>
+        <h2 class="section-title reveal">Be first in your area</h2>
+        <p class="section-lead reveal d1">We're launching in DuPage County, IL first. Join the waitlist and we'll reach out personally before we go live in your city.</p>
 
         <div class="waitlist-card reveal d1">
           <div id="signup-wrap">
-            <div class="seg" id="seg" role="tablist" aria-label="Choose your role">
-              <span class="thumb" aria-hidden="true"></span>
-              <button class="tab active" id="tab-customer" role="tab" aria-selected="true" data-role="customer">I'm a Customer</button>
-              <button class="tab" id="tab-mechanic" role="tab" aria-selected="false" data-role="mechanic">I'm a Mechanic</button>
-            </div>
-            <p class="role-hint" id="role-hint">Joining the <b>customer</b> waitlist to get a mechanic the day we launch.</p>
+            <div class="founders-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9z"/></svg> Founding mechanics get first pick of jobs</div>
             <form class="signup-form" id="signup-form" novalidate>
-              <input class="email-input" id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="Email address" />
-              <button class="btn btn-primary" id="submit-btn" type="submit">Notify Me at Launch</button>
+              <label class="field-label" for="first-name">First name</label>
+              <input class="field-input" id="first-name" type="text" autocomplete="given-name" placeholder="Your first name" aria-label="First name" />
+
+              <label class="field-label" for="email">Email address</label>
+              <input class="field-input" id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="Email address" />
+
+              <label class="field-label" for="phone">Phone number <span class="opt">(optional)</span></label>
+              <input class="field-input" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-5555" aria-label="Phone number, optional" />
+
+              <label class="field-label" for="work-style">How do you work?</label>
+              <select class="field-input" id="work-style" aria-label="How do you work?">
+                <option value="" disabled selected>Select one</option>
+                <option value="mobile">Mobile (I go to customers)</option>
+                <option value="shop">My own shop</option>
+                <option value="both">Both</option>
+              </select>
+
+              <button class="btn btn-primary" id="submit-btn" type="submit">Join the Mechanic Waitlist</button>
               <div class="form-error" id="form-error" role="alert"></div>
             </form>
-            <p class="legal-note">No spam. Just one email the day we launch.</p>
           </div>
 
           <div class="confirm" id="confirm">
             <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
             <h3>You're on the list.</h3>
-            <p id="confirm-msg">We'll email you the moment Myku goes live.</p>
+            <p>We'll reach out personally before we launch in your area. — Rohaan, founder of Myku</p>
           </div>
         </div>
       </div>
@@ -629,11 +502,14 @@
 
   </main>
 
-  <!-- ── 8. Footer ─────────────────────────────────── -->
+  <!-- ── 9. Footer ─────────────────────────────────── -->
   <footer class="site-footer">
     <div class="container">
-      <a href="#top" class="wordmark">Myku<span class="dot">.</span></a>
-      <p class="foot-tag">The mechanic in your pocket, for everyone.</p>
+      <a href="#top" class="wordmark">Myku <span class="auto">Auto</span></a>
+      <p class="foot-tag">Building the mechanic network for the next generation of auto service.</p>
+      <div>
+        <a class="foot-cross" href="customers.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Need a mechanic? See how Myku works</a>
+      </div>
       <div class="footer-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>
@@ -641,8 +517,7 @@
       </div>
       <a class="footer-email" href="mailto:support@trymyku.com">support@trymyku.com</a>
       <div class="foot-bottom">
-        <span class="footer-copy">© 2026 Myku. All rights reserved.</span>
-        <span class="foot-badge"><span class="pulse"></span> Launching soon on iOS</span>
+        <span class="footer-copy">© 2026 Myku Auto. All rights reserved.</span>
       </div>
     </div>
   </footer>
@@ -651,13 +526,11 @@
     (function () {
       'use strict';
 
-      /* Smooth-scroll + optional role preselect */
+      /* Smooth-scroll to waitlist */
       document.querySelectorAll('[data-scroll]').forEach(function (el) {
         el.addEventListener('click', function () {
           var target = document.querySelector(el.getAttribute('data-scroll'));
           if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          var role = el.getAttribute('data-role');
-          if (role) setRole(role);
         });
       });
 
@@ -683,62 +556,51 @@
           });
         }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
         reveals.forEach(function (r) { io.observe(r); });
-        // Safety net: if anything hasn't revealed shortly after load, show it.
         setTimeout(revealAll, 1600);
       } else {
         revealAll();
       }
 
-      /* Role segmented control */
-      var seg = document.getElementById('seg');
-      var tabCustomer = document.getElementById('tab-customer');
-      var tabMechanic = document.getElementById('tab-mechanic');
-      var roleHint = document.getElementById('role-hint');
-      var submitBtn = document.getElementById('submit-btn');
-      var currentRole = 'customer';
-
-      function setRole(role) {
-        currentRole = role === 'mechanic' ? 'mechanic' : 'customer';
-        var isMech = currentRole === 'mechanic';
-        seg.classList.toggle('mech', isMech);
-        tabCustomer.classList.toggle('active', !isMech);
-        tabMechanic.classList.toggle('active', isMech);
-        tabCustomer.setAttribute('aria-selected', String(!isMech));
-        tabMechanic.setAttribute('aria-selected', String(isMech));
-        submitBtn.classList.toggle('btn-primary', !isMech);
-        submitBtn.classList.toggle('btn-teal', isMech);
-        roleHint.innerHTML = isMech
-          ? 'Joining the <b>mechanic</b> waitlist to start earning on day one.'
-          : 'Joining the <b>customer</b> waitlist to get a mechanic the day we launch.';
-      }
-      tabCustomer.addEventListener('click', function () { setRole('customer'); });
-      tabMechanic.addEventListener('click', function () { setRole('mechanic'); });
-
       /* Form validation + confirmation (no backend) */
       var form = document.getElementById('signup-form');
+      var firstName = document.getElementById('first-name');
       var email = document.getElementById('email');
+      var workStyle = document.getElementById('work-style');
       var formError = document.getElementById('form-error');
       var signupWrap = document.getElementById('signup-wrap');
       var confirm = document.getElementById('confirm');
-      var confirmMsg = document.getElementById('confirm-msg');
       var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      email.addEventListener('input', function () { email.classList.remove('invalid'); formError.textContent = ''; });
+      function clearInvalid(el) {
+        el.addEventListener('input', function () { el.classList.remove('invalid'); formError.textContent = ''; });
+      }
+      clearInvalid(firstName);
+      clearInvalid(email);
+      workStyle.addEventListener('change', function () { workStyle.classList.remove('invalid'); formError.textContent = ''; });
 
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-        var value = email.value.trim();
-        if (!EMAIL_RE.test(value)) {
+        formError.textContent = '';
+
+        if (!firstName.value.trim()) {
+          firstName.classList.add('invalid');
+          formError.textContent = 'Please enter your first name.';
+          firstName.focus();
+          return;
+        }
+        if (!EMAIL_RE.test(email.value.trim())) {
           email.classList.add('invalid');
           formError.textContent = 'Please enter a valid email address.';
           email.focus();
           return;
         }
-        var isMech = currentRole === 'mechanic';
-        confirm.classList.toggle('teal', isMech);
-        confirmMsg.textContent = isMech
-          ? "You're on the mechanic list. We'll email you the moment Myku goes live so you can start taking jobs."
-          : "You're on the list. We'll email you the moment Myku goes live.";
+        if (!workStyle.value) {
+          workStyle.classList.add('invalid');
+          formError.textContent = 'Please tell us how you work.';
+          workStyle.focus();
+          return;
+        }
+
         signupWrap.style.display = 'none';
         confirm.classList.add('show');
       });
