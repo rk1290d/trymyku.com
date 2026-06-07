@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>Myku Auto — Join the Mechanic Waitlist</title>
+<meta name="description" content="You have the skills. We have the customers. Myku Auto puts your name in front of vehicle owners the moment they need help. Set your hours, set your prices. Free during launch. Join the waitlist in DuPage County, IL." />
+
+<meta property="og:title" content="Myku Auto — For Mechanics" />
+<meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or from your shop. Join the waitlist and be first in your city." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://trymyku.com/mechanics.html" />
+<meta property="og:image" content="https://trymyku.com/logo.png" />
+<meta property="og:image:width" content="1024" />
+<meta property="og:image:height" content="1024" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Myku Auto — For Mechanics" />
+<meta name="twitter:description" content="You have the skills. We have the customers. Join the mechanic waitlist." />
+<meta name="twitter:image" content="https://trymyku.com/logo.png" />
+
+<link rel="icon" href="/logo.png" />
+<link rel="apple-touch-icon" href="/logo.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface-2: #1b1b1b;
+    --border: #232323; --border-2: #2e2e2e;
+    --accent: #f97316; --accent-2: #ffb877; --accent-soft: rgba(249,115,22,0.12);
+    --accent-line: rgba(249,115,22,0.22); --accent-glow: rgba(249,115,22,0.38);
+    --teal: #2DD4BF; --teal-2: #7af0e0; --teal-soft: rgba(45,212,191,0.12); --teal-glow: rgba(45,212,191,0.30);
+    --text: #fff; --text-2: #d4d4d8; --muted: #9ca3af; --muted-2: #6b7280;
+    --maxw: 1080px; --radius: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11','ss01'; }
+  ::selection { background: rgba(249,115,22,0.28); color: #fff; }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+  .grad { background: linear-gradient(120deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .grad-teal { background: linear-gradient(120deg, var(--teal), var(--teal-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* Header */
+  header { position: sticky; top: 0; z-index: 60; background: rgba(10,10,10,0.72);
+    backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
+    border-bottom: 1px solid transparent; transition: border-color 0.3s ease, background 0.3s ease; }
+  header.scrolled { border-bottom-color: var(--border); background: rgba(10,10,10,0.9); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .brand { display: inline-flex; align-items: center; gap: 11px; }
+  .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
+  .brand .wm { font-size: 21px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .back { font-size: 14.5px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; transition: color 0.18s ease; }
+  .back:hover { color: var(--accent); }
+  .btn-cta { font-family: inherit; font-size: 14px; font-weight: 700; color: #0a0a0a; background: var(--accent); border: none; padding: 11px 20px; border-radius: 999px; cursor: pointer; box-shadow: 0 10px 26px -12px var(--accent-glow); transition: transform 0.18s ease; }
+  .btn-cta:hover { transform: translateY(-1px); }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-weight: 700; font-size: 15.5px; padding: 15px 26px; border-radius: 13px;
+    cursor: pointer; border: 1.5px solid transparent; white-space: nowrap;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
+  .btn svg { width: 18px; height: 18px; }
+  .btn-primary { background: var(--accent); color: #0a0a0a; box-shadow: 0 12px 34px -10px var(--accent-glow); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--accent-glow); }
+
+  /* Hero */
+  .hero { position: relative; min-height: calc(100vh - 68px); display: flex; align-items: center; padding: clamp(48px,8vw,80px) 0; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 760px; max-width: 130vw; height: 600px; background: radial-gradient(ellipse at center, var(--accent-glow), transparent 60%); opacity: 0.5; filter: blur(8px); pointer-events: none; }
+  .hero-inner { position: relative; z-index: 1; width: 100%; max-width: 760px; margin: 0 auto; text-align: center; }
+  .pill { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; color: var(--teal-2);
+    background: var(--teal-soft); border: 1px solid rgba(45,212,191,0.28); padding: 7px 15px; border-radius: 999px; margin-bottom: 26px; }
+  .pill .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(45,212,191,0.5);} 70%{box-shadow:0 0 0 9px rgba(45,212,191,0);} 100%{box-shadow:0 0 0 0 rgba(45,212,191,0);} }
+  .h1 { font-size: clamp(38px, 7.6vw, 64px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.04; margin-bottom: 22px; }
+  .lead { font-size: clamp(16px, 2.3vw, 19px); color: var(--muted); max-width: 580px; margin: 0 auto 34px; }
+
+  /* Sections */
+  section { padding: clamp(70px, 11vw, 116px) 0; }
+  .tag { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .tag.teal { color: var(--teal); }
+  h2.title { font-size: clamp(27px, 5vw, 42px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.1; margin-bottom: 16px; }
+  .sub { font-size: clamp(16px, 2.1vw, 18.5px); color: var(--muted); max-width: 620px; }
+  .center { text-align: center; } .center .sub { margin-left: auto; margin-right: auto; }
+
+  /* Problem */
+  .problem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .problem .container { max-width: 760px; }
+  .problem h2 { font-size: clamp(26px,4.6vw,40px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 22px; }
+  .problem p { font-size: clamp(16.5px, 2.4vw, 21px); font-weight: 500; color: var(--text-2); line-height: 1.5; }
+  .problem p .hl { color: var(--accent); font-weight: 700; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
+  .step { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; }
+  .step:hover { transform: translateY(-5px); border-color: var(--accent-line); box-shadow: 0 22px 48px -26px var(--accent-glow); }
+  .step .n { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); font-weight: 900; font-size: 17px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .step h3 { font-size: 18.5px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
+  .step p { color: var(--muted); font-size: 14.5px; }
+
+  /* Value */
+  .why { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .values { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
+  .value { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: transform 0.22s ease, border-color 0.22s ease; }
+  .value:hover { transform: translateY(-5px); border-color: var(--border-2); }
+  .value .ic { width: 48px; height: 48px; border-radius: 12px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .value .ic svg { width: 23px; height: 23px; stroke: var(--accent); }
+  .value h3 { font-size: 18px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
+  .value p { color: var(--muted); font-size: 14.5px; }
+
+  /* Trust */
+  .trust { position: relative; overflow: hidden; }
+  .trust::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 820px; max-width: 130vw; height: 520px; background: radial-gradient(ellipse at center, var(--teal-soft), transparent 64%); pointer-events: none; }
+  .trust .container { position: relative; max-width: 760px; }
+  .trust h2 { font-size: clamp(25px,4.4vw,38px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.14; margin-bottom: 20px; }
+  .trust p { font-size: clamp(16px,2.3vw,19px); color: var(--text-2); line-height: 1.55; }
+
+  /* Waitlist */
+  .waitlist { background: var(--surface); border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+  .waitlist::before { content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%); width: 700px; max-width: 120vw; height: 460px; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 65%); pointer-events: none; }
+  .wl-card { position: relative; max-width: 540px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border-2); border-radius: 24px; padding: clamp(28px,6vw,44px); text-align: center; box-shadow: 0 40px 90px -50px rgba(0,0,0,0.9); }
+  .form { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; text-align: left; }
+  .lbl { font-size: 12.5px; font-weight: 700; color: var(--text-2); margin-bottom: -4px; }
+  .lbl .opt { color: var(--muted-2); font-weight: 500; }
+  .inp { font-family: inherit; font-size: 16px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 13px; padding: 15px 17px; width: 100%; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+  .inp::placeholder { color: var(--muted-2); }
+  .inp:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .inp.bad { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+  select.inp { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px; }
+  .err { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; }
+  .form .btn { width: 100%; margin-top: 4px; }
+  .confirm { display: none; flex-direction: column; align-items: center; gap: 13px; padding: 8px 0; }
+  .confirm.show { display: flex; animation: rise 0.5s ease; }
+  .confirm .ck { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
+  .confirm .ck svg { width: 30px; height: 30px; stroke: var(--accent); }
+  .confirm h3 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; }
+  .confirm p { color: var(--muted); font-size: 14.5px; max-width: 400px; }
+  @keyframes rise { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:none;} }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 52px 0 40px; text-align: center; }
+  .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
+  .foot-brand .wm { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; margin: 16px 0 18px; }
+  .foot-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
+  .foot-links a:hover { color: var(--accent); }
+  .foot-email { display: inline-block; color: var(--text-2); font-size: 14.5px; font-weight: 600; margin-bottom: 16px; }
+  .foot-email:hover { color: var(--accent); }
+  .foot-copy { color: var(--muted-2); font-size: 13px; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal { opacity: 1 !important; transform: none !important; transition: none; } .pulse { animation: none !important; } }
+
+  @media (min-width: 680px) { .steps { grid-template-columns: repeat(2, 1fr); } .values { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 980px) { .steps { grid-template-columns: repeat(4, 1fr); } }
+</style>
+</head>
+<body>
+  <header id="hdr">
+    <div class="container nav">
+      <a href="index.html" class="brand" aria-label="Myku Auto home">
+        <img src="/logo.png" alt="Myku Auto logo" />
+        <span class="wm">Myku Auto</span>
+      </a>
+      <a href="index.html" class="back">← Back</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="pill reveal"><span class="pulse"></span> Now recruiting · DuPage County, IL</div>
+        <h1 class="h1 reveal d1">You have the skills.<br><span class="grad">We have the customers.</span></h1>
+        <p class="lead reveal d1">Myku Auto puts your name in front of vehicle owners in your area the moment they need help. No cold calling. No slow seasons. Just jobs, on your terms.</p>
+        <a href="#waitlist" class="btn btn-primary reveal d2" data-scroll>Join the Waitlist</a>
+      </div>
+    </section>
+
+    <section class="problem">
+      <div class="container">
+        <h2 class="reveal">Your next customer is already looking for you.</h2>
+        <p class="reveal d1">Right now, someone in your zip code is sitting next to a car that won't start. They don't know a mechanic. They're about to call a tow truck or overpay at a dealership. <span class="hl">That's your job. That's your $200.</span> Myku makes sure they find you instead.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="container center">
+        <span class="tag reveal">How it works</span>
+        <h2 class="title reveal">Four steps to your first job</h2>
+        <p class="sub reveal d1">No bidding wars for leads, no monthly fee during launch. Just real jobs from customers near you.</p>
+        <div class="steps">
+          <div class="step reveal" style="text-align:left">
+            <div class="n">1</div>
+            <h3>Build your profile in 5 minutes</h3>
+            <p>Set your services, your rate, your diagnostic fee, your service area. Mobile, your shop, or both.</p>
+          </div>
+          <div class="step reveal d1" style="text-align:left">
+            <div class="n">2</div>
+            <h3>Jobs land in your feed</h3>
+            <p>Customers post jobs and diagnostic requests in real time. You see the vehicle, the issue, the location, and how far away they are before you respond.</p>
+          </div>
+          <div class="step reveal d2" style="text-align:left">
+            <div class="n">3</div>
+            <h3>You respond on your terms</h3>
+            <p>Send your price and availability. Customer picks you. You show up, do the work, build your reputation.</p>
+          </div>
+          <div class="step reveal d3" style="text-align:left">
+            <div class="n">4</div>
+            <h3>Your reviews build your business</h3>
+            <p>Every job you complete builds your rating. The better your rating, the more jobs you win. Your reputation follows you.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="why">
+      <div class="container center">
+        <span class="tag reveal">Why Myku</span>
+        <h2 class="title reveal">Built around your work, not a boss</h2>
+        <div class="values">
+          <div class="value reveal" style="text-align:left">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <h3>Free during launch.</h3>
+            <p>No monthly fee while we build the network. Be first in your area and lock in your spot before anyone else.</p>
+          </div>
+          <div class="value reveal d1" style="text-align:left">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <h3>Your hours. Your prices.</h3>
+            <p>Accept jobs when you want. Set your own rate. No one tells you what to charge or when to work.</p>
+          </div>
+          <div class="value reveal d2" style="text-align:left">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
+            <h3>Mobile or your shop.</h3>
+            <p>Go to the customer or have them come to you. Work however your setup allows.</p>
+          </div>
+          <div class="value reveal d3" style="text-align:left">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <h3>Real customers, real jobs.</h3>
+            <p>Every customer on Myku is verified. You see the full job details before you commit to anything.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust">
+      <div class="container">
+        <h2 class="reveal">Built by someone who needed a mechanic and couldn't find one.</h2>
+        <p class="reveal d1">Myku Auto started from a real moment — a car that wouldn't start, no mechanic in the contacts, no good options. We built the platform we wished existed. And we built it for mechanics like you first, because without you, none of this works.</p>
+      </div>
+    </section>
+
+    <section class="waitlist" id="waitlist">
+      <div class="container center">
+        <span class="tag reveal">Join the waitlist</span>
+        <h2 class="title reveal">Be first in your area.</h2>
+        <p class="sub reveal d1">We're launching in DuPage County, IL. Join the waitlist and we'll reach out personally before we go live near you.</p>
+
+        <div class="wl-card reveal d1">
+          <div id="wrap">
+            <form class="form" id="form" novalidate>
+              <label class="lbl" for="fn">First name</label>
+              <input class="inp" id="fn" type="text" autocomplete="given-name" placeholder="Your first name" />
+              <label class="lbl" for="em">Email</label>
+              <input class="inp" id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" />
+              <label class="lbl" for="ph">Phone <span class="opt">(optional)</span></label>
+              <input class="inp" id="ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-5555" />
+              <label class="lbl" for="work">How do you work?</label>
+              <select class="inp" id="work">
+                <option value="" disabled selected>Select one</option>
+                <option value="mobile">Mobile — I go to customers</option>
+                <option value="shop">My own shop</option>
+                <option value="both">Both</option>
+              </select>
+              <button class="btn btn-primary" id="submit" type="submit">Join the Mechanic Waitlist</button>
+              <div class="err" id="err" role="alert"></div>
+            </form>
+          </div>
+          <div class="confirm" id="confirm">
+            <div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
+            <h3>You're on the list.</h3>
+            <p>We'll reach out personally before we launch in your area. — Rohaan, founder of Myku Auto</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku Auto</span></a>
+      <div class="foot-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="support.html">Support</a>
+      </div>
+      <a class="foot-email" href="mailto:support@trymyku.com">support@trymyku.com</a>
+      <div class="foot-copy">© 2026 Myku Auto. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var hdr = document.getElementById('hdr');
+      function onScroll(){ hdr.classList.toggle('scrolled', (window.scrollY||0) > 8); }
+      window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+      document.querySelectorAll('[data-scroll]').forEach(function(el){
+        el.addEventListener('click', function(e){ e.preventDefault();
+          var t = document.querySelector(el.getAttribute('href')); if(t) t.scrollIntoView({behavior:'smooth', block:'start'}); });
+      });
+
+      var reveals = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        reveals.forEach(function(r){ io.observe(r); });
+        setTimeout(function(){ reveals.forEach(function(r){ r.classList.add('in'); }); }, 1500);
+      } else { reveals.forEach(function(r){ r.classList.add('in'); }); }
+
+      var form = document.getElementById('form');
+      var fn = document.getElementById('fn'), em = document.getElementById('em'), work = document.getElementById('work');
+      var err = document.getElementById('err'), wrap = document.getElementById('wrap'), confirm = document.getElementById('confirm');
+      var RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      [fn, em].forEach(function(i){ i.addEventListener('input', function(){ i.classList.remove('bad'); err.textContent=''; }); });
+      work.addEventListener('change', function(){ work.classList.remove('bad'); err.textContent=''; });
+      form.addEventListener('submit', function(e){
+        e.preventDefault(); err.textContent='';
+        if(!fn.value.trim()){ fn.classList.add('bad'); err.textContent='Please enter your first name.'; fn.focus(); return; }
+        if(!RE.test(em.value.trim())){ em.classList.add('bad'); err.textContent='Please enter a valid email address.'; em.focus(); return; }
+        if(!work.value){ work.classList.add('bad'); err.textContent='Please tell us how you work.'; work.focus(); return; }
+        wrap.style.display='none'; confirm.classList.add('show');
+      });
+    })();
+  </script>
+</body>
+</html>

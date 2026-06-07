@@ -1,609 +1,214 @@
 <!DOCTYPE html>
-<html lang="en" class="no-js">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
-<title>Myku Auto — Join the Mechanic Waitlist</title>
-<meta name="description" content="Myku Auto connects mechanics with customers in their area. Set your own hours, set your own prices, work mobile or from your shop. Join the waitlist and be first in your city." />
+<title>Myku Auto — Auto Service, Reimagined</title>
+<meta name="description" content="Myku Auto is a marketplace connecting vehicle owners with independent mechanics. Finding a trustworthy mechanic should be as easy as opening an app. Launching in DuPage County, IL." />
 
-<meta property="og:title" content="Myku Auto — For Mechanics" />
-<meta property="og:description" content="Myku Auto connects mechanics with customers in their area. Set your own hours, set your own prices, work mobile or from your shop. Join the waitlist and be first in your city." />
+<meta property="og:title" content="Myku Auto — Auto Service, Reimagined" />
+<meta property="og:description" content="A marketplace connecting vehicle owners with independent mechanics. Finding a trustworthy mechanic should be as easy as opening an app." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/" />
+<meta property="og:image" content="https://trymyku.com/logo.png" />
+<meta property="og:image:width" content="1024" />
+<meta property="og:image:height" content="1024" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Myku Auto — Auto Service, Reimagined" />
+<meta name="twitter:description" content="A marketplace connecting vehicle owners with independent mechanics." />
+<meta name="twitter:image" content="https://trymyku.com/logo.png" />
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230a0a0a'/%3E%3Ctext x='50' y='73' font-family='Inter,Arial,sans-serif' font-size='66' font-weight='900' fill='%23f97316' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="/logo.png" />
+<link rel="apple-touch-icon" href="/logo.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-<script>document.documentElement.className = 'js';</script>
-
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface-2: #1b1b1b;
-    --surface-3: #202020;
-    --border: #232323;
-    --border-2: #2e2e2e;
-    --accent: #f97316;
-    --accent-2: #ffb877;
-    --accent-soft: rgba(249,115,22,0.12);
-    --accent-line: rgba(249,115,22,0.22);
-    --accent-glow: rgba(249,115,22,0.38);
-    --teal: #2DD4BF;
-    --teal-2: #7af0e0;
-    --teal-soft: rgba(45,212,191,0.12);
-    --teal-glow: rgba(45,212,191,0.30);
-    --text: #ffffff;
-    --text-2: #d4d4d8;
-    --muted: #9ca3af;
-    --muted-2: #6b7280;
-    --maxw: 1140px;
-    --radius: 18px;
+    --bg: #0a0a0a; --surface: #141414; --surface-2: #1b1b1b;
+    --border: #232323; --border-2: #2e2e2e;
+    --accent: #f97316; --accent-2: #ffb877; --accent-soft: rgba(249,115,22,0.12);
+    --accent-line: rgba(249,115,22,0.22); --accent-glow: rgba(249,115,22,0.38);
+    --teal: #2DD4BF; --teal-2: #7af0e0; --teal-soft: rgba(45,212,191,0.12);
+    --text: #fff; --text-2: #d4d4d8; --muted: #9ca3af; --muted-2: #6b7280;
+    --maxw: 1080px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { -webkit-text-size-adjust: 100%; }
-  html.js { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    font-feature-settings: 'cv11', 'ss01';
-  }
-
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden;
+    -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11','ss01'; }
   ::selection { background: rgba(249,115,22,0.28); color: #fff; }
-
   a { color: inherit; text-decoration: none; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
-
   .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
-
-  .wordmark { font-weight: 900; letter-spacing: -0.045em; color: var(--accent); }
-  .wordmark .auto { color: var(--text); font-weight: 800; }
-
   .grad { background: linear-gradient(120deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .grad-teal { background: linear-gradient(120deg, var(--teal), var(--teal-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 
-  /* ── Scroll progress ─────────────────────────────────── */
-  .progress {
-    position: fixed; top: 0; left: 0; height: 2px; width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    z-index: 100; transition: width 0.1s linear;
-  }
+  /* Header */
+  header { position: sticky; top: 0; z-index: 60; background: rgba(10,10,10,0.72);
+    backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
+    border-bottom: 1px solid transparent; transition: border-color 0.3s ease, background 0.3s ease; }
+  header.scrolled { border-bottom-color: var(--border); background: rgba(10,10,10,0.9); }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .brand { display: inline-flex; align-items: center; gap: 11px; }
+  .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
+  .brand .wm { font-size: 21px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
 
-  /* ── Header ──────────────────────────────────────────── */
-  header {
-    position: sticky; top: 0; z-index: 60;
-    background: rgba(10,10,10,0.6);
-    backdrop-filter: saturate(160%) blur(16px);
-    -webkit-backdrop-filter: saturate(160%) blur(16px);
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.3s ease, background 0.3s ease;
-  }
-  header.scrolled { border-bottom-color: var(--border); background: rgba(10,10,10,0.82); }
-  .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-  .nav .wordmark { font-size: 23px; }
-  .btn-notify {
-    font-family: inherit; font-size: 14px; font-weight: 700; color: #0a0a0a;
-    background: var(--accent); border: 1px solid var(--accent);
-    padding: 10px 20px; border-radius: 999px; cursor: pointer;
-    box-shadow: 0 10px 26px -12px var(--accent-glow);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-  }
-  .btn-notify:hover { transform: translateY(-1px); box-shadow: 0 16px 34px -12px var(--accent-glow); }
-
-  /* ── Buttons ─────────────────────────────────────────── */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-    font-family: inherit; font-weight: 700; font-size: 15.5px;
-    padding: 15px 24px; border-radius: 13px; cursor: pointer;
-    border: 1.5px solid transparent; white-space: nowrap;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-  }
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-family: inherit; font-weight: 700; font-size: 15.5px; padding: 15px 26px; border-radius: 13px;
+    cursor: pointer; border: 1.5px solid transparent; white-space: nowrap;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease, background 0.18s ease; }
   .btn svg { width: 18px; height: 18px; }
   .btn-primary { background: var(--accent); color: #0a0a0a; box-shadow: 0 12px 34px -10px var(--accent-glow); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--accent-glow); }
+  .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-2); }
+  .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); color: var(--accent); }
 
-  /* ── Hero ────────────────────────────────────────────── */
-  .hero { position: relative; min-height: calc(100vh - 66px); display: flex; align-items: center; padding: clamp(48px, 8vw, 80px) 0; overflow: hidden; }
-  .hero::before {
-    content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-    width: 760px; max-width: 130vw; height: 600px;
-    background: radial-gradient(ellipse at center, var(--accent-glow), transparent 60%);
-    opacity: 0.5; filter: blur(8px); pointer-events: none;
-  }
-  .hero::after {
-    content: ''; position: absolute; bottom: -260px; right: -120px;
-    width: 600px; max-width: 100vw; height: 600px;
-    background: radial-gradient(circle at center, var(--teal-glow), transparent 62%);
-    opacity: 0.4; pointer-events: none;
-  }
-  .dotgrid {
-    position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 30px 30px;
-    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 75%);
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, #000 30%, transparent 75%);
-  }
-  .hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; text-align: center; }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600;
-    color: var(--teal-2); background: var(--teal-soft); border: 1px solid rgba(45,212,191,0.28);
-    padding: 7px 15px; border-radius: 999px; margin-bottom: 26px;
-  }
-  .eyebrow .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(45,212,191,0.5);} 70% { box-shadow: 0 0 0 9px rgba(45,212,191,0);} 100% { box-shadow: 0 0 0 0 rgba(45,212,191,0);} }
-  h1.hero-title { font-size: clamp(40px, 8.4vw, 68px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.02; margin-bottom: 22px; }
-  .hero-sub { font-size: clamp(16px, 2.3vw, 19px); color: var(--muted); max-width: 560px; margin: 0 auto 34px; }
-  .hero-ctas { display: flex; justify-content: center; }
-  .hero-ctas .btn { min-width: 280px; }
-  .hero-note { margin-top: 22px; font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: 9px; }
-  .hero-note svg { width: 16px; height: 16px; stroke: var(--teal); flex-shrink: 0; }
+  /* Hero */
+  .hero { position: relative; min-height: calc(100vh - 68px); display: flex; align-items: center; padding: clamp(48px,8vw,90px) 0; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 760px; max-width: 130vw; height: 600px; background: radial-gradient(ellipse at center, var(--accent-glow), transparent 60%); opacity: 0.5; filter: blur(8px); pointer-events: none; }
+  .hero-inner { position: relative; z-index: 1; width: 100%; text-align: center; }
+  .h1 { font-size: clamp(40px, 8vw, 72px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.02; margin-bottom: 22px; }
+  .lead { font-size: clamp(16px, 2.3vw, 20px); color: var(--muted); max-width: 620px; margin: 0 auto 44px; }
 
-  /* ── Trust strip ─────────────────────────────────────── */
-  .trust { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.012); }
-  .trust-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 30px; padding: 22px 0; }
-  .trust-item { display: inline-flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; color: var(--text-2); }
-  .trust-item svg { width: 17px; height: 17px; stroke: var(--accent); flex-shrink: 0; }
+  .cards { display: grid; grid-template-columns: 1fr; gap: 18px; max-width: 860px; margin: 0 auto; text-align: left; }
+  .card { border-radius: 22px; padding: clamp(26px,4vw,36px); display: flex; flex-direction: column; min-height: 230px; transition: transform 0.22s ease, box-shadow 0.22s ease; }
+  .card:hover { transform: translateY(-5px); }
+  .card .k { font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; }
+  .card h2 { font-size: clamp(22px,3.4vw,27px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 10px; }
+  .card p { font-size: 15px; margin-bottom: 24px; }
+  .card .btn { margin-top: auto; align-self: flex-start; }
+  .card-mech { background: linear-gradient(165deg, #f97316, #ea6a0c); color: #1a0d02; box-shadow: 0 30px 70px -36px var(--accent-glow); }
+  .card-mech .k { color: rgba(26,13,2,0.7); }
+  .card-mech p { color: rgba(26,13,2,0.92); }
+  .card-mech .btn { background: #0a0a0a; color: #fff; }
+  .card-mech .btn:hover { transform: translateY(-2px); background: #000; }
+  .card-cust { background: var(--surface); border: 1.5px solid var(--accent-line); }
+  .card-cust .k { color: var(--accent); }
+  .card-cust p { color: var(--muted); }
 
-  /* ── Sections ────────────────────────────────────────── */
-  section { padding: clamp(70px, 11vw, 116px) 0; scroll-margin-top: 80px; }
-  .section-tag { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
-  .section-tag.teal { color: var(--teal); }
-  h2.section-title { font-size: clamp(28px, 5.2vw, 44px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.08; margin-bottom: 16px; }
-  .section-lead { font-size: clamp(16px, 2.1vw, 18.5px); color: var(--muted); max-width: 580px; }
-  .center { text-align: center; }
-  .center .section-lead { margin-left: auto; margin-right: auto; }
+  .hero-foot { margin-top: 40px; font-size: 14px; color: var(--muted); display: inline-flex; align-items: center; gap: 9px; flex-wrap: wrap; justify-content: center; }
+  .hero-foot .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
 
-  /* ── Demand story ────────────────────────────────────── */
-  .problem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .problem-grid { display: grid; grid-template-columns: 1fr; gap: 36px; align-items: center; }
-  .problem-quote { position: relative; padding-left: 22px; font-size: clamp(23px, 4.4vw, 33px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.22; }
-  .problem-quote::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 4px; border-radius: 4px; background: linear-gradient(var(--accent), var(--accent-2)); }
-  .problem-quote .hl { color: var(--accent); }
-  .problem-body { font-size: clamp(15px, 2vw, 17.5px); color: var(--muted); }
-  .problem-body p { margin-bottom: 16px; }
-  .problem-body p:last-child { margin-bottom: 0; }
-  .problem-body strong { color: var(--text); font-weight: 700; }
+  /* Mission */
+  .mission { padding: clamp(72px,11vw,120px) 0; border-top: 1px solid var(--border); background: var(--surface); }
+  .mission .container { max-width: 760px; }
+  .mission p { font-size: clamp(18px, 2.6vw, 23px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.5; color: var(--text-2); margin-bottom: 28px; }
+  .mission p:last-child { margin-bottom: 0; }
+  .mission p .hl { color: var(--accent); }
 
-  /* ── How it works ────────────────────────────────────── */
-  .steps { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
-  .step-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; }
-  .step-card:hover { transform: translateY(-5px); border-color: var(--accent-line); box-shadow: 0 22px 48px -26px var(--accent-glow); }
-  .step-num { position: absolute; top: 20px; right: 22px; font-size: 42px; font-weight: 900; color: rgba(255,255,255,0.05); line-height: 1; }
-  .step-icon { width: 50px; height: 50px; border-radius: 13px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
-  .step-icon svg { width: 24px; height: 24px; stroke: var(--accent); }
-  .step-card h3 { font-size: 19px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
-  .step-card p { color: var(--muted); font-size: 14.5px; }
+  /* CTA */
+  .cta { padding: clamp(64px,9vw,100px) 0; text-align: center; }
+  .cta h2 { font-size: clamp(26px,4.6vw,40px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 26px; }
+  .cta .btn { width: 100%; max-width: 460px; padding: 18px 26px; font-size: 16.5px; }
 
-  /* ── Why ─────────────────────────────────────────────── */
-  .why { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .value-grid { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
-  .value-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: transform 0.22s ease, border-color 0.22s ease; }
-  .value-card:hover { transform: translateY(-5px); border-color: var(--border-2); }
-  .value-icon { width: 50px; height: 50px; border-radius: 13px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 17px; }
-  .value-icon svg { width: 24px; height: 24px; stroke: var(--accent); }
-  .value-card h3 { font-size: 18.5px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
-  .value-card p { color: var(--muted); font-size: 14.5px; }
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 52px 0 40px; text-align: center; }
+  .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
+  .foot-brand .wm { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; margin: 16px 0 18px; }
+  .foot-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
+  .foot-links a:hover { color: var(--accent); }
+  .foot-email { display: inline-block; color: var(--text-2); font-size: 14.5px; font-weight: 600; margin-bottom: 16px; }
+  .foot-email:hover { color: var(--accent); }
+  .foot-copy { color: var(--muted-2); font-size: 13px; }
 
-  /* ── Trust / social proof ────────────────────────────── */
-  .assure { position: relative; overflow: hidden; }
-  .assure::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 820px; max-width: 130vw; height: 520px; background: radial-gradient(ellipse at center, var(--teal-soft), transparent 64%); pointer-events: none; }
-  .assure-card { position: relative; max-width: 760px; margin: 50px auto 0; display: grid; grid-template-columns: 1fr; gap: 16px; }
-  .assure-item { display: flex; align-items: flex-start; gap: 15px; background: var(--surface); border: 1px solid rgba(45,212,191,0.22); border-radius: 16px; padding: 22px 22px; text-align: left; }
-  .assure-ic { width: 44px; height: 44px; border-radius: 12px; background: var(--teal-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .assure-ic svg { width: 22px; height: 22px; stroke: var(--teal); }
-  .assure-item h3 { font-size: 16.5px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.01em; }
-  .assure-item p { color: var(--muted); font-size: 14px; }
+  /* Reveal */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal { opacity: 1 !important; transform: none !important; transition: none; } }
 
-  /* ── Waitlist ────────────────────────────────────────── */
-  .waitlist { background: var(--surface); border-top: 1px solid var(--border); position: relative; overflow: hidden; }
-  .waitlist::before { content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%); width: 700px; max-width: 120vw; height: 460px; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 65%); pointer-events: none; }
-  .waitlist-card { position: relative; max-width: 540px; margin: 0 auto; background: var(--bg); border: 1px solid var(--border-2); border-radius: 24px; padding: clamp(28px, 6vw, 44px); text-align: center; box-shadow: 0 40px 90px -50px rgba(0,0,0,0.9); }
-  .signup-form { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; text-align: left; }
-  .field-label { font-size: 12.5px; font-weight: 700; color: var(--text-2); margin-bottom: -4px; letter-spacing: 0.01em; }
-  .field-label .opt { color: var(--muted-2); font-weight: 500; }
-  .field-input { font-family: inherit; font-size: 16px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 13px; padding: 15px 17px; width: 100%; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-  .field-input::placeholder { color: var(--muted-2); }
-  .field-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  .field-input.invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
-  select.field-input { appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px; padding-right: 44px; }
-  .form-error { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; }
-  .signup-form .btn { width: 100%; margin-top: 4px; }
-  .confirm { display: none; flex-direction: column; align-items: center; gap: 13px; padding: 8px 0; }
-  .confirm.show { display: flex; animation: rise 0.5s ease; }
-  .confirm .check { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
-  .confirm .check svg { width: 30px; height: 30px; stroke: var(--accent); }
-  .confirm h3 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; }
-  .confirm p { color: var(--muted); font-size: 14.5px; max-width: 380px; }
-  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-
-  /* ── FAQ ─────────────────────────────────────────────── */
-  .faq-list { max-width: 720px; margin: 44px auto 0; display: flex; flex-direction: column; gap: 12px; text-align: left; }
-  .faq { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s ease; }
-  .faq[open] { border-color: var(--accent-line); }
-  .faq summary { list-style: none; cursor: pointer; padding: 20px 22px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-  .faq summary::-webkit-details-marker { display: none; }
-  .faq summary .ic { flex-shrink: 0; width: 22px; height: 22px; position: relative; transition: transform 0.25s ease; }
-  .faq summary .ic::before, .faq summary .ic::after { content: ''; position: absolute; background: var(--accent); border-radius: 2px; }
-  .faq summary .ic::before { top: 10px; left: 3px; right: 3px; height: 2px; }
-  .faq summary .ic::after { left: 10px; top: 3px; bottom: 3px; width: 2px; transition: opacity 0.25s ease; }
-  .faq[open] summary .ic { transform: rotate(180deg); }
-  .faq[open] summary .ic::after { opacity: 0; }
-  .faq .faq-body { padding: 0 22px 20px; color: var(--muted); font-size: 14.5px; }
-
-  /* ── Founding badge ──────────────────────────────────── */
-  .founders-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--teal); background: var(--teal-soft); border: 1px solid rgba(45,212,191,0.3); padding: 7px 14px; border-radius: 999px; margin-bottom: 18px; }
-  .founders-badge svg { width: 14px; height: 14px; stroke: var(--teal); }
-
-  /* ── Footer ──────────────────────────────────────────── */
-  footer.site-footer { border-top: 1px solid var(--border); padding: 56px 0 42px; text-align: center; }
-  .foot-cross { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; color: var(--accent); border: 1px solid var(--accent-line); background: var(--accent-soft); padding: 9px 16px; border-radius: 999px; margin-bottom: 28px; transition: transform 0.18s ease; }
-  .foot-cross:hover { transform: translateY(-1px); }
-  .foot-cross svg { width: 15px; height: 15px; stroke: var(--accent); }
-  footer .wordmark { font-size: 25px; display: inline-block; margin-bottom: 12px; }
-  .foot-tag { color: var(--muted); font-size: 14.5px; max-width: 420px; margin: 0 auto 26px; }
-  .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-bottom: 20px; }
-  .footer-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
-  .footer-links a:hover { color: var(--accent); }
-  .footer-email { display: inline-block; color: var(--text-2); font-size: 14.5px; font-weight: 600; margin-bottom: 22px; transition: color 0.18s ease; }
-  .footer-email:hover { color: var(--accent); }
-  .foot-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; border-top: 1px solid var(--border); padding-top: 22px; }
-  .footer-copy { color: var(--muted-2); font-size: 13px; }
-
-  /* ── Reveal (progressive enhancement) ────────────────── */
-  html.js .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-  html.js .reveal.in { opacity: 1; transform: none; }
-  .reveal.d1 { transition-delay: 0.08s; }
-  .reveal.d2 { transition-delay: 0.16s; }
-  .reveal.d3 { transition-delay: 0.24s; }
-
-  @media (prefers-reduced-motion: reduce) {
-    html.js { scroll-behavior: auto; }
-    html.js .reveal { opacity: 1 !important; transform: none !important; transition: none; }
-    .pulse, .eyebrow .pulse { animation: none !important; }
-  }
-
-  /* ── Responsive ──────────────────────────────────────── */
-  @media (min-width: 680px) {
-    .steps { grid-template-columns: repeat(3, 1fr); }
-    .value-grid { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (min-width: 900px) {
-    .problem-grid { grid-template-columns: 0.85fr 1.15fr; gap: 56px; }
-  }
-  @media (max-width: 420px) {
-    .hero-ctas .btn { min-width: 0; width: 100%; }
-  }
+  @media (min-width: 760px) { .cards { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
-  <div class="progress" id="progress"></div>
-
-  <!-- ── Header ──────────────────────────────────────── -->
-  <header id="site-header">
+  <header id="hdr">
     <div class="container nav">
-      <a href="#top" class="wordmark" aria-label="Myku Auto home">Myku <span class="auto">Auto</span></a>
-      <button class="btn-notify" data-scroll="#waitlist">Join Waitlist</button>
+      <a href="index.html" class="brand" aria-label="Myku Auto home">
+        <img src="/logo.png" alt="Myku Auto logo" />
+        <span class="wm">Myku Auto</span>
+      </a>
     </div>
   </header>
 
-  <main id="top">
-
-    <!-- ── 1. Hero ───────────────────────────────────── -->
+  <main>
     <section class="hero">
-      <div class="dotgrid"></div>
+      <div class="container hero-inner">
+        <h1 class="h1 reveal">Auto service,<br><span class="grad">reimagined.</span></h1>
+        <p class="lead reveal d1">We built Myku Auto because finding a trustworthy mechanic shouldn't require knowing the right people. It should be as easy as opening an app.</p>
+
+        <div class="cards">
+          <div class="card card-mech reveal d1">
+            <div class="k">I'm a Mechanic</div>
+            <h2>Turn your skills into a business.</h2>
+            <p>Set your hours, set your prices, build your clientele.</p>
+            <a href="mechanics.html" class="btn">See How It Works
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+          <div class="card card-cust reveal d2">
+            <div class="k">I Need a Mechanic</div>
+            <h2>Find a trusted mechanic near you.</h2>
+            <p>Post a job or describe the problem and let mechanics come to you.</p>
+            <a href="customers.html" class="btn btn-ghost">Learn More
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-foot reveal d3"><span class="dot"></span> Launching on iOS · Currently building our mechanic network in DuPage County, IL</div>
+      </div>
+    </section>
+
+    <section class="mission">
       <div class="container">
-        <div class="hero-inner">
-          <div class="eyebrow reveal"><span class="pulse"></span> Now recruiting mechanics in DuPage County, IL</div>
-          <h1 class="hero-title reveal d1">Get paid to fix cars.<br><span class="grad">On your schedule.</span></h1>
-          <p class="hero-sub reveal d1">
-            Myku Auto connects you with customers who need a mechanic in your area. You set
-            the price, you set the hours, you choose the jobs. Free to join during launch.
-          </p>
-          <div class="hero-ctas reveal d2">
-            <button class="btn btn-primary" data-scroll="#waitlist">Join the Mechanic Waitlist</button>
-          </div>
-          <div class="hero-note reveal d3">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            Launching on iOS — currently building our mechanic network
-          </div>
-        </div>
+        <p class="reveal">Finding a mechanic used to mean knowing someone. A friend of a friend. A lucky Google search. A gamble on whoever showed up. We built Myku Auto because <span class="hl">that's not good enough.</span></p>
+        <p class="reveal">Myku Auto is a marketplace that connects vehicle owners with independent mechanics in their area. Customers post jobs or describe symptoms and request a diagnosis. Mechanics respond with their price and availability. Everyone wins.</p>
+        <p class="reveal">We are starting in DuPage County, Illinois and expanding city by city. If you are a mechanic who wants to be first in your area, the link below is for you.</p>
       </div>
     </section>
 
-    <!-- ── 2. Trust strip ────────────────────────────── -->
-    <div class="trust">
-      <div class="container trust-row reveal">
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Free during launch</span>
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Your hours, your prices</span>
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Mobile or your shop</span>
-        <span class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg> iOS at launch</span>
-      </div>
-    </div>
-
-    <!-- ── 3. The Demand Story ───────────────────────── -->
-    <section class="problem">
+    <section class="cta">
       <div class="container">
-        <div class="problem-grid">
-          <p class="problem-quote reveal">There's a customer near you whose car <span class="hl">just won't start.</span></p>
-          <div class="problem-body reveal d1">
-            <p>One random morning a car won't start. Everything looks fine, and the only real option is hunting for a mechanic through a friend of a friend. <strong>Most people don't have that connection.</strong></p>
-            <p>So right now there are thousands of people in your area who need a mechanic and have no good way to find one — and you're the one they're looking for.</p>
-            <p><strong>Myku puts you in front of them.</strong></p>
-          </div>
-        </div>
+        <h2 class="reveal">Be first in your area.</h2>
+        <a href="mechanics.html" class="btn btn-primary reveal d1">Join as a Mechanic
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
       </div>
     </section>
-
-    <!-- ── 4. How it works for mechanics ─────────────── -->
-    <section id="how">
-      <div class="container center">
-        <span class="section-tag reveal">How it works</span>
-        <h2 class="section-title reveal">From sign-up to paid in three steps</h2>
-        <p class="section-lead reveal d1">No bidding wars for leads, no monthly fee during launch. Just jobs from customers near you.</p>
-
-        <div class="steps">
-          <div class="step-card reveal" style="text-align:left">
-            <span class="step-num">1</span>
-            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
-            <h3>Create your profile</h3>
-            <p>Set your services, hourly rate, diagnostic fee, and service area. Takes 5 minutes.</p>
-          </div>
-          <div class="step-card reveal d1" style="text-align:left">
-            <span class="step-num">2</span>
-            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
-            <h3>Jobs come to you</h3>
-            <p>Customers in your area post jobs and request diagnostics. You see them in real time and respond with your price and availability.</p>
-          </div>
-          <div class="step-card reveal d2" style="text-align:left">
-            <span class="step-num">3</span>
-            <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <h3>You get paid</h3>
-            <p>Customer picks you, you show up, job done. Build your reviews and grow your client base on Myku.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── 5. Why join Myku ──────────────────────────── -->
-    <section class="why" id="why">
-      <div class="container center">
-        <span class="section-tag reveal">Why join Myku</span>
-        <h2 class="section-title reveal">Built around your work, not a boss</h2>
-        <p class="section-lead reveal d1">You're the talent. Myku is the platform that brings the customers to you and stays out of your way.</p>
-
-        <div class="value-grid">
-          <div class="value-card reveal" style="text-align:left">
-            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-            <h3>Your schedule, your rules</h3>
-            <p>Work mornings, evenings, weekends. Accept only the jobs you want. No boss, no shop politics.</p>
-          </div>
-          <div class="value-card reveal d1" style="text-align:left">
-            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <h3>Free during launch</h3>
-            <p>No subscription fee while we build the network. Be first in your area and get the best jobs before anyone else.</p>
-          </div>
-          <div class="value-card reveal d2" style="text-align:left">
-            <div class="value-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
-            <h3>Mobile or your shop</h3>
-            <p>Go to the customer or have them come to you. Work however fits your setup.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── 6. Trust / social proof ───────────────────── -->
-    <section class="assure">
-      <div class="container center">
-        <span class="section-tag teal reveal">Built for mechanics</span>
-        <h2 class="section-title reveal">No surprises. No sketchy leads.</h2>
-        <p class="section-lead reveal d1">We know your time is money. Here's how Myku keeps the jobs real and the customers serious.</p>
-
-        <div class="assure-card">
-          <div class="assure-item reveal">
-            <div class="assure-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
-            <div><h3>ID-verified customers only</h3><p>Every customer is verified on the platform before they can post a job, so you know who you're dealing with.</p></div>
-          </div>
-          <div class="assure-item reveal d1">
-            <div class="assure-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
-            <div><h3>You always see the job details first</h3><p>The vehicle, the problem, and the location are all there before you respond. No surprises, no wasted trips.</p></div>
-          </div>
-          <div class="assure-item reveal d2">
-            <div class="assure-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
-            <div><h3>Built by someone who needed you</h3><p>Myku was built by someone who couldn't find a mechanic when they needed one — and knew there had to be a better way.</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── 7. FAQ ────────────────────────────────────── -->
-    <section id="faq">
-      <div class="container center">
-        <span class="section-tag reveal">Straight answers</span>
-        <h2 class="section-title reveal">What mechanics ask us</h2>
-
-        <div class="faq-list">
-          <details class="faq reveal">
-            <summary>What does it cost to be on Myku?<span class="ic"></span></summary>
-            <div class="faq-body">Nothing during launch. No subscription, no sign-up fee while we build the network in your area. Founding mechanics keep that head start and get first pick of jobs as demand ramps up.</div>
-          </details>
-          <details class="faq reveal">
-            <summary>Are there really customers, or is this just another lead list?<span class="ic"></span></summary>
-            <div class="faq-body">That's exactly why we recruit mechanics first. We're building real supply in DuPage County before we drive customer demand, so the jobs that show up are real people in your area — not recycled leads sold to ten shops at once.</div>
-          </details>
-          <details class="faq reveal">
-            <summary>How and when do I get paid?<span class="ic"></span></summary>
-            <div class="faq-body">You set your price on every quote. The customer picks you, you do the work, and you get paid for the job — no bidding your rate into the ground and no monthly fee eating your margin.</div>
-          </details>
-          <details class="faq reveal">
-            <summary>Do I need my own shop?<span class="ic"></span></summary>
-            <div class="faq-body">No. Work fully mobile and go to the customer, run everything out of your own shop, or do both. You set your service area and the kinds of jobs you take.</div>
-          </details>
-          <details class="faq reveal">
-            <summary>Do I have to accept every job?<span class="ic"></span></summary>
-            <div class="faq-body">Never. You see the vehicle, the problem, and the location before you respond, and you only quote the jobs you actually want. Your schedule stays yours.</div>
-          </details>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── 8. Waitlist ───────────────────────────────── -->
-    <section class="waitlist" id="waitlist">
-      <div class="container center">
-        <span class="section-tag reveal">Join the waitlist</span>
-        <h2 class="section-title reveal">Be first in your area</h2>
-        <p class="section-lead reveal d1">We're launching in DuPage County, IL first. Join the waitlist and we'll reach out personally before we go live in your city.</p>
-
-        <div class="waitlist-card reveal d1">
-          <div id="signup-wrap">
-            <div class="founders-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8L3.5 9.2l5.9-.9z"/></svg> Founding mechanics get first pick of jobs</div>
-            <form class="signup-form" id="signup-form" novalidate>
-              <label class="field-label" for="first-name">First name</label>
-              <input class="field-input" id="first-name" type="text" autocomplete="given-name" placeholder="Your first name" aria-label="First name" />
-
-              <label class="field-label" for="email">Email address</label>
-              <input class="field-input" id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="Email address" />
-
-              <label class="field-label" for="phone">Phone number <span class="opt">(optional)</span></label>
-              <input class="field-input" id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-5555" aria-label="Phone number, optional" />
-
-              <label class="field-label" for="work-style">How do you work?</label>
-              <select class="field-input" id="work-style" aria-label="How do you work?">
-                <option value="" disabled selected>Select one</option>
-                <option value="mobile">Mobile (I go to customers)</option>
-                <option value="shop">My own shop</option>
-                <option value="both">Both</option>
-              </select>
-
-              <button class="btn btn-primary" id="submit-btn" type="submit">Join the Mechanic Waitlist</button>
-              <div class="form-error" id="form-error" role="alert"></div>
-            </form>
-          </div>
-
-          <div class="confirm" id="confirm">
-            <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
-            <h3>You're on the list.</h3>
-            <p>We'll reach out personally before we launch in your area. — Rohaan, founder of Myku</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- ── 9. Footer ─────────────────────────────────── -->
-  <footer class="site-footer">
+  <footer>
     <div class="container">
-      <a href="#top" class="wordmark">Myku <span class="auto">Auto</span></a>
-      <p class="foot-tag">Building the mechanic network for the next generation of auto service.</p>
-      <div>
-        <a class="foot-cross" href="customers.html"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Need a mechanic? See how Myku works</a>
-      </div>
-      <div class="footer-links">
+      <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku Auto</span></a>
+      <div class="foot-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>
         <a href="support.html">Support</a>
       </div>
-      <a class="footer-email" href="mailto:support@trymyku.com">support@trymyku.com</a>
-      <div class="foot-bottom">
-        <span class="footer-copy">© 2026 Myku Auto. All rights reserved.</span>
-      </div>
+      <a class="foot-email" href="mailto:support@trymyku.com">support@trymyku.com</a>
+      <div class="foot-copy">© 2026 Myku Auto. All rights reserved.</div>
     </div>
   </footer>
 
   <script>
     (function () {
-      'use strict';
-
-      /* Smooth-scroll to waitlist */
-      document.querySelectorAll('[data-scroll]').forEach(function (el) {
-        el.addEventListener('click', function () {
-          var target = document.querySelector(el.getAttribute('data-scroll'));
-          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-      });
-
-      /* Header border + scroll progress */
-      var header = document.getElementById('site-header');
-      var progress = document.getElementById('progress');
-      function onScroll() {
-        var y = window.scrollY || document.documentElement.scrollTop;
-        header.classList.toggle('scrolled', y > 8);
-        var h = document.documentElement.scrollHeight - window.innerHeight;
-        progress.style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
-      }
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-
-      /* Scroll reveal: failsafe so content is NEVER stuck hidden */
+      var hdr = document.getElementById('hdr');
+      function onScroll(){ hdr.classList.toggle('scrolled', (window.scrollY||0) > 8); }
+      window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
       var reveals = document.querySelectorAll('.reveal');
-      function revealAll() { reveals.forEach(function (r) { r.classList.add('in'); }); }
       if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
-          });
-        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-        reveals.forEach(function (r) { io.observe(r); });
-        setTimeout(revealAll, 1600);
-      } else {
-        revealAll();
-      }
-
-      /* Form validation + confirmation (no backend) */
-      var form = document.getElementById('signup-form');
-      var firstName = document.getElementById('first-name');
-      var email = document.getElementById('email');
-      var workStyle = document.getElementById('work-style');
-      var formError = document.getElementById('form-error');
-      var signupWrap = document.getElementById('signup-wrap');
-      var confirm = document.getElementById('confirm');
-      var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      function clearInvalid(el) {
-        el.addEventListener('input', function () { el.classList.remove('invalid'); formError.textContent = ''; });
-      }
-      clearInvalid(firstName);
-      clearInvalid(email);
-      workStyle.addEventListener('change', function () { workStyle.classList.remove('invalid'); formError.textContent = ''; });
-
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        formError.textContent = '';
-
-        if (!firstName.value.trim()) {
-          firstName.classList.add('invalid');
-          formError.textContent = 'Please enter your first name.';
-          firstName.focus();
-          return;
-        }
-        if (!EMAIL_RE.test(email.value.trim())) {
-          email.classList.add('invalid');
-          formError.textContent = 'Please enter a valid email address.';
-          email.focus();
-          return;
-        }
-        if (!workStyle.value) {
-          workStyle.classList.add('invalid');
-          formError.textContent = 'Please tell us how you work.';
-          workStyle.focus();
-          return;
-        }
-
-        signupWrap.style.display = 'none';
-        confirm.classList.add('show');
-      });
+        var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }); }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        reveals.forEach(function(r){ io.observe(r); });
+        setTimeout(function(){ reveals.forEach(function(r){ r.classList.add('in'); }); }, 1500);
+      } else { reveals.forEach(function(r){ r.classList.add('in'); }); }
     })();
   </script>
 </body>
