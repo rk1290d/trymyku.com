@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
 <title>Myku Auto — Join the Mechanic Waitlist</title>
-<meta name="description" content="You have the skills. We have the customers. Myku Auto puts your name in front of vehicle owners the moment they need help. Set your hours, set your prices. Free during launch. Join the waitlist in DuPage County, IL." />
+<meta name="description" content="You have the skills. We have the customers. Myku Auto puts your name in front of vehicle owners the moment they need help. Set your hours, set your prices. Free during launch. Join the waitlist across Chicago and the suburbs." />
 
 <meta property="og:title" content="Myku Auto — For Mechanics" />
 <meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or from your shop. Join the waitlist and be first in your city." />
@@ -57,6 +57,7 @@
   .brand { display: inline-flex; align-items: center; gap: 11px; }
   .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
   .brand .wm { font-size: 21px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .wm .auto { color: var(--text); }
   .back { font-size: 14.5px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; transition: color 0.18s ease; }
   .back:hover { color: var(--accent); }
   .btn-cta { font-family: inherit; font-size: 14px; font-weight: 700; color: #0a0a0a; background: var(--accent); border: none; padding: 11px 20px; border-radius: 999px; cursor: pointer; box-shadow: 0 10px 26px -12px var(--accent-glow); transition: transform 0.18s ease; }
@@ -116,13 +117,6 @@
   .value h3 { font-size: 18px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
   .value p { color: var(--muted); font-size: 14.5px; }
 
-  /* Trust */
-  .trust { position: relative; overflow: hidden; }
-  .trust::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 820px; max-width: 130vw; height: 520px; background: radial-gradient(ellipse at center, var(--teal-soft), transparent 64%); pointer-events: none; }
-  .trust .container { position: relative; max-width: 760px; }
-  .trust h2 { font-size: clamp(25px,4.4vw,38px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.14; margin-bottom: 20px; }
-  .trust p { font-size: clamp(16px,2.3vw,19px); color: var(--text-2); line-height: 1.55; }
-
   /* Waitlist */
   .waitlist { background: var(--surface); border-top: 1px solid var(--border); position: relative; overflow: hidden; }
   .waitlist::before { content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%); width: 700px; max-width: 120vw; height: 460px; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 65%); pointer-events: none; }
@@ -151,6 +145,7 @@
   .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
   .foot-brand .wm { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .foot-brand .wm .auto { color: var(--text); }
   .foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; margin: 16px 0 18px; }
   .foot-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
   .foot-links a:hover { color: var(--accent); }
@@ -172,7 +167,7 @@
     <div class="container nav">
       <a href="index.html" class="brand" aria-label="Myku Auto home">
         <img src="/logo.png" alt="Myku Auto logo" />
-        <span class="wm">Myku Auto</span>
+        <span class="wm">Myku <span class="auto">Auto</span></span>
       </a>
       <a href="index.html" class="back">← Back</a>
     </div>
@@ -181,7 +176,7 @@
   <main>
     <section class="hero">
       <div class="container hero-inner">
-        <div class="pill reveal"><span class="pulse"></span> Now recruiting · DuPage County, IL</div>
+        <div class="pill reveal"><span class="pulse"></span> Now recruiting · Chicago & the suburbs</div>
         <h1 class="h1 reveal d1">You have the skills.<br><span class="grad">We have the customers.</span></h1>
         <p class="lead reveal d1">Myku Auto puts your name in front of vehicle owners in your area the moment they need help. No cold calling. No slow seasons. Just jobs, on your terms.</p>
         <a href="#waitlist" class="btn btn-primary reveal d2" data-scroll>Join the Waitlist</a>
@@ -254,18 +249,12 @@
       </div>
     </section>
 
-    <section class="trust">
-      <div class="container">
-        <h2 class="reveal">Built by someone who needed a mechanic and couldn't find one.</h2>
-        <p class="reveal d1">Myku Auto started from a real moment — a car that wouldn't start, no mechanic in the contacts, no good options. We built the platform we wished existed. And we built it for mechanics like you first, because without you, none of this works.</p>
-      </div>
-    </section>
 
     <section class="waitlist" id="waitlist">
       <div class="container center">
         <span class="tag reveal">Join the waitlist</span>
         <h2 class="title reveal">Be first in your area.</h2>
-        <p class="sub reveal d1">We're launching in DuPage County, IL. Join the waitlist and we'll reach out personally before we go live near you.</p>
+        <p class="sub reveal d1">We're launching across Chicago and the suburbs. Join the waitlist and we'll reach out personally before we go live near you.</p>
 
         <div class="wl-card reveal d1">
           <div id="wrap">
@@ -299,7 +288,7 @@
 
   <footer>
     <div class="container">
-      <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku Auto</span></a>
+      <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku <span class="auto">Auto</span></span></a>
       <div class="foot-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>

@@ -56,6 +56,7 @@
   .brand { display: inline-flex; align-items: center; gap: 11px; }
   .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
   .brand .wm { font-size: 21px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .wm .auto { color: var(--text); }
   .back { font-size: 14.5px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; transition: color 0.18s ease; }
   .back:hover { color: var(--accent); }
 
@@ -133,6 +134,7 @@
   .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
   .foot-brand .wm { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .foot-brand .wm .auto { color: var(--text); }
   .foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; margin: 16px 0 18px; }
   .foot-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
   .foot-links a:hover { color: var(--accent); }
@@ -153,7 +155,7 @@
     <div class="container nav">
       <a href="index.html" class="brand" aria-label="Myku Auto home">
         <img src="/logo.png" alt="Myku Auto logo" />
-        <span class="wm">Myku Auto</span>
+        <span class="wm">Myku <span class="auto">Auto</span></span>
       </a>
       <a href="index.html" class="back">← Back</a>
     </div>
@@ -170,7 +172,7 @@
 
     <section class="problem">
       <div class="container">
-        <p class="reveal">Finding a mechanic you can trust used to mean knowing someone. A recommendation from a friend, a gamble on a Google review, or just hoping the dealership doesn't overcharge you. <span class="hl">There had to be a better way.</span></p>
+        <p class="reveal">Finding a mechanic you can trust used to mean knowing someone. A recommendation from a friend, a gamble on a Google review, or just hoping the dealership doesn't overcharge you. Independent mechanics often do the same work for far less — but only if you can find a good one. <span class="hl">There had to be a better way.</span></p>
       </div>
     </section>
 
@@ -206,7 +208,7 @@
           <div class="value reveal" style="text-align:left">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <h3>No more mystery pricing.</h3>
-            <p>See quotes before anyone touches your car.</p>
+            <p>Independent mechanics often charge far less than the dealership — and you see the quote upfront, before anyone touches your car.</p>
           </div>
           <div class="value reveal d1" style="text-align:left">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
@@ -253,7 +255,7 @@
 
   <footer>
     <div class="container">
-      <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku Auto</span></a>
+      <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku <span class="auto">Auto</span></span></a>
       <div class="foot-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>
