@@ -121,6 +121,8 @@
   .inp.bad { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
   .err { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; text-align: left; }
   .form .btn { width: 100%; }
+  .btn:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+  .hp { position: absolute !important; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
   .confirm { display: none; flex-direction: column; align-items: center; gap: 13px; padding: 8px 0; }
   .confirm.show { display: flex; animation: rise 0.5s ease; }
   .confirm .ck { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
@@ -239,6 +241,10 @@
           <div id="wrap">
             <form class="form" id="form" novalidate>
               <input class="inp" id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="Email address" />
+              <div class="hp" aria-hidden="true">
+                <label for="company">Company</label>
+                <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+              </div>
               <button class="btn btn-primary" id="submit" type="submit">Notify Me</button>
               <div class="err" id="err" role="alert"></div>
             </form>
@@ -279,15 +285,43 @@
         setTimeout(function(){ reveals.forEach(function(r){ r.classList.add('in'); }); }, 1500);
       } else { reveals.forEach(function(r){ r.classList.add('in'); }); }
 
+      var SUPABASE_URL = 'https://fioiaoxaozqfwdqukoho.supabase.co';
+      var SUPABASE_KEY = 'sb_publishable_Wp39xMC488ds7jL9MY4HfA_GksslO4S';
+
       var form = document.getElementById('form');
       var em = document.getElementById('em'), err = document.getElementById('err');
+      var hp = document.getElementById('company'), submit = document.getElementById('submit');
       var wrap = document.getElementById('wrap'), confirm = document.getElementById('confirm');
       var RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       em.addEventListener('input', function(){ em.classList.remove('bad'); err.textContent=''; });
+
+      function setLoading(on){ submit.disabled = on; submit.textContent = on ? 'Submitting…' : 'Notify Me'; }
+      function done(){ wrap.style.display='none'; confirm.classList.add('show'); }
+
       form.addEventListener('submit', function(e){
-        e.preventDefault();
+        e.preventDefault(); err.textContent='';
         if(!RE.test(em.value.trim())){ em.classList.add('bad'); err.textContent='Please enter a valid email address.'; em.focus(); return; }
-        wrap.style.display='none'; confirm.classList.add('show');
+
+        // Honeypot: bots fill this hidden field. Pretend success, store nothing.
+        if(hp && hp.value){ done(); return; }
+
+        setLoading(true);
+        fetch(SUPABASE_URL + '/rest/v1/customer_waitlist', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ email: em.value.trim() })
+        }).then(function(res){
+          if(!res.ok){ throw new Error('status ' + res.status); }
+          done();
+        }).catch(function(){
+          setLoading(false);
+          err.textContent = 'Something went wrong. Please try again, or email support@trymyku.com.';
+        });
       });
     })();
   </script>

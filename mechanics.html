@@ -8,7 +8,7 @@
 <meta name="description" content="You have the skills. We have the customers. Myku Auto puts your name in front of vehicle owners the moment they need help. Set your hours, set your prices. Free during launch. Join the waitlist across Chicago and the suburbs." />
 
 <meta property="og:title" content="Myku Auto — For Mechanics" />
-<meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or from your shop. Join the waitlist and be first in your city." />
+<meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or out of your own shop or garage. Join the waitlist and be first in your city." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/mechanics.html" />
 <meta property="og:image" content="https://trymyku.com/logo.png" />
@@ -132,6 +132,8 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px; }
   .err { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; }
   .form .btn { width: 100%; margin-top: 4px; }
+  .btn:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+  .hp { position: absolute !important; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
   .confirm { display: none; flex-direction: column; align-items: center; gap: 13px; padding: 8px 0; }
   .confirm.show { display: flex; animation: rise 0.5s ease; }
   .confirm .ck { width: 62px; height: 62px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; }
@@ -199,7 +201,7 @@
           <div class="step reveal" style="text-align:left">
             <div class="n">1</div>
             <h3>Build your profile in 5 minutes</h3>
-            <p>Set your services, your rate, your diagnostic fee, your service area. Mobile, your shop, or both.</p>
+            <p>Set your services, your rate, your diagnostic fee, your service area. Mobile, out of your own shop or garage, or both.</p>
           </div>
           <div class="step reveal d1" style="text-align:left">
             <div class="n">2</div>
@@ -237,8 +239,8 @@
           </div>
           <div class="value reveal d2" style="text-align:left">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
-            <h3>Mobile or your shop.</h3>
-            <p>Go to the customer or have them come to you. Work however your setup allows.</p>
+            <h3>Mobile or your own space.</h3>
+            <p>Go to the customer or have them come to you. Your shop, your home garage, your setup — if you've got the tools and the space, you've got a shop.</p>
           </div>
           <div class="value reveal d3" style="text-align:left">
             <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
@@ -265,13 +267,30 @@
               <input class="inp" id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" />
               <label class="lbl" for="ph">Phone <span class="opt">(optional)</span></label>
               <input class="inp" id="ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-5555" />
+              <label class="lbl" for="loc">City or ZIP</label>
+              <input class="inp" id="loc" type="text" autocomplete="off" placeholder="e.g. Naperville or 60540" />
               <label class="lbl" for="work">How do you work?</label>
               <select class="inp" id="work">
                 <option value="" disabled selected>Select one</option>
                 <option value="mobile">Mobile — I go to customers</option>
-                <option value="shop">My own shop</option>
+                <option value="shop">My own shop or garage</option>
                 <option value="both">Both</option>
               </select>
+              <label class="lbl" for="years">Years of experience</label>
+              <select class="inp" id="years">
+                <option value="" disabled selected>Select range</option>
+                <option value="Less than 1 year">Less than 1 year</option>
+                <option value="1–3 years">1–3 years</option>
+                <option value="3–5 years">3–5 years</option>
+                <option value="5–10 years">5–10 years</option>
+                <option value="10+ years">10+ years</option>
+              </select>
+              <label class="lbl" for="spec">Specialties / services</label>
+              <input class="inp" id="spec" type="text" autocomplete="off" placeholder="e.g. brakes, diagnostics, engine, electrical" />
+              <div class="hp" aria-hidden="true">
+                <label for="company">Company</label>
+                <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+              </div>
               <button class="btn btn-primary" id="submit" type="submit">Join the Mechanic Waitlist</button>
               <div class="err" id="err" role="alert"></div>
             </form>
@@ -317,18 +336,60 @@
         setTimeout(function(){ reveals.forEach(function(r){ r.classList.add('in'); }); }, 1500);
       } else { reveals.forEach(function(r){ r.classList.add('in'); }); }
 
+      var SUPABASE_URL = 'https://fioiaoxaozqfwdqukoho.supabase.co';
+      var SUPABASE_KEY = 'sb_publishable_Wp39xMC488ds7jL9MY4HfA_GksslO4S';
+
       var form = document.getElementById('form');
-      var fn = document.getElementById('fn'), em = document.getElementById('em'), work = document.getElementById('work');
+      var fn = document.getElementById('fn'), em = document.getElementById('em'), ph = document.getElementById('ph');
+      var loc = document.getElementById('loc'), work = document.getElementById('work');
+      var years = document.getElementById('years'), spec = document.getElementById('spec');
+      var hp = document.getElementById('company'), submit = document.getElementById('submit');
       var err = document.getElementById('err'), wrap = document.getElementById('wrap'), confirm = document.getElementById('confirm');
       var RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      [fn, em].forEach(function(i){ i.addEventListener('input', function(){ i.classList.remove('bad'); err.textContent=''; }); });
-      work.addEventListener('change', function(){ work.classList.remove('bad'); err.textContent=''; });
+
+      [fn, em, ph, loc, spec].forEach(function(i){ i.addEventListener('input', function(){ i.classList.remove('bad'); err.textContent=''; }); });
+      [work, years].forEach(function(i){ i.addEventListener('change', function(){ i.classList.remove('bad'); err.textContent=''; }); });
+
+      function setLoading(on){ submit.disabled = on; submit.textContent = on ? 'Joining…' : 'Join the Mechanic Waitlist'; }
+      function done(){ wrap.style.display='none'; confirm.classList.add('show'); }
+
       form.addEventListener('submit', function(e){
         e.preventDefault(); err.textContent='';
         if(!fn.value.trim()){ fn.classList.add('bad'); err.textContent='Please enter your first name.'; fn.focus(); return; }
         if(!RE.test(em.value.trim())){ em.classList.add('bad'); err.textContent='Please enter a valid email address.'; em.focus(); return; }
+        if(!loc.value.trim()){ loc.classList.add('bad'); err.textContent='Please enter your city or ZIP.'; loc.focus(); return; }
         if(!work.value){ work.classList.add('bad'); err.textContent='Please tell us how you work.'; work.focus(); return; }
-        wrap.style.display='none'; confirm.classList.add('show');
+        if(!years.value){ years.classList.add('bad'); err.textContent='Please select your years of experience.'; years.focus(); return; }
+        if(!spec.value.trim()){ spec.classList.add('bad'); err.textContent='Please list at least one specialty.'; spec.focus(); return; }
+
+        // Honeypot: bots fill this hidden field. Pretend success, store nothing.
+        if(hp && hp.value){ done(); return; }
+
+        setLoading(true);
+        fetch(SUPABASE_URL + '/rest/v1/mechanic_waitlist', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            first_name: fn.value.trim(),
+            email: em.value.trim(),
+            phone: ph.value.trim() || null,
+            location: loc.value.trim(),
+            work_type: work.value,
+            years_experience: years.value,
+            specialty: spec.value.trim()
+          })
+        }).then(function(res){
+          if(!res.ok){ throw new Error('status ' + res.status); }
+          done();
+        }).catch(function(){
+          setLoading(false);
+          err.textContent = 'Something went wrong. Please try again, or email support@trymyku.com.';
+        });
       });
     })();
   </script>
