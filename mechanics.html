@@ -34,6 +34,8 @@
   "mainEntity": [
     { "@type": "Question", "name": "How much does Myku Auto cost for mechanics?",
       "acceptedAnswer": { "@type": "Answer", "text": "Nothing during launch. There is no monthly fee while we build the network — early mechanics lock in their spot before anyone else." } },
+    { "@type": "Question", "name": "Do you take a cut of my jobs?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. You set your price, the customer pays you directly, and you keep 100% of it. During launch there are no fees of any kind. If that ever changes, early mechanics hear it from us first — no surprises." } },
     { "@type": "Question", "name": "Do I need my own shop?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Work mobile, out of your own shop or home garage, or both. If you have the tools and the space, you have a shop." } },
     { "@type": "Question", "name": "How do jobs reach me?",
@@ -434,6 +436,12 @@
             <div class="a">Nothing during launch. There's no monthly fee while we build the network — early mechanics lock in their spot before anyone else.</div>
           </details>
           <details class="faq">
+            <summary>Do you take a cut of my jobs?
+              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+            </summary>
+            <div class="a">No. You set your price, the customer pays you directly, and you keep 100% of it. During launch there are no fees of any kind. If that ever changes, early mechanics hear it from us first — no surprises.</div>
+          </details>
+          <details class="faq">
             <summary>Do I need my own shop?
               <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
             </summary>
@@ -471,13 +479,13 @@
           <div id="wrap">
             <form class="form" id="form" novalidate>
               <label class="lbl" for="fn">First name</label>
-              <input class="inp" id="fn" type="text" autocomplete="given-name" placeholder="Your first name" />
+              <input class="inp" id="fn" type="text" autocomplete="given-name" placeholder="Your first name" maxlength="120" />
               <label class="lbl" for="em">Email</label>
-              <input class="inp" id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" />
+              <input class="inp" id="em" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" maxlength="200" />
               <label class="lbl" for="ph">Phone <span class="opt">(optional)</span></label>
-              <input class="inp" id="ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-5555" />
+              <input class="inp" id="ph" type="tel" inputmode="tel" autocomplete="tel" placeholder="(555) 555-5555" maxlength="40" />
               <label class="lbl" for="loc">City or ZIP</label>
-              <input class="inp" id="loc" type="text" autocomplete="off" placeholder="e.g. Naperville or 60540" />
+              <input class="inp" id="loc" type="text" autocomplete="off" placeholder="e.g. Naperville or 60540" maxlength="120" />
               <label class="lbl" for="work">How do you work?</label>
               <select class="inp" id="work">
                 <option value="" disabled selected>Select one</option>
@@ -495,7 +503,7 @@
                 <option value="10+ years">10+ years</option>
               </select>
               <label class="lbl" for="spec">Specialties / services</label>
-              <input class="inp" id="spec" type="text" autocomplete="off" placeholder="e.g. brakes, diagnostics, engine, electrical" />
+              <input class="inp" id="spec" type="text" autocomplete="off" placeholder="e.g. brakes, diagnostics, engine, electrical" maxlength="300" />
               <div class="hp" aria-hidden="true">
                 <label for="company">Company</label>
                 <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
@@ -614,7 +622,10 @@
             location: loc.value.trim(),
             work_type: work.value,
             years_experience: years.value,
-            specialty: spec.value.trim()
+            specialty: spec.value.trim(),
+            // Where this signup came from: share links like mechanics.html?src=flyer
+            // or ?src=facebook and the source shows up next to each signup.
+            source: (function(){ try { return (new URLSearchParams(location.search).get('src') || 'site').slice(0, 60); } catch(e){ return 'site'; } })()
           })
         }).then(function(res){
           if(!res.ok){ throw new Error('status ' + res.status); }
