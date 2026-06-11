@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#0a0a0a" />
+<title>Myku Analytics</title>
+<link rel="icon" href="/logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root{ --bg:#0a0a0a; --surface:#141414; --surface2:#1b1b1b; --border:#232323; --border2:#2e2e2e;
+    --accent:#f97316; --accent-soft:rgba(249,115,22,0.12); --teal:#2dd4bf; --teal-soft:rgba(45,212,191,0.12);
+    --text:#fff; --text2:#d4d4d8; --muted:#9ca3af; --muted2:#6b7280; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 64px}
+  .brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:4px}
+  .brand img{width:34px;height:34px;border-radius:9px}
+  .brand b{font-size:19px;font-weight:900;letter-spacing:-0.03em;color:var(--accent)}
+  .brand b span{color:var(--text)}
+  .muted{color:var(--muted)}
+  /* gate */
+  .gate{max-width:380px;margin:14vh auto 0;text-align:center}
+  .gate h1{font-size:22px;font-weight:800;margin-bottom:6px}
+  .gate p{color:var(--muted);font-size:14px;margin-bottom:20px}
+  .inp{width:100%;font-family:inherit;font-size:16px;color:var(--text);background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .btn{width:100%;font-family:inherit;font-weight:700;font-size:15px;color:#0a0a0a;background:var(--accent);border:none;border-radius:12px;padding:14px;cursor:pointer;transition:transform .15s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.sm{width:auto;padding:9px 16px;font-size:13px;background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+  .err{color:#f87171;font-size:13px;font-weight:600;min-height:18px;margin-top:4px}
+  .hidden{display:none}
+  /* dashboard */
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
+  @media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .kpi .v{font-size:30px;font-weight:900;letter-spacing:-0.03em;line-height:1}
+  .kpi .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px}
+  .kpi.accent .v{color:var(--accent)} .kpi.teal .v{color:var(--teal)}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 18px 20px;margin-top:16px}
+  .panel h2{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+  .cols{display:grid;grid-template-columns:1fr;gap:16px} @media(min-width:780px){.cols{grid-template-columns:1fr 1fr}}
+  /* bar chart */
+  .chart{display:flex;align-items:flex-end;gap:6px;height:160px}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+  .bar .col{width:100%;max-width:34px;background:linear-gradient(180deg,var(--accent),#c2570c);border-radius:6px 6px 0 0;transition:height .4s ease}
+  .bar .n{font-size:11px;font-weight:800}
+  .bar .d{font-size:9.5px;color:var(--muted2);white-space:nowrap;transform:rotate(-45deg);transform-origin:center;margin-top:6px;height:28px}
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:0 0 8px}
+  th.r,td.r{text-align:right}
+  td{padding:9px 0;border-top:1px solid var(--border);font-weight:600}
+  td.src{color:var(--text2);font-weight:600}
+  .pill{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--teal-soft);color:var(--teal)}
+  .empty{color:var(--muted2);font-size:13px;padding:6px 0}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Gate -->
+    <div class="gate" id="gate">
+      <div class="brand"><img src="/logo.png" alt="" /><b>Myku <span>Analytics</span></b></div>
+      <h1>Private dashboard</h1>
+      <p>Enter the passphrase to view site traffic.</p>
+      <input class="inp" id="pass" type="password" placeholder="Passphrase" autocomplete="current-password" />
+      <button class="btn" id="go">View dashboard</button>
+      <div class="err" id="err"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="hidden" id="dash">
+      <div class="top">
+        <div>
+          <div class="brand"><img src="/logo.png" alt="" /><b>Myku <span>Analytics</span></b></div>
+          <div class="muted" id="asof" style="font-size:12.5px"></div>
+        </div>
+        <button class="btn sm" id="refresh">Refresh</button>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi accent"><div class="v" id="k_vt">0</div><div class="l">Visits today</div></div>
+        <div class="kpi"><div class="v" id="k_ut">0</div><div class="l">Unique visitors today</div></div>
+        <div class="kpi"><div class="v" id="k_v7">0</div><div class="l">Visits (7 days)</div></div>
+        <div class="kpi"><div class="v" id="k_u7">0</div><div class="l">Uniques (7 days)</div></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi teal"><div class="v" id="k_mt">0</div><div class="l">Mechanic signups (total)</div></div>
+        <div class="kpi"><div class="v" id="k_m7">0</div><div class="l">Mechanic signups (7d)</div></div>
+        <div class="kpi teal"><div class="v" id="k_ct">0</div><div class="l">Customer signups (total)</div></div>
+        <div class="kpi"><div class="v" id="k_v30">0</div><div class="l">Visits (30 days)</div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Daily visits &middot; last 14 days</h2>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="cols">
+        <div class="panel">
+          <h2>Traffic by source &middot; conversion</h2>
+          <table><thead><tr><th>Source</th><th class="r">Visits</th><th class="r">Signups</th><th class="r">Conv.</th></tr></thead>
+            <tbody id="t_conv"></tbody></table>
+        </div>
+        <div class="panel">
+          <h2>Where they came from</h2>
+          <table><thead><tr><th>Referrer</th><th class="r">Visits</th></tr></thead><tbody id="t_ref"></tbody></table>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div class="panel">
+          <h2>Top pages</h2>
+          <table><thead><tr><th>Page</th><th class="r">Views</th></tr></thead><tbody id="t_path"></tbody></table>
+        </div>
+        <div class="panel">
+          <h2>Mechanic signups by source</h2>
+          <table><thead><tr><th>Source</th><th class="r">Signups</th></tr></thead><tbody id="t_msrc"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var FN='https://fioiaoxaozqfwdqukoho.supabase.co/functions/v1/stats';
+  var gate=document.getElementById('gate'), dash=document.getElementById('dash');
+  var pass=document.getElementById('pass'), go=document.getElementById('go'), err=document.getElementById('err');
+  var SK='myku_stats_pass';
+
+  function n(x){ return (x==null?0:x).toLocaleString(); }
+  function set(id,v){ document.getElementById(id).textContent=v; }
+
+  function render(d){
+    set('k_vt',n(d.visits_today)); set('k_ut',n(d.uniques_today));
+    set('k_v7',n(d.visits_7d)); set('k_u7',n(d.uniques_7d));
+    set('k_v30',n(d.visits_30d));
+    set('k_mt',n(d.mech_signups_total)); set('k_m7',n(d.mech_signups_7d));
+    set('k_ct',n(d.cust_signups_total));
+    document.getElementById('asof').textContent='Updated '+new Date(d.generated_at).toLocaleString();
+
+    // chart
+    var daily=d.daily||[], max=1; daily.forEach(function(x){ if(x.visits>max)max=x.visits; });
+    var ch=document.getElementById('chart'); ch.innerHTML='';
+    if(!daily.length){ ch.innerHTML='<div class="empty">No visits recorded yet. Share your links and check back.</div>'; }
+    daily.forEach(function(x){
+      var h=Math.max(4,Math.round(x.visits/max*130));
+      var lbl=new Date(x.day+'T00:00').toLocaleDateString(undefined,{month:'numeric',day:'numeric'});
+      var b=document.createElement('div'); b.className='bar';
+      b.innerHTML='<div class="n">'+x.visits+'</div><div class="col" style="height:'+h+'px"></div><div class="d">'+lbl+'</div>';
+      ch.appendChild(b);
+    });
+
+    // conversion: merge visits-by-source with signups-by-source
+    var sig={}; (d.mech_by_source||[]).forEach(function(m){ sig[m.source]=m.signups; });
+    var conv=document.getElementById('t_conv'); conv.innerHTML='';
+    var bs=d.by_source||[];
+    if(!bs.length){ conv.innerHTML='<tr><td class="empty" colspan="4">No traffic yet.</td></tr>'; }
+    bs.forEach(function(s){
+      var key=(s.source==='(direct/none)')?'site':s.source;
+      var sg=sig[key]||0; var pct=s.visits?((sg/s.visits*100).toFixed(1)+'%'):'-';
+      conv.innerHTML+='<tr><td class="src">'+s.source+'</td><td class="r">'+n(s.visits)+'</td><td class="r">'+n(sg)+'</td><td class="r"><span class="pill">'+pct+'</span></td></tr>';
+    });
+
+    fill('t_ref', d.by_referrer, 'referrer','visits');
+    fill('t_path', d.by_path, 'path','visits');
+    fill('t_msrc', d.mech_by_source, 'source','signups');
+  }
+  function fill(id,arr,k,vk){
+    var t=document.getElementById(id); t.innerHTML=''; arr=arr||[];
+    if(!arr.length){ t.innerHTML='<tr><td class="empty" colspan="2">None yet.</td></tr>'; return; }
+    arr.forEach(function(x){ t.innerHTML+='<tr><td class="src">'+x[k]+'</td><td class="r">'+n(x[vk])+'</td></tr>'; });
+  }
+
+  function load(p){
+    err.textContent=''; go.textContent='Loading…'; go.disabled=true;
+    fetch(FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass:p})})
+      .then(function(r){ if(r.status===401){ throw new Error('Wrong passphrase.'); } if(!r.ok){ throw new Error('Error '+r.status); } return r.json(); })
+      .then(function(d){ if(d.error){ throw new Error(d.error); } sessionStorage.setItem(SK,p); gate.classList.add('hidden'); dash.classList.remove('hidden'); render(d); })
+      .catch(function(e){ err.textContent=e.message||'Something went wrong.'; })
+      .finally(function(){ go.textContent='View dashboard'; go.disabled=false; });
+  }
+
+  go.addEventListener('click', function(){ if(pass.value) load(pass.value); });
+  pass.addEventListener('keydown', function(e){ if(e.key==='Enter'&&pass.value) load(pass.value); });
+  document.getElementById('refresh').addEventListener('click', function(){ var p=sessionStorage.getItem(SK); if(p) load(p); });
+  var saved=sessionStorage.getItem(SK); if(saved){ load(saved); }
+})();
+</script>
+</body>
+</html>
