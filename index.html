@@ -4,11 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
-<title>Myku Auto — Auto Service, Reimagined</title>
+<title>Myku Auto | Auto Service, Reimagined</title>
 <meta name="description" content="Myku Auto is a marketplace connecting vehicle owners with independent mechanics. Finding a trustworthy mechanic should be as easy as opening an app. Launching across Chicago and the suburbs." />
 <link rel="canonical" href="https://trymyku.com/" />
 
-<meta property="og:title" content="Myku Auto — Auto Service, Reimagined" />
+<meta property="og:title" content="Myku Auto | Auto Service, Reimagined" />
 <meta property="og:description" content="A marketplace connecting vehicle owners with independent mechanics. Finding a trustworthy mechanic should be as easy as opening an app." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/" />
@@ -16,7 +16,7 @@
 <meta property="og:image:width" content="1024" />
 <meta property="og:image:height" content="1024" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Myku Auto — Auto Service, Reimagined" />
+<meta name="twitter:title" content="Myku Auto | Auto Service, Reimagined" />
 <meta name="twitter:description" content="A marketplace connecting vehicle owners with independent mechanics." />
 <meta name="twitter:image" content="https://trymyku.com/logo.png" />
 
@@ -222,6 +222,10 @@
   .foot-email { display: inline-block; color: var(--text-2); font-size: 14.5px; font-weight: 600; margin-bottom: 16px; }
   .foot-email:hover { color: var(--accent); }
   .foot-copy { color: var(--muted-2); font-size: 13px; }
+  .foot-social { display: flex; justify-content: center; gap: 12px; margin: 2px 0 18px; }
+  .foot-social a { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
+  .foot-social a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+  .foot-social svg { width: 18px; height: 18px; }
 
   /* ---- Reveal ---- */
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
@@ -298,7 +302,7 @@
               </div>
               <div class="ph-card">
                 <div class="ph-r1"><span class="ph-car">2012 Jeep Wrangler</span><span class="ph-price teal">Diagnosis</span></div>
-                <div class="ph-job">Won't start — clicking sound when turning the key</div>
+                <div class="ph-job">Won't start, clicking sound when turning the key</div>
                 <div class="ph-meta">
                   <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>4.8 mi · Aurora</span>
                   <span>8 min ago</span>
@@ -372,7 +376,7 @@
       <div class="container">
         <div class="cta-panel reveal">
           <h2>Be first in your area.</h2>
-          <p class="sub">We're building the mechanic network now — early members get launch pricing (free) and first pick of their territory.</p>
+          <p class="sub">We're building the mechanic network now. Early members get launch pricing (free) and first pick of their territory.</p>
           <div class="cta-btns">
             <a href="mechanics.html" class="btn btn-primary">Join as a Mechanic
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -387,6 +391,16 @@
   <footer>
     <div class="container">
       <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku <span class="auto">Auto</span></span></a>
+      <div class="foot-social">
+        <a href="https://www.instagram.com/trymyku/" target="_blank" rel="noopener" aria-label="Myku Auto on Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <!-- Facebook: uncomment once the page is live at facebook.com/MykuAuto:
+        <a href="https://www.facebook.com/MykuAuto" target="_blank" rel="noopener" aria-label="Myku Auto on Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.6c-.8-.1-1.6-.15-2.4-.15-2.4 0-4.05 1.45-4.05 4.15v2.3H7.5V13h2.75v8h3.25z"/></svg>
+        </a>
+        -->
+      </div>
       <div class="foot-links">
         <a href="privacy.html">Privacy Policy</a>
         <a href="terms.html">Terms of Service</a>
