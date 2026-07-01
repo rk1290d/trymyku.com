@@ -4,12 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
-<title>Myku Auto | Join the Mechanic Waitlist</title>
+<title>Myku Auto | Join the mechanic waitlist</title>
 <meta name="description" content="You have the skills. We have the customers. Myku Auto puts your name in front of vehicle owners the moment they need help. Set your hours, set your prices. Free during launch. Join the waitlist across Chicago and the suburbs." />
 <link rel="canonical" href="https://trymyku.com/mechanics.html" />
 
 <meta property="og:title" content="Myku Auto | For Mechanics" />
-<meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or out of your own shop or garage. Join the waitlist and be first in your city." />
+<meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or out of your own shop. Join the waitlist and be first in your area." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/mechanics.html" />
 <meta property="og:image" content="https://trymyku.com/logo.png" />
@@ -25,7 +25,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
 
 <script type="application/ld+json">
 {
@@ -50,13 +50,14 @@
 
 <style>
   :root {
-    --bg: #0a0a0a; --surface: #141414; --surface-2: #1b1b1b;
-    --border: #232323; --border-2: #2e2e2e;
+    --bg: #0a0a0a; --bg-warm: #0d0b09;
+    --surface: #111214; --surface-2: #17181b; --elevated: #1b1c1f;
+    --border: #232427; --border-2: #2e2f34;
     --accent: #f97316; --accent-2: #ffb877; --accent-soft: rgba(249,115,22,0.12);
-    --accent-line: rgba(249,115,22,0.22); --accent-glow: rgba(249,115,22,0.38);
-    --teal: #2DD4BF; --teal-2: #7af0e0; --teal-soft: rgba(45,212,191,0.12); --teal-glow: rgba(45,212,191,0.30);
-    --text: #fff; --text-2: #d4d4d8; --muted: #9ca3af; --muted-2: #6b7280;
-    --maxw: 1120px; --radius: 18px;
+    --accent-line: rgba(249,115,22,0.24); --accent-glow: rgba(249,115,22,0.40);
+    --teal: #2dd4bf; --teal-2: #7af0e0; --teal-soft: rgba(45,212,191,0.12); --teal-line: rgba(45,212,191,0.30);
+    --text: #fff; --text-2: #dcdad6; --muted: #a49f97; --muted-2: #6f6a63;
+    --maxw: 1120px; --disp: 'Plus Jakarta Sans', 'Inter', sans-serif; --ease: cubic-bezier(0.16,1,0.3,1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -67,33 +68,35 @@
   a { color: inherit; text-decoration: none; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
   .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+  h1, h2, h3 { font-family: var(--disp); }
+  .tnum { font-feature-settings: 'tnum' 1, 'ss01' 1; }
 
-  /* ---- Atmosphere ---- */
   .bgfx { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .bgfx .warm { position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 42% at 50% -4%, rgba(249,115,22,0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 0%, var(--bg-warm), transparent 55%); }
   .bgfx .grid { position: absolute; inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px);
-    background-size: 30px 30px;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 30px 30px;
     -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 30%, transparent 75%);
     mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 30%, transparent 75%); }
-  .bgfx .noise { position: absolute; inset: 0; opacity: 0.05;
+  .bgfx .noise { position: absolute; inset: 0; opacity: 0.045;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
   main, header, footer { position: relative; z-index: 1; }
 
-  .aurora { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; will-change: transform; }
-  .aurora.a1 { width: 540px; height: 420px; top: -160px; left: -120px;
-    background: radial-gradient(ellipse at center, rgba(249,115,22,0.22), transparent 65%); animation: drift1 22s ease-in-out infinite alternate; }
-  .aurora.a2 { width: 480px; height: 400px; top: 60px; right: -160px;
-    background: radial-gradient(ellipse at center, rgba(45,212,191,0.12), transparent 65%); animation: drift2 26s ease-in-out infinite alternate; }
+  .aurora { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; will-change: transform; }
+  .aurora.a1 { width: 560px; height: 440px; top: -180px; left: -120px;
+    background: radial-gradient(ellipse at center, rgba(249,115,22,0.20), transparent 66%); animation: drift1 24s ease-in-out infinite alternate; }
+  .aurora.a2 { width: 480px; height: 400px; top: 40px; right: -170px;
+    background: radial-gradient(ellipse at center, rgba(45,212,191,0.10), transparent 66%); animation: drift2 30s ease-in-out infinite alternate; }
   @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(70px,40px) scale(1.12); } }
   @keyframes drift2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-60px,50px) scale(1.08); } }
 
-  .grad { background: linear-gradient(110deg, var(--accent), var(--accent-2), var(--accent));
-    background-size: 200% 100%; -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent; animation: shimmer 6s ease-in-out infinite; }
+  .grad { background: linear-gradient(100deg, var(--accent), var(--accent-2) 45%, var(--accent));
+    background-size: 220% 100%; -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; animation: shimmer 7s ease-in-out infinite; }
   @keyframes shimmer { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
-  /* ---- Header ---- */
-  header { position: sticky; top: 0; z-index: 60; background: rgba(10,10,10,0.72);
+  header { position: sticky; top: 0; z-index: 60; background: rgba(10,10,10,0.66);
     backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
     border-bottom: 1px solid transparent; transition: border-color 0.3s ease, background 0.3s ease; }
   header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -102,47 +105,56 @@
   .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; }
   .brand { display: inline-flex; align-items: center; gap: 11px; }
   .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
-  .brand .wm { font-size: 21px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .brand .wm { font-family: var(--disp); font-size: 21px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); }
   .wm .auto { color: var(--text); }
-  .back { font-size: 14.5px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; transition: color 0.18s ease; }
-  .back:hover { color: var(--accent); }
+  .nav-cta { font-size: 14.5px; font-weight: 700; color: var(--text-2); display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 16px; border: 1px solid var(--border-2); border-radius: 10px; transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
+  .nav-cta:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
+  .nav-cta svg { width: 15px; height: 15px; }
 
-  /* ---- Buttons ---- */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px;
     font-family: inherit; font-weight: 700; font-size: 15.5px; padding: 15px 26px; border-radius: 13px;
     cursor: pointer; border: 1.5px solid transparent; white-space: nowrap;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease; }
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, color 0.18s ease, background 0.18s ease; }
   .btn svg { width: 18px; height: 18px; }
-  .btn-primary { background: var(--accent); color: #0a0a0a; box-shadow: 0 12px 34px -10px var(--accent-glow); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--accent-glow); }
+  .btn-primary { position: relative; background: linear-gradient(180deg, #fb8c3a, var(--accent)); color: #180a02;
+    box-shadow: 0 12px 34px -10px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.28); overflow: hidden; }
+  .btn-primary::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.45), transparent); transform: skewX(-18deg); animation: sheen 5.5s ease-in-out infinite; }
+  @keyframes sheen { 0%, 62% { left: -60%; } 82%, 100% { left: 130%; } }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 44px -10px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.28); }
 
-  /* ---- Hero ---- */
-  .hero { position: relative; padding: clamp(56px,9vw,100px) 0 clamp(48px,7vw,80px); overflow: hidden; }
-  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 52px; align-items: center; }
+  .hero { position: relative; padding: clamp(52px,8vw,96px) 0 clamp(44px,6vw,72px); overflow: hidden; }
+  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 50px; align-items: center; }
   .hero-copy { text-align: center; }
   .pill { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; color: var(--teal-2);
-    background: var(--teal-soft); border: 1px solid rgba(45,212,191,0.28); padding: 7px 15px; border-radius: 999px; margin-bottom: 26px; }
-  .pill .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.2s infinite; }
+    background: var(--teal-soft); border: 1px solid var(--teal-line); padding: 7px 15px; border-radius: 999px; margin-bottom: 24px; }
+  .pill .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(45,212,191,0.6); animation: pulse 2.4s infinite; }
   @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(45,212,191,0.5);} 70%{box-shadow:0 0 0 9px rgba(45,212,191,0);} 100%{box-shadow:0 0 0 0 rgba(45,212,191,0);} }
-  .h1 { font-size: clamp(38px, 6.6vw, 62px); font-weight: 900; letter-spacing: -0.04em; line-height: 1.04; margin-bottom: 22px; }
-  .lead { font-size: clamp(16px, 2.3vw, 19px); color: var(--muted); max-width: 560px; margin: 0 auto 32px; }
+  .h1 { font-size: clamp(40px, 7vw, 70px); font-weight: 800; letter-spacing: -0.045em; line-height: 1.02; margin-bottom: 20px; }
+  .lead { font-size: clamp(16.5px, 2.3vw, 20px); color: var(--muted); max-width: 544px; margin: 0 auto 30px; }
   .hero-btns { display: flex; flex-wrap: wrap; gap: 13px; justify-content: center; }
 
-  /* ---- Phone mockup ---- */
-  .hero-visual { display: flex; justify-content: center; perspective: 1200px; }
-  .phone { position: relative; width: 292px; border-radius: 46px; padding: 11px;
-    background: linear-gradient(160deg, #3a3a3a, #161616 40%, #2a2a2a);
-    box-shadow: 0 60px 120px -40px rgba(0,0,0,0.95), 0 30px 80px -30px var(--accent-glow), inset 0 0 0 1.5px rgba(255,255,255,0.07);
+  /* Phone feed */
+  .hero-visual { display: flex; justify-content: center; perspective: 1300px; }
+  .phone-wrap { position: relative; }
+  .phone-glow { position: absolute; inset: -8% -14%; z-index: 0; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(249,115,22,0.22), transparent 72%); filter: blur(10px); }
+  .phone-wrap::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: -24px; height: 44px; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.6), transparent 72%); filter: blur(14px); }
+  .phone { position: relative; z-index: 1; width: 300px; border-radius: 48px; padding: 11px;
+    background: linear-gradient(155deg, #43423f, #161616 42%, #2b2a28);
+    box-shadow: 0 60px 120px -40px rgba(0,0,0,0.96), 0 30px 70px -34px var(--accent-glow), inset 0 0 0 1.5px rgba(255,255,255,0.08);
     transform-style: preserve-3d; transition: transform 0.3s ease; }
-  .ph-screen { background: #0d0d0d; border-radius: 36px; overflow: hidden; padding: 14px 14px 18px; min-height: 560px; position: relative; }
-  .ph-island { width: 86px; height: 24px; border-radius: 999px; background: #000; margin: 2px auto 14px; }
-  .ph-status { position: absolute; top: 18px; left: 28px; right: 28px; display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #ddd; pointer-events: none; }
-  .ph-head { display: flex; align-items: center; justify-content: space-between; margin: 8px 4px 14px; }
-  .ph-head .t { font-size: 17px; font-weight: 900; letter-spacing: -0.03em; }
+  .ph-screen { background: #0c0c0d; border-radius: 38px; overflow: hidden; padding: 14px 14px 18px; min-height: 578px; position: relative; }
+  .ph-island { width: 92px; height: 26px; border-radius: 999px; background: #000; margin: 2px auto 15px; }
+  .ph-status { position: absolute; top: 19px; left: 30px; right: 30px; display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #ddd; pointer-events: none; }
+  .ph-head { display: flex; align-items: center; justify-content: space-between; margin: 6px 4px 14px; }
+  .ph-head .t { font-family: var(--disp); font-size: 18px; font-weight: 800; letter-spacing: -0.03em; }
   .ph-bell { position: relative; width: 32px; height: 32px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; }
-  .ph-bell svg { width: 16px; height: 16px; stroke: var(--text-2); }
+  .ph-bell svg { width: 16px; height: 16px; stroke: var(--text-2); fill: none; }
   .ph-bell .bdg { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--accent); color: #0a0a0a; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
-  .ph-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 13px 14px; margin: 0 2px 11px; }
+  .ph-card { background: var(--surface); border: 1px solid var(--border); border-radius: 15px; padding: 12px 13px; margin: 0 3px 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
   .ph-card.hot { border-color: var(--accent-line); animation: hotpulse 3s ease-in-out infinite; }
   @keyframes hotpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); } 50% { box-shadow: 0 0 22px -4px var(--accent-glow); } }
   .ph-r1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
@@ -150,79 +162,74 @@
   .ph-price { font-size: 13px; font-weight: 800; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; }
   .ph-job { font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
   .ph-meta { display: flex; align-items: center; gap: 11px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
-  .ph-meta svg { width: 11px; height: 11px; stroke: var(--muted); vertical-align: -1.5px; margin-right: 3px; }
+  .ph-meta svg { width: 11px; height: 11px; stroke: var(--muted); fill: none; vertical-align: -1.5px; margin-right: 3px; }
   .ph-new { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
-  .ph-new .d { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: pulse 2.2s infinite; }
-  .ph-act { display: block; width: 100%; text-align: center; font-size: 12.5px; font-weight: 800; color: #0a0a0a; background: var(--accent); border-radius: 10px; padding: 9px 0; }
+  .ph-new .d { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: pulse 2.4s infinite; }
+  .ph-act { display: block; width: 100%; text-align: center; font-size: 12.5px; font-weight: 800; color: #180a02; background: linear-gradient(180deg,#fb8c3a,var(--accent)); border-radius: 10px; padding: 9px 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.28); }
   .ph-state { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 6px 12px; border-radius: 999px; }
   .ph-state.sent { color: var(--accent-2); background: var(--accent-soft); }
   .ph-state.booked { color: var(--teal); background: var(--teal-soft); }
-  .ph-state svg { width: 12px; height: 12px; stroke: currentColor; }
-  .ph-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: linear-gradient(to top, #0d0d0d, transparent); border-radius: 0 0 36px 36px; pointer-events: none; }
+  .ph-state svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+  .ph-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 74px; background: linear-gradient(to top, #0c0c0d, transparent); border-radius: 0 0 38px 38px; pointer-events: none; }
 
-  /* ---- Sections ---- */
-  section { padding: clamp(70px, 11vw, 116px) 0; }
-  .tag { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
-  h2.title { font-size: clamp(27px, 5vw, 42px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.1; margin-bottom: 16px; }
-  .sub { font-size: clamp(16px, 2.1vw, 18.5px); color: var(--muted); max-width: 620px; }
+  .sec { padding: clamp(54px,8vw,90px) 0; }
+  .tone { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .tag { display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; }
+  .title { font-size: clamp(28px, 5vw, 44px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.08; margin-bottom: 14px; }
+  .sub { font-size: clamp(15.5px, 2.1vw, 18px); color: var(--muted); max-width: 600px; }
   .center { text-align: center; } .center .sub { margin-left: auto; margin-right: auto; }
 
-  /* ---- Problem ---- */
-  .problem { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
-  .problem::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent-line), transparent); }
-  .problem .container { max-width: 760px; }
-  .problem .rule { width: 56px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); margin-bottom: 30px; }
-  .problem h2 { font-size: clamp(26px,4.6vw,40px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 22px; }
-  .problem p { font-size: clamp(16.5px, 2.4vw, 21px); font-weight: 500; color: var(--text-2); line-height: 1.5; }
-  .problem p .hl { color: var(--accent); font-weight: 700; }
+  /* Problem lede */
+  .lede { max-width: 780px; }
+  .lede .rule { width: 56px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); margin-bottom: 26px; }
+  .lede h2 { font-size: clamp(25px, 4.4vw, 38px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 18px; }
+  .lede p { font-size: clamp(16.5px, 2.4vw, 21px); color: var(--text-2); font-weight: 500; line-height: 1.5; }
+  .lede p .hl { color: var(--accent); font-weight: 700; }
 
-  /* ---- Steps (connected timeline) ---- */
-  .steps { position: relative; display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
-  .steps::before { content: ''; position: absolute; display: none; top: 48px; left: 12.5%; right: 12.5%; height: 2px;
-    background: linear-gradient(90deg, var(--accent-line), var(--accent), var(--accent-line)); opacity: 0.5; }
-  .step { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; text-align: left;
-    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease; overflow: hidden; }
-  .step:hover { transform: translateY(-5px); border-color: var(--accent-line); box-shadow: 0 22px 48px -26px var(--accent-glow); }
-  .step .n { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); font-weight: 900; font-size: 17px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; position: relative; z-index: 1; }
-  .step h3 { font-size: 18.5px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
-  .step p { color: var(--muted); font-size: 14.5px; }
+  /* Process cards */
+  .pgrid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 44px; text-align: left; }
+  .pcard { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 26px 24px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); overflow: hidden; transition: transform 0.22s var(--ease), border-color 0.22s ease; }
+  .pcard:hover { transform: translateY(-4px); border-color: var(--accent-line); }
+  .pcard .pn { width: 40px; height: 40px; border-radius: 12px; background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent); font-family: var(--disp); font-weight: 800; font-size: 17px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+  .pcard h3 { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .pcard p { font-size: 13.5px; color: var(--muted); }
 
-  /* ---- Value ---- */
-  .why { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .values { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 50px; }
-  .value { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; text-align: left; overflow: hidden;
-    transition: transform 0.22s ease, border-color 0.22s ease; }
-  .value:hover { transform: translateY(-5px); border-color: var(--border-2); }
-  .value .ic { width: 48px; height: 48px; border-radius: 12px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-  .value .ic svg { width: 23px; height: 23px; stroke: var(--accent); }
-  .value h3 { font-size: 18px; font-weight: 800; margin-bottom: 7px; letter-spacing: -0.015em; }
-  .value p { color: var(--muted); font-size: 14.5px; }
+  /* Feature cards */
+  .feats { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 44px; }
+  .feat { position: relative; background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 26px 24px; text-align: left;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); overflow: hidden; transition: transform 0.22s var(--ease), border-color 0.22s ease; }
+  .feat:hover { transform: translateY(-4px); border-color: var(--border-2); }
+  .feat .ic { width: 46px; height: 46px; border-radius: 13px; background: var(--accent-soft); border: 1px solid var(--accent-line); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+  .feat .ic svg { width: 22px; height: 22px; stroke: var(--accent); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .feat h3 { font-size: 17.5px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .feat p { font-size: 14px; color: var(--muted); }
   .spot::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
-    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(249,115,22,0.10), transparent 65%);
-    transition: opacity 0.25s ease; }
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(249,115,22,0.10), transparent 65%); transition: opacity 0.25s ease; }
   .spot:hover::after { opacity: 1; }
+  @media (min-width: 700px) { .pgrid, .feats { grid-template-columns: repeat(2,1fr); } }
+  @media (min-width: 1000px) { .pgrid, .feats { grid-template-columns: repeat(4,1fr); } }
 
-  /* ---- FAQ ---- */
-  .faq-list { max-width: 720px; margin: 44px auto 0; text-align: left; display: flex; flex-direction: column; gap: 12px; }
-  .faq { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.22s ease; }
+  /* FAQ */
+  .faq-list { max-width: 720px; margin: 40px auto 0; text-align: left; display: flex; flex-direction: column; gap: 12px; }
+  .faq { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.22s ease; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
   .faq[open] { border-color: var(--accent-line); }
   .faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 19px 22px; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+    padding: 18px 22px; font-family: var(--disp); font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; }
   .faq summary::-webkit-details-marker { display: none; }
   .faq summary .chev { flex: none; width: 26px; height: 26px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; transition: transform 0.25s ease, background 0.25s ease; }
-  .faq summary .chev svg { width: 13px; height: 13px; stroke: var(--muted); }
+  .faq summary .chev svg { width: 13px; height: 13px; stroke: var(--muted); fill: none; }
   .faq[open] summary .chev { transform: rotate(45deg); background: var(--accent-soft); }
   .faq[open] summary .chev svg { stroke: var(--accent); }
   .faq .a { padding: 0 22px 20px; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
 
-  /* ---- Waitlist ---- */
-  .waitlist { background: var(--surface); border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+  /* Waitlist form */
+  .waitlist { position: relative; overflow: hidden; }
   .waitlist::before { content: ''; position: absolute; top: -180px; left: 50%; transform: translateX(-50%); width: 700px; max-width: 120vw; height: 460px; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 65%); pointer-events: none; }
-  .wl-card { position: relative; max-width: 540px; margin: 0 auto; background: var(--bg); border: 1px solid var(--accent-line); border-radius: 24px; padding: clamp(28px,6vw,44px); text-align: center; box-shadow: 0 40px 90px -50px rgba(0,0,0,0.9); }
-  .wl-card::before { content: ''; position: absolute; top: 0; left: 14%; right: 14%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent); }
-  .form { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; text-align: left; }
+  .wl-card { position: relative; max-width: 540px; margin: 30px auto 0; background: var(--bg); border: 1px solid var(--accent-line); border-radius: 24px; padding: clamp(28px,6vw,44px); text-align: center;
+    box-shadow: 0 40px 90px -50px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.05); }
+  .wl-card::before { content: ''; position: absolute; top: 0; left: 14%; right: 14%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+  .form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
   .lbl { font-size: 12.5px; font-weight: 700; color: var(--text-2); margin-bottom: -4px; }
   .lbl .opt { color: var(--muted-2); font-weight: 500; }
   .inp { font-family: inherit; font-size: 16px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 13px; padding: 15px 17px; width: 100%; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -230,7 +237,7 @@
   .inp:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .inp.bad { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
   select.inp { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 44px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px; }
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a49f97' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 18px; }
   .err { color: #f87171; font-size: 13px; font-weight: 600; min-height: 16px; }
   .form .btn { width: 100%; margin-top: 4px; }
   .btn:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
@@ -243,37 +250,33 @@
   .confirm p { color: var(--muted); font-size: 14.5px; max-width: 400px; }
   @keyframes rise { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:none;} }
 
-  /* ---- Footer ---- */
   footer { border-top: 1px solid var(--border); padding: 52px 0 40px; text-align: center; }
   .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
-  .foot-brand .wm { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; color: var(--accent); }
+  .foot-brand .wm { font-family: var(--disp); font-size: 18px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); }
   .foot-brand .wm .auto { color: var(--text); }
+  .foot-social { display: flex; justify-content: center; gap: 12px; margin: 2px 0 18px; }
+  .foot-social a { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
+  .foot-social a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+  .foot-social svg { width: 18px; height: 18px; }
   .foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; margin: 16px 0 18px; }
   .foot-links a { color: var(--muted); font-size: 14.5px; font-weight: 500; transition: color 0.18s ease; }
   .foot-links a:hover { color: var(--accent); }
   .foot-email { display: inline-block; color: var(--text-2); font-size: 14.5px; font-weight: 600; margin-bottom: 16px; }
   .foot-email:hover { color: var(--accent); }
   .foot-copy { color: var(--muted-2); font-size: 13px; }
-  .foot-social { display: flex; justify-content: center; gap: 12px; margin: 2px 0 18px; }
-  .foot-social a { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
-  .foot-social a:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
-  .foot-social svg { width: 18px; height: 18px; }
 
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
   .reveal.in { opacity: 1; transform: none; }
   .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal { opacity: 1 !important; transform: none !important; transition: none; }
-    .aurora, .grad, .ph-card.hot, .pulse, .ph-new .d { animation: none !important; }
+    .aurora, .grad, .pulse, .ph-card.hot, .ph-new .d, .btn-primary::after { animation: none !important; }
     .phone { transform: none !important; }
   }
-
-  @media (min-width: 680px) { .steps { grid-template-columns: repeat(2, 1fr); } .values { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 980px) { .steps { grid-template-columns: repeat(4, 1fr); } .steps::before { display: block; } }
   @media (min-width: 920px) {
-    .hero-grid { grid-template-columns: 1.08fr 0.92fr; gap: 36px; }
+    .hero-grid { grid-template-columns: 1.06fr 0.94fr; gap: 38px; }
     .hero-copy { text-align: left; }
     .lead { margin-left: 0; }
     .hero-btns { justify-content: flex-start; }
@@ -281,7 +284,7 @@
 </style>
 </head>
 <body>
-  <div class="bgfx" aria-hidden="true"><div class="grid"></div><div class="noise"></div></div>
+  <div class="bgfx" aria-hidden="true"><div class="warm"></div><div class="grid"></div><div class="noise"></div></div>
 
   <header id="hdr">
     <div class="container nav">
@@ -289,7 +292,9 @@
         <img src="/logo.png" alt="Myku Auto logo" />
         <span class="wm">Myku <span class="auto">Auto</span></span>
       </a>
-      <a href="index.html" class="back">← Back</a>
+      <a href="customers.html" class="nav-cta">I Need a Mechanic
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </div>
   </header>
 
@@ -299,9 +304,9 @@
       <div class="aurora a2" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="pill reveal"><span class="pulse"></span> Now recruiting · Chicago &amp; the suburbs</div>
+          <div class="pill reveal"><span class="pulse"></span> Now recruiting across Chicago and the suburbs</div>
           <h1 class="h1 reveal d1">You have the skills.<br><span class="grad">We have the customers.</span></h1>
-          <p class="lead reveal d1">Myku Auto puts your name in front of vehicle owners in your area the moment they need help. No cold calling. No slow seasons. Just jobs, on your terms.</p>
+          <p class="lead reveal d1">Myku puts your name in front of vehicle owners near you the moment they need help. No cold calling. Just jobs, on your terms.</p>
           <div class="hero-btns reveal d2">
             <a href="#waitlist" class="btn btn-primary" data-scroll>Join the Waitlist
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -310,174 +315,151 @@
         </div>
 
         <div class="hero-visual reveal d2">
-          <div class="phone" id="phone" aria-hidden="true">
-            <div class="ph-screen">
-              <div class="ph-status"><span>9:41</span><span>5G ▮▮▮</span></div>
-              <div class="ph-island"></div>
-              <div class="ph-head">
-                <span class="t">Your jobs</span>
-                <span class="ph-bell">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-                  <span class="bdg">2</span>
-                </span>
-              </div>
-              <div class="ph-card hot">
-                <div class="ph-new"><span class="d"></span> New job near you</div>
-                <div class="ph-r1"><span class="ph-car">2015 Honda Civic</span><span class="ph-price">$220</span></div>
-                <div class="ph-job">Front brake pads &amp; rotors</div>
-                <div class="ph-meta">
-                  <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>2.1 mi away</span>
-                  <span>Just now</span>
+          <div class="phone-wrap">
+            <div class="phone-glow" aria-hidden="true"></div>
+            <div class="phone" id="phone" aria-hidden="true">
+              <div class="ph-screen">
+                <div class="ph-status"><span>9:41</span><span>5G</span></div>
+                <div class="ph-island"></div>
+                <div class="ph-head">
+                  <span class="t">Your jobs</span>
+                  <span class="ph-bell">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+                    <span class="bdg">2</span>
+                  </span>
                 </div>
-                <span class="ph-act">Send your offer</span>
-              </div>
-              <div class="ph-card">
-                <div class="ph-r1"><span class="ph-car">2012 Jeep Wrangler</span><span class="ph-price">$45</span></div>
-                <div class="ph-job">Diagnosis: won't start, clicking sound</div>
-                <div class="ph-meta">
-                  <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>4.8 mi away</span>
-                  <span>12 min ago</span>
+                <div class="ph-card hot">
+                  <div class="ph-new"><span class="d"></span> New job near you</div>
+                  <div class="ph-r1"><span class="ph-car">2015 Honda Civic</span><span class="ph-price tnum">$220</span></div>
+                  <div class="ph-job">Front brake pads and rotors</div>
+                  <div class="ph-meta">
+                    <span><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="tnum">2.1 mi away</span></span>
+                    <span>Just now</span>
+                  </div>
+                  <span class="ph-act">Send your offer</span>
                 </div>
-                <span class="ph-state sent">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
-                  Offer sent · awaiting customer
-                </span>
-              </div>
-              <div class="ph-card">
-                <div class="ph-r1"><span class="ph-car">2019 Toyota Camry</span><span class="ph-price">$85</span></div>
-                <div class="ph-job">Full synthetic oil change, customer's driveway</div>
-                <div class="ph-meta">
-                  <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>6.3 mi away</span>
+                <div class="ph-card">
+                  <div class="ph-r1"><span class="ph-car">2012 Jeep Wrangler</span><span class="ph-price tnum">$45</span></div>
+                  <div class="ph-job">Diagnosis: won't start, clicking sound</div>
+                  <div class="ph-meta">
+                    <span><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="tnum">4.8 mi away</span></span>
+                    <span>12 min ago</span>
+                  </div>
+                  <span class="ph-state sent">
+                    <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+                    Offer sent, awaiting customer
+                  </span>
                 </div>
-                <span class="ph-state booked">
-                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                  Booked · Tue 2:30 PM
-                </span>
+                <div class="ph-card">
+                  <div class="ph-r1"><span class="ph-car">2019 Toyota Camry</span><span class="ph-price tnum">$85</span></div>
+                  <div class="ph-job">Full synthetic oil change, at the driveway</div>
+                  <div class="ph-meta">
+                    <span><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><span class="tnum">6.3 mi away</span></span>
+                  </div>
+                  <span class="ph-state booked">
+                    <svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+                    Booked, Tue 2:30 PM
+                  </span>
+                </div>
+                <div class="ph-fade"></div>
               </div>
-              <div class="ph-fade"></div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="problem">
+    <section class="sec tone">
       <div class="container">
-        <div class="rule reveal"></div>
-        <h2 class="reveal">Your next customer is already looking for you.</h2>
-        <p class="reveal d1">Right now, someone in your zip code is sitting next to a car that won't start. They don't know a mechanic. They're about to call a tow truck or overpay at a dealership. <span class="hl">That's your job. That's your $$$.</span> Myku makes sure they find you instead.</p>
+        <div class="lede">
+          <div class="rule reveal"></div>
+          <h2 class="reveal">Your next customer is already looking for you.</h2>
+          <p class="reveal d1">Right now, someone in your zip code is next to a car that will not start. They do not know a mechanic, and they are about to call a tow truck or overpay at a dealership. <span class="hl">That is your customer, and your income.</span> Myku makes sure they find you instead.</p>
+        </div>
       </div>
     </section>
 
-    <section>
+    <section class="sec">
       <div class="container center">
         <span class="tag reveal">How it works</span>
-        <h2 class="title reveal">Four steps to your first job</h2>
+        <h2 class="title reveal">Four steps to your first job.</h2>
         <p class="sub reveal d1">No bidding wars for leads, no monthly fee during launch. Just real jobs from customers near you.</p>
-        <div class="steps">
-          <div class="step spot reveal">
-            <div class="n">1</div>
-            <h3>Build your profile in 5 minutes</h3>
-            <p>Set your services, your rate, your diagnostic fee, your service area. Mobile, out of your own shop or garage, or both.</p>
-          </div>
-          <div class="step spot reveal d1">
-            <div class="n">2</div>
-            <h3>Jobs land in your feed</h3>
-            <p>Customers post jobs and diagnostic requests in real time. You see the vehicle, the issue, the location, and how far away they are before you respond.</p>
-          </div>
-          <div class="step spot reveal d2">
-            <div class="n">3</div>
-            <h3>You respond on your terms</h3>
-            <p>Send your price and availability. Customer picks you. You show up, do the work, build your reputation.</p>
-          </div>
-          <div class="step spot reveal d3">
-            <div class="n">4</div>
-            <h3>Your reviews build your business</h3>
-            <p>Every job you complete builds your rating. The better your rating, the more jobs you win. Your reputation follows you.</p>
-          </div>
+        <div class="pgrid">
+          <div class="pcard spot reveal"><div class="pn">1</div><h3>Build your profile</h3><p>Set your services, your rate, your diagnostic fee, and your area. Mobile, your own shop, or both.</p></div>
+          <div class="pcard spot reveal d1"><div class="pn">2</div><h3>Jobs land in your feed</h3><p>Customers post jobs in real time. You see the vehicle, the issue, and how far away they are before you respond.</p></div>
+          <div class="pcard spot reveal d2"><div class="pn">3</div><h3>Respond on your terms</h3><p>Send your price and availability. The customer picks you. You show up and do the work.</p></div>
+          <div class="pcard spot reveal d3"><div class="pn">4</div><h3>Reviews build your business</h3><p>Every job builds your rating. The better your rating, the more jobs you win. Your reputation is yours.</p></div>
         </div>
       </div>
     </section>
 
-    <section class="why">
+    <section class="sec tone">
       <div class="container center">
         <span class="tag reveal">Why Myku</span>
-        <h2 class="title reveal">Built around your work, not a boss</h2>
-        <div class="values">
-          <div class="value spot reveal">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h2 class="title reveal">Built around your work, not a boss.</h2>
+        <div class="feats">
+          <div class="feat spot reveal">
+            <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
             <h3>Free during launch.</h3>
-            <p>No monthly fee while we build the network. Be first in your area and lock in your spot before anyone else.</p>
+            <p>No monthly fee while we build the network. Be first in your area and lock in your spot.</p>
           </div>
-          <div class="value spot reveal d1">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="feat spot reveal d1">
+            <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
             <h3>Your hours. Your prices.</h3>
-            <p>Accept jobs when you want. Set your own rate. No one tells you what to charge or when to work.</p>
+            <p>Take jobs when you want. Set your own rate. No one tells you what to charge or when to work.</p>
           </div>
-          <div class="value spot reveal d2">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
+          <div class="feat spot reveal d2">
+            <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h2l1.5-4.5A2 2 0 0 1 8.4 11h7.2a2 2 0 0 1 1.9 1.5L19 17h2"/><path d="M5 17v2M19 17v2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div>
             <h3>Mobile or your own space.</h3>
-            <p>Go to the customer or have them come to you. Your shop, your home garage, your setup. If you've got the tools and the space, you've got a shop.</p>
+            <p>Go to the customer or have them come to you. If you have the tools and the space, you have a shop.</p>
           </div>
-          <div class="value spot reveal d3">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <div class="feat spot reveal d3">
+            <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
             <h3>Real customers, real jobs.</h3>
-            <p>Every customer on Myku is verified. You see the full job details before you commit to anything.</p>
+            <p>Every customer is verified, and you see the full job details before you commit to anything.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section>
+    <section class="sec">
       <div class="container center">
         <span class="tag reveal">Questions</span>
-        <h2 class="title reveal">Straight answers</h2>
+        <h2 class="title reveal">Straight answers.</h2>
         <div class="faq-list reveal d1">
           <details class="faq">
-            <summary>How much does it cost?
-              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-            </summary>
-            <div class="a">Nothing during launch. There's no monthly fee while we build the network. Early mechanics lock in their spot before anyone else.</div>
+            <summary>How much does it cost?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+            <div class="a">Nothing during launch. There is no monthly fee while we build the network. Early mechanics lock in their spot before anyone else.</div>
           </details>
           <details class="faq">
-            <summary>Do you take a cut of my jobs?
-              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-            </summary>
+            <summary>Do you take a cut of my jobs?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
             <div class="a">No. You set your price, the customer pays you directly, and you keep 100% of it. During launch there are no fees of any kind. If that ever changes, early mechanics hear it from us first. No surprises.</div>
           </details>
           <details class="faq">
-            <summary>Do I need my own shop?
-              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-            </summary>
-            <div class="a">No. Work mobile, out of your own shop or home garage, or both. If you've got the tools and the space, you've got a shop.</div>
+            <summary>Do I need my own shop?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+            <div class="a">No. Work mobile, out of your own shop or home garage, or both. If you have the tools and the space, you have a shop.</div>
           </details>
           <details class="faq">
-            <summary>How do jobs reach me?
-              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-            </summary>
+            <summary>How do jobs reach me?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
             <div class="a">Customers post jobs and diagnostic requests in real time. They land in your feed with the vehicle, the issue, and the distance. You respond with your price and availability.</div>
           </details>
           <details class="faq">
-            <summary>Where is Myku launching?
-              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-            </summary>
+            <summary>Where is Myku launching?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
             <div class="a">Chicago and the suburbs first, then city by city from there. Joining the waitlist tells us where to go next.</div>
           </details>
           <details class="faq">
-            <summary>What happens after I join the waitlist?
-              <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
-            </summary>
-            <div class="a">We reach out personally before we go live in your area, so you're set up and first in line on day one.</div>
+            <summary>What happens after I join the waitlist?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+            <div class="a">We reach out personally before we go live in your area, so you are set up and first in line on day one.</div>
           </details>
         </div>
       </div>
     </section>
 
-    <section class="waitlist" id="waitlist">
+    <section class="sec tone waitlist" id="waitlist">
       <div class="container center">
         <span class="tag reveal">Join the waitlist</span>
-        <h2 class="title reveal">Be first in your area.</h2>
-        <p class="sub reveal d1">We're launching across Chicago and the suburbs. Join the waitlist and we'll reach out personally before we go live near you.</p>
+        <h2 class="title reveal">Be the first name in your area.</h2>
+        <p class="sub reveal d1">We are launching across Chicago and the suburbs. Join the waitlist and we will reach out personally before we go live near you.</p>
 
         <div class="wl-card reveal d1">
           <div id="wrap">
@@ -533,11 +515,6 @@
         <a href="https://www.instagram.com/trymyku/" target="_blank" rel="noopener" aria-label="Myku Auto on Instagram">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
         </a>
-        <!-- Facebook: uncomment once the page is live at facebook.com/MykuAuto:
-        <a href="https://www.facebook.com/MykuAuto" target="_blank" rel="noopener" aria-label="Myku Auto on Facebook">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5h1.65V3.6c-.8-.1-1.6-.15-2.4-.15-2.4 0-4.05 1.45-4.05 4.15v2.3H7.5V13h2.75v8h3.25z"/></svg>
-        </a>
-        -->
       </div>
       <div class="foot-links">
         <a href="privacy.html">Privacy Policy</a>
@@ -545,7 +522,7 @@
         <a href="support.html">Support</a>
       </div>
       <a class="foot-email" href="mailto:support@trymyku.com">support@trymyku.com</a>
-      <div class="foot-copy">© 2026 Myku Auto. All rights reserved.</div>
+      <div class="foot-copy">&copy; 2026 Myku Auto. All rights reserved.</div>
     </div>
   </footer>
 
@@ -586,7 +563,7 @@
           var r = heroEl.getBoundingClientRect();
           var x = (e.clientX - r.left) / r.width - 0.5;
           var y = (e.clientY - r.top) / r.height - 0.5;
-          phone.style.transform = 'rotateY(' + (x * 7) + 'deg) rotateX(' + (-y * 5) + 'deg)';
+          phone.style.transform = 'rotateY(' + (x * 6) + 'deg) rotateX(' + (-y * 4) + 'deg)';
         });
         heroEl.addEventListener('pointerleave', function(){ phone.style.transform = ''; });
       }
