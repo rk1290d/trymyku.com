@@ -62,6 +62,12 @@ const PinIcon = () => (
   </svg>
 );
 
+const WrenchIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+);
+
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M20 6L9 17l-5-5" />
@@ -131,252 +137,284 @@ export default async function ProfilePage({
   if (page.has_certifications) facts.push('Certifications on file');
   const work = workTypeLabel(page.work_type);
   const city = page.service_city?.trim() || null;
+  const cityShort = city?.split(',')[0]?.trim() || null;
   const unclaimed = page.web_status === 'unclaimed';
+
+  const stats: { value: React.ReactNode; label: string }[] = [];
+  if (hasRating)
+    stats.push({
+      value: (
+        <>
+          {ratingNum.toFixed(1)} <span className="st">{ratingStars(ratingNum)}</span>
+        </>
+      ),
+      label: `${page.review_count} review${(page.review_count ?? 0) === 1 ? '' : 's'}`,
+    });
+  if ((page.years_experience ?? 0) > 0)
+    stats.push({ value: <>{page.years_experience}+</>, label: 'years experience' });
+  if ((page.jobs_done ?? 0) > 0)
+    stats.push({ value: <>{page.jobs_done}</>, label: 'jobs on Myku' });
+  if (wall.length > 0 && stats.length < 3)
+    stats.push({ value: <>{wall.length}</>, label: 'documented jobs' });
+
+  const quotePanel = (
+    <section className="pp-quote-sec" id="quote">
+      <div className="pp-form-card">
+        <h2>Request a quote from {first}</h2>
+        <p className="s">
+          Describe the job and leave your number. {first} replies with a real
+          price. Your number is shared with {first} only.
+        </p>
+        <QuoteForm mechanicId={page.id} slug={page.slug} mechanicFirstName={first} />
+      </div>
+      <p className="pp-note">Free to ask. No account, no download.</p>
+    </section>
+  );
 
   return (
     <>
       <Header cta={{ href: '#quote', label: 'Request a Quote' }} />
-      <main>
-        <div className="pp">
-          {unclaimed ? (
-            <div className="pp-claim">
-              <div>
-                <b>This page hasn&apos;t been claimed yet.</b> The details come from
-                public listings and haven&apos;t been confirmed by {first}. Are you{' '}
-                {first}?{' '}
-                <a
-                  href={`mailto:${SUPPORT_EMAIL}?subject=Claiming my Myku page (${page.slug})`}
-                >
-                  Claim this page
-                </a>
+      <main className="pp-page">
+        <div className="pp-hero">
+          <div className="pp-wrap pp-hero-in">
+            {unclaimed ? (
+              <div className="pp-claim">
+                <div>
+                  <b>This page hasn&apos;t been claimed yet.</b> The details come
+                  from public listings and haven&apos;t been confirmed by {first}.
+                  Are you {first}?{' '}
+                  <a href={`mailto:${SUPPORT_EMAIL}?subject=Claiming my Myku page (${page.slug})`}>
+                    Claim this page
+                  </a>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="pp-idrow">
+              {page.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  className="pp-avatar"
+                  src={page.photo_url}
+                  alt={`${page.full_name} profile photo`}
+                />
+              ) : (
+                <div className="pp-avatar ph" aria-hidden="true">
+                  {initials(page.full_name)}
+                </div>
+              )}
+              <div className="pp-id">
+                <h1 className="pp-name">{page.full_name}</h1>
+                {page.specialization ? (
+                  <div className="pp-spec">{page.specialization}</div>
+                ) : null}
+                <div className="pp-metarow">
+                  {cityShort ? (
+                    <span className="m">
+                      <PinIcon />
+                      {cityShort}
+                    </span>
+                  ) : null}
+                  {work ? (
+                    <span className="m">
+                      <WrenchIcon />
+                      {work}
+                    </span>
+                  ) : null}
+                  {page.available ? (
+                    <span className="m avail">
+                      <span className="d" />
+                      Taking new work
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
-          ) : null}
 
-          <div className="pp-head">
-            {page.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className="pp-avatar"
-                src={page.photo_url}
-                alt={`${page.full_name} profile photo`}
-              />
-            ) : (
-              <div className="pp-avatar ph" aria-hidden="true">
-                {initials(page.full_name)}
-              </div>
-            )}
-            <div className="pp-id">
-              <h1 className="pp-name">{page.full_name}</h1>
-              {page.specialization ? (
-                <div className="pp-spec">{page.specialization}</div>
-              ) : null}
-              {city ? (
-                <span className="pp-city">
-                  <PinIcon />
-                  {city}
-                </span>
-              ) : null}
-            </div>
-          </div>
-
-          {(hasRating || (page.years_experience ?? 0) > 0 || (page.jobs_done ?? 0) > 0) && (
-            <div className="pp-stats">
-              {hasRating ? (
-                <span className="pp-stat">
-                  <b className="tnum">
-                    {ratingNum.toFixed(1)} <span className="st">{ratingStars(ratingNum)}</span>
-                  </b>
-                  <span>
-                    {page.review_count} review{(page.review_count ?? 0) === 1 ? '' : 's'}
-                  </span>
-                </span>
-              ) : null}
-              {(page.years_experience ?? 0) > 0 ? (
-                <span className="pp-stat">
-                  <b className="tnum">{page.years_experience}</b>
-                  <span>years experience</span>
-                </span>
-              ) : null}
-              {(page.jobs_done ?? 0) > 0 ? (
-                <span className="pp-stat">
-                  <b className="tnum">{page.jobs_done}</b>
-                  <span>jobs on Myku</span>
-                </span>
-              ) : null}
-            </div>
-          )}
-
-          {facts.length > 0 ? (
-            <div className="pp-facts">
-              {facts.map((f) => (
-                <span className="pp-fact" key={f}>
-                  <CheckIcon />
-                  {f}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="pp-ctas">
-            <a href="#quote" className="btn btn-primary">
-              Request a Quote
-            </a>
-          </div>
-          <p className="pp-note">
-            Free to ask. {first} replies with a real price, and you decide.
-          </p>
-
-          {(page.bio || work || (page.hourly_rate ?? 0) > 0 || (page.diagnostic_fee ?? 0) > 0 || (page.certifications?.length ?? 0) > 0) && (
-            <section className="pp-sec">
-              <div className="pp-sec-t">
-                <h2>About</h2>
-              </div>
-              {page.bio ? <p className="pp-bio">{page.bio}</p> : null}
-              <div className="pp-meta-rows">
-                {city ? (
-                  <div className="pp-meta-row">
-                    <span className="k2">Service area</span>
-                    <span className="v">{city}</span>
-                  </div>
-                ) : null}
-                {work ? (
-                  <div className="pp-meta-row">
-                    <span className="k2">How they work</span>
-                    <span className="v">{work}</span>
-                  </div>
-                ) : null}
-                {(page.hourly_rate ?? 0) > 0 ? (
-                  <div className="pp-meta-row">
-                    <span className="k2">Hourly rate</span>
-                    <span className="v tnum">${page.hourly_rate}/hr</span>
-                  </div>
-                ) : null}
-                {(page.diagnostic_fee ?? 0) > 0 ? (
-                  <div className="pp-meta-row">
-                    <span className="k2">Diagnostic fee</span>
-                    <span className="v tnum">${page.diagnostic_fee}</span>
-                  </div>
-                ) : null}
-                {(page.certifications?.length ?? 0) > 0 ? (
-                  <div className="pp-meta-row">
-                    <span className="k2">Certifications</span>
-                    <span className="v">{page.certifications!.join(', ')}</span>
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          )}
-
-          {services.length > 0 ? (
-            <section className="pp-sec">
-              <div className="pp-sec-t">
-                <h2>Services</h2>
-              </div>
-              <div className="pp-services">
-                {services.map((s) => (
-                  <span className="pp-service" key={s}>
-                    {s}
+            {facts.length > 0 ? (
+              <div className="pp-facts">
+                {facts.map((f) => (
+                  <span className="pp-fact" key={f}>
+                    <CheckIcon />
+                    {f}
                   </span>
                 ))}
               </div>
-            </section>
-          ) : null}
+            ) : null}
 
-          <section className="pp-sec">
-            <div className="pp-sec-t">
-              <h2>Job history</h2>
-              {wall.length > 0 ? <span className="n">{wall.length} documented</span> : null}
-            </div>
-            {wall.length > 0 ? (
-              <div className="pp-jobs">
-                {wall.map((j) => (
-                  <div className={`pp-job${j.verified ? ' vf' : ''}`} key={j.key}>
-                    <div className="pp-job-r1">
-                      <span className="pp-job-veh">{j.vehicle}</span>
-                      {j.price ? (
-                        <span className="pp-job-price tnum">{j.price}</span>
-                      ) : null}
-                    </div>
-                    {j.service ? <div className="pp-job-svc">{j.service}</div> : null}
-                    <div className="pp-job-r2">
-                      <span className="pp-job-meta tnum">
-                        {[j.when, j.town].filter(Boolean).join(' · ')}
-                      </span>
-                      {j.verified ? (
-                        <span className="pp-job-badge vf">
-                          <CheckIcon />
-                          Myku verified
-                        </span>
-                      ) : (
-                        <span className="pp-job-badge sr">Shared by {first}</span>
-                      )}
-                    </div>
-                    {j.photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        className="pp-job-photo"
-                        src={j.photo}
-                        alt={`${j.vehicle}: ${j.service ?? 'job photo'}`}
-                        loading="lazy"
-                      />
-                    ) : null}
+            {stats.length > 0 ? (
+              <div className={`pp-stats${stats.length === 2 ? ' n2' : stats.length === 1 ? ' n1' : ''}`}>
+                {stats.slice(0, 3).map((s2, i) => (
+                  <div className="pp-stat" key={i}>
+                    <b className="tnum">{s2.value}</b>
+                    <span>{s2.label}</span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="pp-empty">
-                {first} hasn&apos;t added job history yet. You can still request a
-                quote below.
-              </div>
-            )}
-          </section>
+            ) : null}
 
-          {reviews.length > 0 ? (
-            <section className="pp-sec">
-              <div className="pp-sec-t">
-                <h2>Reviews</h2>
-                <span className="n">{reviews.length} shown</span>
-              </div>
-              <div className="pp-reviews">
-                {reviews.map((r) => (
-                  <div className="pp-review" key={r.id}>
-                    <span className="st">{ratingStars(r.rating)}</span>
-                    {r.text ? <p>{r.text}</p> : null}
-                    <div className="dt">{timeAgo(r.created_at)}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          <section className="pp-quote-sec" id="quote">
-            <div className="pp-form-card">
-              <h2>Request a quote from {first}</h2>
-              <p className="s">
-                Describe the job and leave your number. {first} gets the request and
-                replies with a real price. Your number is shared with {first} only.
+            <div className="pp-hero-cta">
+              <a href="#quote" className="btn btn-primary">
+                Request a Quote
+              </a>
+              <p className="pp-note">
+                Free to ask. {first} replies with a real price, and you decide.
               </p>
-              <QuoteForm
-                mechanicId={page.id}
-                slug={page.slug}
-                mechanicFirstName={first}
-              />
             </div>
-          </section>
-
-          <div className="pp-trust">
-            <b>
-              We confirm facts. We do not endorse.{' '}
-              <span className="a">You decide.</span>
-            </b>
-            <p>
-              Myku is a marketplace. {first} is an independent business: their prices,
-              their work, their reputation. Verification means we checked paperwork,
-              not that we vouch for the work. Jobs marked &quot;Shared by {first}&quot; are
-              self-reported; &quot;Myku verified&quot; jobs were completed through the platform.
-            </p>
           </div>
+        </div>
+
+        <div className="pp-wrap pp-grid">
+          <div className="pp-main">
+            {(page.bio || work || city || (page.hourly_rate ?? 0) > 0 || (page.diagnostic_fee ?? 0) > 0 || (page.certifications?.length ?? 0) > 0) && (
+              <section className="pp-sec">
+                <div className="pp-sec-t">
+                  <h2>About</h2>
+                </div>
+                {page.bio ? <p className="pp-bio">{page.bio}</p> : null}
+                <div className="pp-meta-rows">
+                  {city ? (
+                    <div className="pp-meta-row">
+                      <span className="k2">Service area</span>
+                      <span className="v">{city}</span>
+                    </div>
+                  ) : null}
+                  {work ? (
+                    <div className="pp-meta-row">
+                      <span className="k2">How {first} works</span>
+                      <span className="v">{work}</span>
+                    </div>
+                  ) : null}
+                  {(page.hourly_rate ?? 0) > 0 ? (
+                    <div className="pp-meta-row">
+                      <span className="k2">Hourly rate</span>
+                      <span className="v tnum">${page.hourly_rate}/hr</span>
+                    </div>
+                  ) : null}
+                  {(page.diagnostic_fee ?? 0) > 0 ? (
+                    <div className="pp-meta-row">
+                      <span className="k2">Diagnostic fee</span>
+                      <span className="v tnum">${page.diagnostic_fee}</span>
+                    </div>
+                  ) : null}
+                  {(page.certifications?.length ?? 0) > 0 ? (
+                    <div className="pp-meta-row">
+                      <span className="k2">Certifications</span>
+                      <span className="v">{page.certifications!.join(', ')}</span>
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+            )}
+
+            {services.length > 0 ? (
+              <section className="pp-sec">
+                <div className="pp-sec-t">
+                  <h2>Services</h2>
+                </div>
+                <div className="pp-services">
+                  {services.map((s2) => (
+                    <span className="pp-service" key={s2}>
+                      {s2}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            <section className="pp-sec">
+              <div className="pp-sec-t">
+                <h2>Job history</h2>
+                {wall.length > 0 ? <span className="n">{wall.length} documented</span> : null}
+              </div>
+              {wall.length > 0 ? (
+                <div className="pp-jobs">
+                  {wall.map((j) => (
+                    <div className={`pp-job${j.verified ? ' vf' : ''}`} key={j.key}>
+                      <div className="pp-job-flex">
+                        <div className="pp-job-body">
+                          <div className="pp-job-r1">
+                            <span className="pp-job-veh">{j.vehicle}</span>
+                            {j.price ? (
+                              <span className="pp-job-price tnum">{j.price}</span>
+                            ) : null}
+                          </div>
+                          {j.service ? <div className="pp-job-svc">{j.service}</div> : null}
+                          <div className="pp-job-r2">
+                            <span className="pp-job-meta tnum">
+                              {[j.when, j.town].filter(Boolean).join(' · ')}
+                            </span>
+                            {j.verified ? (
+                              <span className="pp-job-badge vf">
+                                <CheckIcon />
+                                Myku verified
+                              </span>
+                            ) : (
+                              <span className="pp-job-badge sr">Shared by {first}</span>
+                            )}
+                          </div>
+                        </div>
+                        {j.photo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            className="pp-job-thumb"
+                            src={j.photo}
+                            alt={`${j.vehicle}: ${j.service ?? 'job photo'}`}
+                            loading="lazy"
+                          />
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="pp-empty">
+                  {first} hasn&apos;t added job history yet. You can still request
+                  a quote.
+                </div>
+              )}
+            </section>
+
+            {reviews.length > 0 ? (
+              <section className="pp-sec">
+                <div className="pp-sec-t">
+                  <h2>Reviews</h2>
+                  <span className="n">{reviews.length} shown</span>
+                </div>
+                <div className="pp-reviews">
+                  {reviews.map((r) => (
+                    <div className="pp-review" key={r.id}>
+                      <span className="st">{ratingStars(r.rating)}</span>
+                      {r.text ? <p>{r.text}</p> : null}
+                      <div className="dt">{timeAgo(r.created_at)}</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            <div className="pp-trust">
+              <b>
+                We confirm facts. We do not endorse.{' '}
+                <span className="a">You decide.</span>
+              </b>
+              <p>
+                Myku is a marketplace. {first} is an independent business: their
+                prices, their work, their reputation. Verification means we
+                checked paperwork, not that we vouch for the work. Jobs marked
+                &quot;Shared by {first}&quot; are self-reported; &quot;Myku
+                verified&quot; jobs were completed through the platform.
+              </p>
+            </div>
+          </div>
+
+          <aside className="pp-side">{quotePanel}</aside>
+        </div>
+
+        <div className="pp-stickybar">
+          <a href="#quote" className="btn btn-primary">
+            Request a Quote
+          </a>
         </div>
       </main>
       <Footer />
