@@ -4,21 +4,21 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
-<title>Myku Auto | Join the mechanic waitlist</title>
-<meta name="description" content="You have the skills. We have the customers. Myku Auto puts your name in front of vehicle owners the moment they need help. Set your hours, set your prices. Free during launch. Join the waitlist across Chicago and the suburbs." />
+<title>Myku Auto | A professional page for your business, free</title>
+<meta name="description" content="Get a professional page with your real jobs, real prices, and real reviews. Share it anywhere in one tap. Your prices, your customers, your reputation. Live across Chicago and the suburbs." />
 <link rel="canonical" href="https://trymyku.com/mechanics.html" />
 
 <meta property="og:title" content="Myku Auto | For Mechanics" />
-<meta property="og:description" content="You have the skills. We have the customers. Set your hours, set your prices, work mobile or out of your own shop. Join the waitlist and be first in your area." />
+<meta property="og:description" content="A professional page with your real jobs, real prices, and real reviews. Share it anywhere in one tap. Your prices, your customers, your reputation." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/mechanics.html" />
-<meta property="og:image" content="https://trymyku.com/logo.png" />
-<meta property="og:image:width" content="1024" />
-<meta property="og:image:height" content="1024" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:image" content="https://trymyku.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Myku Auto | For Mechanics" />
-<meta name="twitter:description" content="You have the skills. We have the customers. Join the mechanic waitlist." />
-<meta name="twitter:image" content="https://trymyku.com/logo.png" />
+<meta name="twitter:description" content="A professional page with your real jobs, prices, and reviews. Share it anywhere in one tap." />
+<meta name="twitter:image" content="https://trymyku.com/og.png" />
 
 <link rel="icon" href="/logo.png" />
 <link rel="apple-touch-icon" href="/logo.png" />
@@ -32,18 +32,18 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
+    { "@type": "Question", "name": "What do I get on day one?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A professional Myku page with your services, your area, and photos of work you have already done. It looks like a real business because it is one. You can share the link the same day." } },
     { "@type": "Question", "name": "How much does Myku Auto cost for mechanics?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Nothing during launch. There is no monthly fee while we build the network. Early mechanics lock in their spot before anyone else." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Nothing. The page, the app, and incoming requests are free." } },
     { "@type": "Question", "name": "Do you take a cut of my jobs?",
-      "acceptedAnswer": { "@type": "Answer", "text": "No. You set your price, the customer pays you directly, and you keep 100% of it. During launch there are no fees of any kind. If that ever changes, early mechanics hear it from us first. No surprises." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "No. You set your price, the customer pays you directly, and you keep 100% of it." } },
     { "@type": "Question", "name": "Do I need my own shop?",
       "acceptedAnswer": { "@type": "Answer", "text": "No. Work mobile, out of your own shop or home garage, or both. If you have the tools and the space, you have a shop." } },
-    { "@type": "Question", "name": "How do jobs reach me?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Customers post jobs and diagnostic requests in real time. They land in your feed with the vehicle, the issue, and the distance. You respond with your price and availability." } },
-    { "@type": "Question", "name": "Where is Myku Auto launching?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Chicago and the suburbs first, then city by city from there." } },
-    { "@type": "Question", "name": "What happens after I join the waitlist?",
-      "acceptedAnswer": { "@type": "Answer", "text": "We reach out personally before we go live in your area, so you are set up and first in line on day one." } }
+    { "@type": "Question", "name": "How do customers reach me?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Two ways. People near you post jobs in the app and you respond with your price. And anyone who opens your page can request a quote in one tap, which lands straight in your app." } },
+    { "@type": "Question", "name": "What does a verified job mean on my page?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Jobs completed through Myku are timestamped and tied to a real customer, so they carry a verified badge. Past work you upload yourself shows too, labeled as shared by you. Both make the page stronger; only one cannot be faked." } }
   ]
 }
 </script>
@@ -70,6 +70,22 @@
   .container { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
   h1, h2, h3 { font-family: var(--disp); }
   .tnum { font-feature-settings: 'tnum' 1, 'ss01' 1; }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+
+  /* ---- App Store badge ---- */
+  .appstore { display: inline-flex; align-items: center; gap: 10px; background: #000; color: #fff;
+    border: 1px solid #3a3b3e; border-radius: 12px; padding: 8px 16px 8px 12px; white-space: nowrap;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
+  .appstore:hover { transform: translateY(-2px); border-color: #6a6b6e; box-shadow: 0 14px 34px -14px rgba(0,0,0,0.9); }
+  .appstore .apple { width: 24px; height: 24px; fill: #fff; flex-shrink: 0; }
+  .appstore .lines { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.16; }
+  .appstore .small { font-size: 10.5px; font-weight: 500; color: #d5d5d7; letter-spacing: 0.01em; }
+  .appstore .big { font-family: var(--disp); font-size: 16.5px; font-weight: 700; letter-spacing: -0.015em; }
+  .appstore.sm { padding: 6px 13px 6px 10px; border-radius: 10px; }
+  .appstore.sm .apple { width: 19px; height: 19px; }
+  .appstore.sm .small { font-size: 9px; }
+  .appstore.sm .big { font-size: 13.5px; }
+  .foot-badge { margin: 4px 0 18px; }
 
   .bgfx { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
   .bgfx .warm { position: absolute; inset: 0;
@@ -292,9 +308,15 @@
         <img src="/logo.png" alt="Myku Auto logo" />
         <span class="wm">Myku <span class="auto">Auto</span></span>
       </a>
-      <a href="customers.html" class="nav-cta">I Need a Mechanic
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
+      <span class="nav-right">
+        <a href="customers.html" class="nav-cta">I Need a Mechanic
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="appstore sm" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+          <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
+        </a>
+      </span>
     </div>
   </header>
 
@@ -304,13 +326,15 @@
       <div class="aurora a2" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="pill reveal"><span class="pulse"></span> Now recruiting across Chicago and the suburbs</div>
-          <h1 class="h1 reveal d1">You have the skills.<br><span class="grad">We have the customers.</span></h1>
-          <p class="lead reveal d1">Myku puts your name in front of vehicle owners near you the moment they need help. No cold calling. Just jobs, on your terms.</p>
+          <div class="pill reveal"><span class="pulse"></span> Now onboarding across Chicago and the suburbs</div>
+          <h1 class="h1 reveal d1">Your work is good.<br><span class="grad">Your page should prove it.</span></h1>
+          <p class="lead reveal d1">Myku gives you a professional page with your real jobs, real prices, and real reviews. One tap to share it anywhere you already talk to customers.</p>
           <div class="hero-btns reveal d2">
-            <a href="#waitlist" class="btn btn-primary" data-scroll>Join the Waitlist
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <a class="appstore" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+              <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+              <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
             </a>
+            <a href="#build" class="btn btn-ghost" data-scroll>Or let us build it for you</a>
           </div>
         </div>
 
@@ -373,8 +397,8 @@
       <div class="container">
         <div class="lede">
           <div class="rule reveal"></div>
-          <h2 class="reveal">Your next customer is already looking for you.</h2>
-          <p class="reveal d1">Right now, someone in your zip code is next to a car that will not start. They do not know a mechanic, and they are about to call a tow truck or overpay at a dealership. <span class="hl">That is your customer, and your income.</span> Myku makes sure they find you instead.</p>
+          <h2 class="reveal">Right now, your reputation lives in DMs and comments.</h2>
+          <p class="reveal d1">Every week you type your services into Facebook groups by hand. The customer sees a comment, not a business. <span class="hl">Your years of work deserve a page that looks like what you actually are: a professional.</span> That page is what Myku gives you, on day one, for nothing.</p>
         </div>
       </div>
     </section>
@@ -382,13 +406,13 @@
     <section class="sec">
       <div class="container center">
         <span class="tag reveal">How it works</span>
-        <h2 class="title reveal">Four steps to your first job.</h2>
-        <p class="sub reveal d1">No bidding wars for leads, no monthly fee during launch. Just real jobs from customers near you.</p>
+        <h2 class="title reveal">Four steps to a page worth sharing.</h2>
+        <p class="sub reveal d1">Everything on it is yours: your prices, your customers, your reputation.</p>
         <div class="pgrid">
-          <div class="pcard spot reveal"><div class="pn">1</div><h3>Build your profile</h3><p>Set your services, your rate, your diagnostic fee, and your area. Mobile, your own shop, or both.</p></div>
-          <div class="pcard spot reveal d1"><div class="pn">2</div><h3>Jobs land in your feed</h3><p>Customers post jobs in real time. You see the vehicle, the issue, and how far away they are before you respond.</p></div>
-          <div class="pcard spot reveal d2"><div class="pn">3</div><h3>Respond on your terms</h3><p>Send your price and availability. The customer picks you. You show up and do the work.</p></div>
-          <div class="pcard spot reveal d3"><div class="pn">4</div><h3>Reviews build your business</h3><p>Every job builds your rating. The better your rating, the more jobs you win. Your reputation is yours.</p></div>
+          <div class="pcard spot reveal"><div class="pn">1</div><h3>Build your page</h3><p>Add your services and area, then upload photos of work you've already done, straight from your phone. About 10 minutes.</p></div>
+          <div class="pcard spot reveal d1"><div class="pn">2</div><h3>Share your link</h3><p>One tap sends your page anywhere: Facebook, Messenger, text. It shows your face, your work, and your reviews.</p></div>
+          <div class="pcard spot reveal d2"><div class="pn">3</div><h3>Jobs come to you</h3><p>Customers near you post jobs in real time, and people on your page can reach out. You respond with your price.</p></div>
+          <div class="pcard spot reveal d3"><div class="pn">4</div><h3>Every job builds the page</h3><p>Work done through Myku gets a verified badge: real job, real price, real date. Nobody can fake that, and it compounds.</p></div>
         </div>
       </div>
     </section>
@@ -399,9 +423,9 @@
         <h2 class="title reveal">Built around your work, not a boss.</h2>
         <div class="feats">
           <div class="feat spot reveal">
-            <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <h3>Free during launch.</h3>
-            <p>No monthly fee while we build the network. Be first in your area and lock in your spot.</p>
+            <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 14h5"/></svg></div>
+            <h3>A page that sells for you.</h3>
+            <p>Documented jobs with photos, prices, and dates. It answers the only question customers have: has this person done my repair before.</p>
           </div>
           <div class="feat spot reveal d1">
             <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
@@ -415,8 +439,8 @@
           </div>
           <div class="feat spot reveal d3">
             <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg></div>
-            <h3>Real customers, real jobs.</h3>
-            <p>Every customer is verified, and you see the full job details before you commit to anything.</p>
+            <h3>Verified means verified.</h3>
+            <p>ID, license, and insurance checks put facts next to your name. We confirm, customers decide. Your reputation does the rest.</p>
           </div>
         </div>
       </div>
@@ -428,38 +452,38 @@
         <h2 class="title reveal">Straight answers.</h2>
         <div class="faq-list reveal d1">
           <details class="faq">
+            <summary>What do I get on day one?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+            <div class="a">A professional Myku page with your services, your area, and photos of work you've already done. It looks like a real business because it is one. You can share the link the same day.</div>
+          </details>
+          <details class="faq">
             <summary>How much does it cost?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
-            <div class="a">Nothing during launch. There is no monthly fee while we build the network. Early mechanics lock in their spot before anyone else.</div>
+            <div class="a">Nothing. The page, the app, and incoming requests are free.</div>
           </details>
           <details class="faq">
             <summary>Do you take a cut of my jobs?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
-            <div class="a">No. You set your price, the customer pays you directly, and you keep 100% of it. During launch there are no fees of any kind. If that ever changes, early mechanics hear it from us first. No surprises.</div>
+            <div class="a">No. You set your price, the customer pays you directly, and you keep 100% of it.</div>
           </details>
           <details class="faq">
             <summary>Do I need my own shop?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
             <div class="a">No. Work mobile, out of your own shop or home garage, or both. If you have the tools and the space, you have a shop.</div>
           </details>
           <details class="faq">
-            <summary>How do jobs reach me?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
-            <div class="a">Customers post jobs and diagnostic requests in real time. They land in your feed with the vehicle, the issue, and the distance. You respond with your price and availability.</div>
+            <summary>How do customers reach me?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+            <div class="a">Two ways. People near you post jobs in the app and you respond with your price. And anyone who opens your page can reach out about work, straight from the page.</div>
           </details>
           <details class="faq">
-            <summary>Where is Myku launching?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
-            <div class="a">Chicago and the suburbs first, then city by city from there. Joining the waitlist tells us where to go next.</div>
-          </details>
-          <details class="faq">
-            <summary>What happens after I join the waitlist?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
-            <div class="a">We reach out personally before we go live in your area, so you are set up and first in line on day one.</div>
+            <summary>What does "verified job" mean on my page?<span class="chev"><svg viewBox="0 0 24 24" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+            <div class="a">Jobs completed through Myku are timestamped and tied to a real customer, so they carry a verified badge. Past work you upload yourself shows too, labeled as shared by you. Both make the page stronger; only one can't be faked.</div>
           </details>
         </div>
       </div>
     </section>
 
-    <section class="sec tone waitlist" id="waitlist">
+    <section class="sec tone waitlist" id="build">
       <div class="container center">
-        <span class="tag reveal">Join the waitlist</span>
-        <h2 class="title reveal">Be the first name in your area.</h2>
-        <p class="sub reveal d1">We are launching across Chicago and the suburbs. Join the waitlist and we will reach out personally before we go live near you.</p>
+        <span class="tag reveal">The no-effort option</span>
+        <h2 class="title reveal">Want us to build it for you?</h2>
+        <p class="sub reveal d1">Leave your details. We'll put your page together from what's already out there and send you the link to look over. You fix anything we got wrong, and nothing goes live until you say so.</p>
 
         <div class="wl-card reveal d1">
           <div id="wrap">
@@ -494,14 +518,14 @@
                 <label for="company">Company</label>
                 <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
               </div>
-              <button class="btn btn-primary" id="submit" type="submit">Join the Mechanic Waitlist</button>
+              <button class="btn btn-primary" id="submit" type="submit">Build My Page For Me</button>
               <div class="err" id="err" role="alert"></div>
             </form>
           </div>
           <div class="confirm" id="confirm">
             <div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>
-            <h3>You're on the list.</h3>
-            <p>We'll reach out personally before we launch in your area.</p>
+            <h3>On it.</h3>
+            <p>We'll build your page from what's already out there and send you the link to look over. Nothing goes live until you say so.</p>
           </div>
         </div>
       </div>
@@ -511,6 +535,12 @@
   <footer>
     <div class="container">
       <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku <span class="auto">Auto</span></span></a>
+      <div class="foot-badge">
+        <a class="appstore" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+          <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
+        </a>
+      </div>
       <div class="foot-social">
         <a href="https://www.instagram.com/trymyku/" target="_blank" rel="noopener" aria-label="Myku Auto on Instagram">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -582,7 +612,7 @@
       [fn, em, ph, loc, spec].forEach(function(i){ i.addEventListener('input', function(){ i.classList.remove('bad'); err.textContent=''; }); });
       [work, years].forEach(function(i){ i.addEventListener('change', function(){ i.classList.remove('bad'); err.textContent=''; }); });
 
-      function setLoading(on){ submit.disabled = on; submit.textContent = on ? 'Joining…' : 'Join the Mechanic Waitlist'; }
+      function setLoading(on){ submit.disabled = on; submit.textContent = on ? 'Sending…' : 'Build My Page For Me'; }
       function done(){ wrap.style.display='none'; confirm.classList.add('show'); }
 
       form.addEventListener('submit', function(e){
@@ -614,9 +644,9 @@
             work_type: work.value,
             years_experience: years.value,
             specialty: spec.value.trim(),
-            // Where this signup came from: share links like mechanics.html?src=flyer
-            // or ?src=facebook and the source shows up next to each signup.
-            source: (function(){ try { return (new URLSearchParams(location.search).get('src') || 'site').slice(0, 60); } catch(e){ return 'site'; } })()
+            // Tagged as a page-build request; ?src= campaign tags still append,
+            // e.g. mechanics.html?src=flyer -> "page-build:flyer".
+            source: (function(){ try { return ('page-build:' + (new URLSearchParams(location.search).get('src') || 'site')).slice(0, 60); } catch(e){ return 'page-build:site'; } })()
           })
         }).then(function(res){
           if(!res.ok){ throw new Error('status ' + res.status); }

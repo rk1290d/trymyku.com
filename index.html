@@ -5,20 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a0a0a" />
 <title>Myku Auto | The first place you go for car trouble</title>
-<meta name="description" content="Something wrong with your car? Open Myku. A marketplace that connects vehicle owners with independent, verified mechanics who set their own prices and win your work. Launching across Chicago and the suburbs." />
+<meta name="description" content="Something wrong with your car? Open Myku. A marketplace that connects vehicle owners with independent, verified mechanics who set their own prices and win your work. Free on iOS, live across Chicago and the suburbs." />
 <link rel="canonical" href="https://trymyku.com/" />
 
 <meta property="og:title" content="Myku Auto | The first place you go for car trouble" />
 <meta property="og:description" content="Something wrong with your car? Open Myku. A marketplace connecting vehicle owners with independent, verified mechanics near them." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://trymyku.com/" />
-<meta property="og:image" content="https://trymyku.com/logo.png" />
-<meta property="og:image:width" content="1024" />
-<meta property="og:image:height" content="1024" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:image" content="https://trymyku.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Myku Auto | The first place you go for car trouble" />
-<meta name="twitter:description" content="A marketplace connecting vehicle owners with independent mechanics." />
-<meta name="twitter:image" content="https://trymyku.com/logo.png" />
+<meta name="twitter:description" content="A marketplace connecting vehicle owners with independent mechanics. Free on iOS." />
+<meta name="twitter:image" content="https://trymyku.com/og.png" />
 
 <link rel="icon" href="/logo.png" />
 <link rel="apple-touch-icon" href="/logo.png" />
@@ -35,7 +35,7 @@
   "url": "https://trymyku.com/",
   "logo": "https://trymyku.com/logo.png",
   "email": "support@trymyku.com",
-  "description": "A marketplace connecting vehicle owners with independent mechanics, launching across Chicago and the suburbs.",
+  "description": "A marketplace connecting vehicle owners with independent mechanics, live across Chicago and the suburbs.",
   "areaServed": "Chicago, IL"
 }
 </script>
@@ -109,6 +109,22 @@
   .nav-cta:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
   .nav-cta svg { width: 15px; height: 15px; }
   @media (min-width: 720px) { .nav-cta { display: inline-flex; } }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+
+  /* ---- App Store badge ---- */
+  .appstore { display: inline-flex; align-items: center; gap: 10px; background: #000; color: #fff;
+    border: 1px solid #3a3b3e; border-radius: 12px; padding: 8px 16px 8px 12px; white-space: nowrap;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
+  .appstore:hover { transform: translateY(-2px); border-color: #6a6b6e; box-shadow: 0 14px 34px -14px rgba(0,0,0,0.9); }
+  .appstore .apple { width: 24px; height: 24px; fill: #fff; flex-shrink: 0; }
+  .appstore .lines { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.16; }
+  .appstore .small { font-size: 10.5px; font-weight: 500; color: #d5d5d7; letter-spacing: 0.01em; }
+  .appstore .big { font-family: var(--disp); font-size: 16.5px; font-weight: 700; letter-spacing: -0.015em; }
+  .appstore.sm { padding: 6px 13px 6px 10px; border-radius: 10px; }
+  .appstore.sm .apple { width: 19px; height: 19px; }
+  .appstore.sm .small { font-size: 9px; }
+  .appstore.sm .big { font-size: 13.5px; }
+  .foot-badge { margin: 4px 0 18px; }
 
   /* ---- Buttons ---- */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px;
@@ -347,9 +363,15 @@
         <img src="/logo.png" alt="Myku Auto logo" />
         <span class="wm">Myku <span class="auto">Auto</span></span>
       </a>
-      <a href="mechanics.html" class="nav-cta">I'm a Mechanic
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
+      <span class="nav-right">
+        <a href="mechanics.html" class="nav-cta">I'm a Mechanic
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="appstore sm" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+          <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
+        </a>
+      </span>
     </div>
   </header>
 
@@ -359,16 +381,19 @@
       <div class="aurora a2" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="pill reveal"><span class="pulse"></span> Launching across Chicago and the suburbs</div>
+          <div class="pill reveal"><span class="pulse"></span> Live across Chicago and the suburbs</div>
           <h1 class="h1 reveal d1">Something wrong with your car?<br><span class="grad">Open Myku.</span></h1>
           <p class="lead reveal d1">Post the problem, or just describe the symptom. Independent, verified mechanics near you send back a real price, and you choose.</p>
           <div class="hero-btns reveal d2">
-            <a href="mechanics.html" class="btn btn-primary">I'm a Mechanic
+            <a class="appstore" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+              <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+              <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
+            </a>
+            <a href="mechanics.html" class="btn btn-ghost">I'm a Mechanic
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
-            <a href="customers.html" class="btn btn-ghost">I Need a Mechanic</a>
           </div>
-          <div class="hero-foot reveal d3"><span class="dot"></span> On iOS. Building our mechanic network now.</div>
+          <div class="hero-foot reveal d3"><span class="dot"></span> Free to download. Mechanics quote, you pick.</div>
         </div>
 
         <div class="hero-visual reveal d2">
@@ -488,8 +513,8 @@
         <div class="cards">
           <div class="card card-mech spot reveal d1">
             <div class="k"><svg class="ki" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>For mechanics</div>
-            <h2>Your business. Your prices. Your customers.</h2>
-            <p>Work for yourself, not for a dispatcher. Set your own prices, keep your own customers, and build a reputation that is yours. We just bring you the jobs.</p>
+            <h2>Your business deserves more than a Facebook comment.</h2>
+            <p>Get a professional page with your real work, real reviews, and a link you can share anywhere. Your prices, your customers, your reputation. Yours from day one.</p>
             <a href="mechanics.html" class="btn">See how it works
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
@@ -533,12 +558,15 @@
       <div class="container">
         <div class="cta-panel reveal">
           <h2>Be the first name in your area.</h2>
-          <p class="sub">We are building the network now. Early mechanics join free and get a head start. Car owner? Get notified when we open near you.</p>
+          <p class="sub">Mechanics: get a page that makes your work impossible to ignore. Car owners: the next time something rattles, you know where to start.</p>
           <div class="cta-btns">
-            <a href="mechanics.html" class="btn btn-primary">Join as a Mechanic
+            <a href="mechanics.html" class="btn btn-primary">Get Your Page
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </a>
-            <a href="customers.html" class="btn btn-ghost">Get Notified at Launch</a>
+            <a class="appstore" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+              <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+              <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
+            </a>
           </div>
         </div>
       </div>
@@ -548,6 +576,12 @@
   <footer>
     <div class="container">
       <a href="index.html" class="foot-brand"><img src="/logo.png" alt="Myku Auto logo" /><span class="wm">Myku <span class="auto">Auto</span></span></a>
+      <div class="foot-badge">
+        <a class="appstore" href="https://apps.apple.com/us/app/myku-auto/id6776354424" target="_blank" rel="noopener" aria-label="Download Myku Auto on the App Store">
+          <svg class="apple" viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span class="lines"><span class="small">Download on the</span><span class="big">App Store</span></span>
+        </a>
+      </div>
       <div class="foot-social">
         <a href="https://www.instagram.com/trymyku/" target="_blank" rel="noopener" aria-label="Myku Auto on Instagram">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
