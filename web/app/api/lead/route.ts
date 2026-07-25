@@ -8,6 +8,11 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Legacy anon JWT (public by design): the notify-lead edge function sits
+// behind verify_jwt, which the modern publishable key can't satisfy.
+const SUPABASE_ANON_JWT =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpb2lhb3hhb3pxZndkcXVrb2hvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MDk1OTksImV4cCI6MjA5NDk4NTU5OX0.CiVafVFbEaW5s8ejGtvDtg8c6guMeYKHaLL6eiDjwq8';
+
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
@@ -42,6 +47,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
   }
 
+  // Generate the id here: anon can insert but never read rows back, and the
+  // push notifier needs the id to target this exact lead.
+  const leadId = crypto.randomUUID();
+
   const res = await fetch(`${SUPABASE_URL}/rest/v1/profile_leads`, {
     method: 'POST',
     headers: {
@@ -51,6 +60,7 @@ export async function POST(req: NextRequest) {
       Prefer: 'return=minimal',
     },
     body: JSON.stringify({
+      id: leadId,
       mechanic_id: mechanicId,
       slug,
       customer_name: name,
@@ -64,5 +74,20 @@ export async function POST(req: NextRequest) {
   if (!res.ok) {
     return NextResponse.json({ error: 'could not save' }, { status: 502 });
   }
+
+  // Buzz the mechanic's phone. Fire-and-forget: the lead is already saved,
+  // so a push hiccup must never fail the customer's submission.
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/notify-lead`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_JWT,
+        Authorization: `Bearer ${SUPABASE_ANON_JWT}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ lead_id: leadId }),
+    });
+  } catch {}
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }
