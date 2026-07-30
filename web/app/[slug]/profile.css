@@ -1,0 +1,972 @@
+/* ============================================================
+   PUBLIC MECHANIC PAGE  ::  trymyku.com/<slug>
+   THE STOREFRONT COMPOSER
+
+   Every rule below is scoped to .mp (the <main> of the profile
+   route) or to a body:has(.mp) escape hatch. Tokens are declared
+   on the scope, never on :root, so the dark marketing site is
+   untouched.
+
+   SYSTEM SUMMARY
+   - 7 font sizes: 11 / 13 / 15 / 17 / 22 / 34 (44 at >=720px)
+   - 3 radii: 4px (controls + images), 12px (three containers),
+     999px (one 7px dot)
+   - 2 shadows, both neutral ink alpha, no colored glows
+   - Orange has exactly 2 jobs: the send control's fill, and the
+     focus state of the composer's fields
+   - Zero @keyframes. Transitions on interaction only, 150ms.
+   ============================================================ */
+
+.mp {
+  /* ---- COLOR: 10 solids + 1 accent alpha ---- */
+  --paper:       #FAF7F2;               /* page ground, warm, not pure white */
+  --paper-2:     #F1EDE5;               /* recessed: chips, portrait plate, sent block, claim banner */
+  --field:       #FFFFFF;               /* input fills only, the one pure white */
+  --rule:        #CDC5B6;               /* every 1px hairline (1.59:1 on paper; #DCD5C9 measured 1.35:1 and the WORK list collapsed into an undifferentiated column in daylight) */
+  --ink:         #14120F;               /* name, headings, prices, and the label on the orange button */
+  --ink-2:       #57514A;               /* body prose */
+  --ink-3:       #6F6A61;               /* meta, eyebrows, placeholders, input borders */
+  --accent:      #F97316;               /* ORANGE, exactly 2 jobs */
+  --accent-ring: rgba(249,115,22,0.20); /* the only alpha of orange that exists, part of job 2 */
+  --verified:    #12626E;               /* the ONE semantic colour, job provenance mark only */
+  --danger:      #B3261E;               /* form validation text + invalid field border */
+
+  /* ORANGE HAS EXACTLY TWO JOBS
+     1. The fill of the send control (form submit + the repeat-ask
+        anchor). One component, two placements.
+     2. The focus state of the composer's fields.
+     Nowhere else: no orange text, no orange eyebrows, no orange
+     price pills, no orange borders, no orange ring, no orange
+     selection, no orange logo, no orange focus outline. */
+
+  /* ---- TYPE SCALE: 6 tokens, 7 values, integers only ---- */
+  --t-name:   34px;  /* mechanic name only, h1 */
+  --t-head:   22px;  /* section-level headings + fact-strip figures + initials */
+  --t-prose:  17px;  /* bio, review text, all form controls, button labels */
+  --t-body:   15px;  /* job lines, service rows, facts line, About values */
+  --t-meta:   13px;  /* dates, labels, credential line, legend, footnotes */
+  --t-micro:  11px;  /* eyebrows, strip captions, provenance marks */
+
+  /* ---- RADII: exactly 3 ---- */
+  --r-sm:   4px;    /* controls and images */
+  --r-lg:   12px;   /* three containers: claim banner, sent block, desktop ask panel */
+  --r-pill: 999px;  /* the 7px availability dot, and nothing else */
+
+  /* ---- SPACING: one scale ---- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* ---- SHADOWS: exactly 2 ---- */
+  --sh-1: 0 1px 2px rgba(20,18,15,0.07);
+  --sh-2: 0 6px 24px -12px rgba(20,18,15,0.18);
+
+  /* ---- LAYOUT ---- */
+  --gutter:  16px;
+  --measure: 640px;
+
+  /* ---- BASE ---- */
+  background: var(--paper);
+  color: var(--ink);
+  color-scheme: light;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 0;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: var(--t-body);
+  line-height: 1.5;
+}
+
+/* ---- KILL THE DARK MARKETING ATMOSPHERE ---- */
+/* body and .mp-paper are not descendants of .mp, so they cannot read its
+   tokens and must restate the literal.
+   KEEP #FAF7F2 BELOW IN SYNC WITH --paper ABOVE AND WITH THE themeColor
+   EXPORT IN page.tsx. A drift here fails silently, in exactly the browser
+   the fallback layer exists to protect. */
+body:has(.mp),
+.mp-paper { background: #FAF7F2; }
+/* 1. :has() route, for browsers that support it */
+body:has(.mp) .bgfx { display: none; }
+/* 2. Fallback opaque layer, so a browser without :has() never renders
+      drifting orange auroras behind a light page. */
+.mp-paper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---- SELECTION + FOCUS (orange stays at 2 jobs) ---- */
+.mp ::selection { background: rgba(20,18,15,0.12); color: var(--ink); }
+.mp :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r-sm); }
+.mp .mp-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); outline: none; }
+.mp .mp-inp:focus-visible { outline: none; }
+
+/* ---- MOTION: zero @keyframes in this entire file ---- */
+.mp a,
+.mp button,
+.mp summary,
+.mp .mp-inp {
+  transition: background-color 150ms ease, border-color 150ms ease,
+    color 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp *,
+  .mp *::before,
+  .mp *::after { transition: none !important; animation: none !important; }
+  html:has(.mp) { scroll-behavior: auto; }
+}
+
+/* ---- SHARED PRIMITIVES ---- */
+.mp .tnum { font-feature-settings: 'tnum' 1; }
+.mp a { color: inherit; text-decoration: none; }
+.mp img { max-width: 100%; display: block; }
+
+.mp-wrap {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* Eyebrows: the page's only uppercase device. font-family: inherit keeps
+   the section <h2>s in Inter, so Jakarta stays reserved for the four
+   moments of voice. */
+.mp-eyebrow {
+  font-family: inherit;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+/* One check glyph, two colours. There are no other SVGs on this page. */
+.mp-ck {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mp-ck.v { stroke: var(--verified); stroke-width: 2.4; width: 11px; height: 11px; }
+
+/* ============================================================
+   1. TOP BAR
+   Non-sticky, 44px, one plain-text wordmark. Nothing above the
+   composer navigates off-page.
+   ============================================================ */
+.mp-topbar {
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.mp-topbar .mp-wrap {
+  height: 44px;
+  display: flex;
+  align-items: center;
+}
+.mp-topbar span {
+  font-size: var(--t-meta);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+
+/* ============================================================
+   2. UNCLAIMED BANNER
+   ============================================================ */
+.mp-claim {
+  margin-top: var(--s-4);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-lg);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--t-meta);
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.mp-claim a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  white-space: nowrap;
+}
+.mp-claim a:hover { color: var(--ink-2); }
+
+/* ============================================================
+   3. IDENTITY
+   ============================================================ */
+/* --s-4 rather than --s-5 here, at .mp-band and at .mp-ask: three on-scale
+   steps that together reclaim 24px of pre-composer rhythm, which is what
+   keeps the ask box on the first screen once a claim banner is present. */
+.mp-id { padding-top: var(--s-4); }
+.mp-id .mp-eyebrow { margin-bottom: var(--s-3); }
+
+.mp-idrow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+.mp-portrait {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+/* Square, not circular: a circle reads social profile, a square reads business. */
+.mp-portrait.ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--t-head);
+  font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+}
+.mp-idcol { min-width: 0; }
+.mp-name {
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-name);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.mp-factline {
+  margin-top: var(--s-3);
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.mp-factline .sep { padding: 0 var(--s-2); color: var(--ink-3); }
+.mp-avail {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  white-space: nowrap;
+}
+.mp-avail .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  flex: none;
+}
+
+.mp-cred {
+  margin-top: var(--s-2);
+  font-size: var(--t-meta);
+  font-weight: 500;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.mp-cred .mp-ck { margin-right: 6px; vertical-align: -1px; display: inline-block; }
+/* The qualification sits adjacent to the claim, same size, same breath.
+   That adjacency is the whole mechanism. */
+.mp-qual {
+  margin-top: var(--s-1);
+  font-size: var(--t-meta);
+  font-weight: 400;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   4. FACT STRIP
+   A 1px-gap grid whose gaps ARE the hairlines, so it self-heals
+   at 1, 2, 3 or 4 cells with no extra rules.
+   ============================================================ */
+.mp-band {
+  margin-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.mp-band-in { max-width: var(--measure); margin: 0 auto; }
+.mp-strip {
+  display: grid;
+  gap: 1px;
+  background: var(--rule);
+  grid-template-columns: minmax(0, 1fr);
+}
+.mp-strip.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mp-strip.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mp-strip.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mp-cell {
+  background: var(--paper);
+  padding: 14px var(--gutter);
+  min-width: 0;
+}
+.mp-cell b {
+  display: block;
+  font-size: var(--t-head);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mp-cell span {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Fallback cell: not an absence, a positive statement about how this
+   business prices. The money question is never silent. */
+.mp-cell.fb {
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   5. THE ASK  (the only conversion event on the page)
+   ============================================================ */
+/* Zero-height alias so the legacy #quote deep link still lands on the ask. */
+.mp-anchor { display: block; height: 0; scroll-margin-top: var(--s-4); }
+.mp-ask {
+  margin-top: var(--s-4);
+  scroll-margin-top: var(--s-4);
+  min-width: 0;
+}
+.mp-ask h2 {
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-head);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.mp-ask-sub {
+  margin-top: var(--s-2);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* Starter chips. They exist because a blank textarea is the number one
+   abandonment point in any free-text lead form. */
+.mp-chips {
+  margin-top: var(--s-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+/* --ink-3 rather than --rule on the border: these are interactive controls
+   and WCAG 1.4.11 wants 3:1 on the boundary. --rule measures 1.35:1 against
+   paper, so the chips read as ghost rectangles on a phone in daylight, which
+   would kill the one mechanism that defeats the blank-textarea abandonment
+   problem. This is the same reasoning already applied to .mp-inp below. */
+.mp-chip {
+  height: 40px;
+  padding: 0 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  font-family: inherit;
+  font-size: var(--t-meta);
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mp-chip:hover { background: var(--paper); }
+.mp-chip:active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.mp-form { margin-top: var(--s-3); }
+.mp-lbl {
+  display: block;
+  margin-bottom: var(--s-2);
+  font-size: var(--t-meta);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+/* The 1px --ink-3 border is deliberate: --rule on white is 1.46:1 and
+   fails the 3:1 non-text contrast rule. These fields must not be missable. */
+.mp-inp {
+  display: block;
+  width: 100%;
+  background: var(--field);
+  border: 1px solid var(--ink-3);
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-1);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--t-prose);
+  line-height: 1.5;
+  padding: 0 14px;
+  height: 52px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.mp-inp::placeholder { color: var(--ink-3); opacity: 1; }
+.mp-inp.ta {
+  height: auto;
+  min-height: 104px;
+  padding: var(--s-3) 14px;
+  resize: vertical;
+}
+.mp-inp.bad { border-color: var(--danger); }
+.mp-field { margin-top: var(--s-3); }
+
+.mp-optlink {
+  margin-top: var(--s-3);
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--t-meta);
+  font-weight: 600;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  min-height: 40px;
+}
+.mp-optlink:hover { color: var(--ink); }
+
+/* THE SEND CONTROL. Orange job 1. Ink label, because #14120F on #F97316
+   is 6.65:1 and white would be 2.80:1. */
+.mp-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
+  margin-top: var(--s-4);
+  background: var(--accent);
+  color: var(--ink);
+  border: 0;
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-1);
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-prose);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  text-align: center;
+}
+.mp-send:hover { filter: brightness(0.95); }
+.mp-send:active { filter: brightness(0.90); }
+.mp-send:disabled { opacity: 0.55; filter: none; cursor: default; }
+
+/* min-height reserved so the layout never jumps when validation fires */
+.mp-err {
+  min-height: 18px;
+  margin-top: var(--s-2);
+  font-size: var(--t-meta);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--danger);
+}
+.mp-reassure {
+  margin-top: var(--s-3);
+  text-align: center;
+  font-size: var(--t-meta);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* Sent state. No check icon, no circle, no animation: the words are the
+   message and the icon was reassurance theatre. */
+.mp-sent {
+  background: var(--paper-2);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+}
+.mp-sent h3 {
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-head);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.mp-sent p {
+  margin-top: var(--s-2);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+/* The install ask lives after the conversion, never before it. */
+.mp-sent .inst {
+  margin-top: var(--s-5);
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+.mp-sent .badgewrap { margin-top: var(--s-3); }
+
+/* Honeypot. Off-screen, never focusable. */
+.mp-hp {
+  position: absolute !important;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   6-9. EVIDENCE SECTIONS
+   Sections carry no chrome: an eyebrow, a rule and content.
+   That is why an omitted section leaves no gap.
+   ============================================================ */
+.mp-sec { margin-top: var(--s-6); min-width: 0; }
+.mp-sec-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.mp-sec-n {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex: none;
+}
+.mp-sec-meta {
+  font-size: var(--t-meta);
+  font-weight: 500;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex: none;
+}
+/* A strong ink rule under the eyebrow is the table-header signal.
+   Every rule below it is the 1px hairline. */
+.mp-list { border-top: 1px solid var(--ink); }
+
+/* ---- WORK ---- */
+.mp-legend {
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-meta);
+  line-height: 1.55;
+  color: var(--ink-3);
+}
+.mp-legend .mp-ck { margin-right: 5px; vertical-align: -1px; display: inline-block; }
+/* The mark names are set the way the marks themselves are set, so the
+   definition and the thing it defines are recognisably the same object. */
+.mp-legend .m {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.mp-legend .m.v { color: var(--verified); }
+
+.mp-job {
+  display: flex;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--rule);
+}
+.mp-job-b { flex: 1; min-width: 0; }
+.mp-job-r1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+}
+.mp-job-veh {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* ONE size always. A long free-text price wraps, it never shrinks. */
+.mp-job-price {
+  flex: none;
+  max-width: 40%;
+  text-align: right;
+  font-size: var(--t-body);
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.mp-job-svc {
+  margin-top: var(--s-1);
+  font-size: var(--t-body);
+  font-weight: 400;
+  color: var(--ink-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mp-job-meta {
+  margin-top: var(--s-2);
+  font-size: var(--t-meta);
+  font-weight: 400;
+  color: var(--ink-3);
+}
+/* THE PROVENANCE MARK. Always the last line of every row, so it occupies
+   a position the eye learns in two rows. Both kinds carry identical size,
+   weight and tracking: self-reported work is differently sourced, not
+   second class, and platform work is a fact, not a prize. */
+.mp-prov {
+  margin-top: var(--s-1);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+.mp-prov.v { color: var(--verified); }
+.mp-prov .mp-ck { margin-right: 5px; vertical-align: -1px; display: inline-block; }
+.mp-job-thumb {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+
+/* Native disclosure for overflow. Zero JavaScript. */
+.mp-more { display: block; }
+.mp-more > summary {
+  list-style: none;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-meta);
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.mp-more > summary::-webkit-details-marker { display: none; }
+.mp-more > summary::marker { content: ''; }
+/* The summary vanishes once expanded, as specified, but via the clip
+   pattern rather than display:none. display:none would delete the element
+   that currently holds focus, dropping a keyboard or switch user to <body>
+   and back to the top of the document. Clipped, it keeps its place in the
+   focus order and stays available as the collapse control. */
+.mp-more[open] > summary {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}
+
+/* ---- ABOUT ---- */
+.mp-bio {
+  padding: var(--s-4) 0;
+  font-size: var(--t-prose);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.mp-bio p + p { margin-top: var(--s-3); }
+.mp-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--s-4);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  align-items: baseline;
+}
+.mp-row .k {
+  font-size: var(--t-meta);
+  font-weight: 400;
+  color: var(--ink-3);
+}
+.mp-row .v {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* ---- SERVICES ---- */
+/* A ruled list reads as a menu of what this business does.
+   Chips would read as decorative tags. */
+.mp-svcs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--s-5);
+}
+.mp-svcs div {
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+/* An orphan on the last row spans it, so the closing rule runs the full
+   width. Otherwise an odd service count closes the section on a hairline
+   that stops dead halfway across, which on a page built entirely from
+   hairlines is the most legible possible mistake. */
+.mp-svcs > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* ---- REVIEWS ---- */
+.mp-rev {
+  padding: var(--s-5) 0;
+  border-bottom: 1px solid var(--rule);
+}
+/* Full ink: a review is a voice, not metadata. */
+.mp-rev p {
+  font-size: var(--t-prose);
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.mp-rev .att {
+  margin-top: var(--s-3);
+  font-size: var(--t-meta);
+  font-weight: 400;
+  color: var(--ink-3);
+}
+.mp-rev p + .att { margin-top: var(--s-3); }
+
+/* ============================================================
+   10. HOW MYKU WORKS
+   No box, no fill, no radius, no shadow, no icon. A panel styled
+   to look reassuring is itself an endorsement gesture.
+   ============================================================ */
+.mp-how {
+  margin-top: var(--s-6);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+  max-width: 62ch;
+}
+/* When a populated section precedes it, that section's last row already
+   closed with a hairline, and a second identical hairline 32px below it
+   reads as a rendering artifact rather than a divider. The rule is only
+   needed when HOW MYKU WORKS opens the column. */
+.mp-col > .mp-sec + .mp-how { border-top: 0; padding-top: 0; }
+.mp-how .mp-eyebrow { margin-bottom: var(--s-3); }
+.mp-how p {
+  font-size: var(--t-meta);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+.mp-how p + p { margin-top: var(--s-3); }
+
+/* ============================================================
+   11. REPEAT ASK  (rich pages only, mobile and tablet only)
+   ============================================================ */
+.mp-repeat {
+  margin-top: var(--s-6);
+  text-align: center;
+}
+.mp-repeat h2 {
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-head);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: var(--s-4);
+}
+/* The SAME orange control, not a ghost button. */
+.mp-repeat .mp-send { margin-top: 0; }
+
+/* ============================================================
+   12. FOOTER  (local paper variant)
+   The mechanic's name opens and closes the page.
+   ============================================================ */
+.mp-footer {
+  margin-top: var(--s-7);
+  border-top: 1px solid var(--rule);
+  padding: var(--s-6) 0;
+  text-align: center;
+}
+.mp-footer > * + * { margin-top: var(--s-3); }
+.mp-footer .who {
+  font-size: var(--t-meta);
+  font-weight: 600;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.mp-footer .note {
+  font-size: var(--t-meta);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--ink-3);
+}
+.mp-footer .note a {
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.mp-footer .note a:hover { color: var(--ink); }
+.mp-footer .links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-4);
+}
+.mp-footer .links a {
+  font-size: var(--t-meta);
+  font-weight: 500;
+  color: var(--ink-3);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+.mp-footer .links a:hover { color: var(--ink); }
+.mp-footer .badgewrap { display: flex; justify-content: center; }
+
+/* ============================================================
+   APP STORE BADGE, paper variant.
+   Scoped override of the global .appstore so the shared component
+   needs no change. It also pulls the badge's two half-pixel type
+   sizes back onto this page's integer scale.
+   ============================================================ */
+.mp .appstore {
+  background: var(--field);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  height: 36px;
+  padding: 0 14px;
+  gap: var(--s-2);
+  color: var(--ink);
+  box-shadow: none;
+  transform: none;
+}
+.mp .appstore:hover {
+  background: var(--paper-2);
+  border-color: var(--ink-3);
+  transform: none;
+  box-shadow: none;
+}
+.mp .appstore .apple { width: 18px; height: 18px; fill: var(--ink); }
+.mp .appstore .small { font-size: var(--t-micro); font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
+.mp .appstore .big {
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* ============================================================
+   BREAKPOINT 1: >=720px. Typography and grid density only.
+   Still one column. No clamp() anywhere on this page.
+   ============================================================ */
+@media (min-width: 720px) {
+  .mp { --t-name: 44px; --gutter: 24px; }
+  .mp-portrait { width: 96px; height: 96px; }
+  .mp-svcs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Reset the 2-column orphan rule, then the 3-column equivalents. */
+  .mp-svcs > div:last-child:nth-child(odd) { grid-column: auto; }
+  .mp-svcs > div:last-child:nth-child(3n + 1) { grid-column: 1 / -1; }
+  .mp-svcs > div:last-child:nth-child(3n + 2) { grid-column: 2 / -1; }
+  .mp-strip.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ============================================================
+   BREAKPOINT 2: >=900px. The only real layout change.
+   The sidebar is the one concession to conversion in an otherwise
+   single-column design: it holds the only conversion event on
+   screen for the entire scroll of a rich page.
+   ============================================================ */
+@media (min-width: 900px) {
+  .mp { --measure: 1000px; }
+  .mp-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    column-gap: var(--s-8);
+    align-items: start;
+  }
+  .mp-col { grid-column: 1; grid-row: 1; min-width: 0; max-width: 640px; }
+  /* --paper, NOT --field: --field is reserved for input fills, and a white
+     panel holding white inputs makes the one element that must not be
+     missable the least visible thing on the page. The card still separates
+     from the page ground by its hairline and --sh-2.
+     max-height: a fully expanded composer runs ~700px, which is taller than
+     a 1280x720 laptop viewport; without it sticky pins the top and the send
+     button can never be scrolled to. */
+  .mp-ask {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: var(--s-5);
+    margin-top: var(--s-5);
+    max-height: calc(100vh - var(--s-8));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-2);
+    padding: var(--s-5);
+  }
+  .mp-repeat { display: none; }
+  .mp-how { max-width: 62ch; }
+}
+
+/* THE SPARSE DESKTOP OVERRIDE.
+   On a sparse page the left column would hold only the HOW MYKU WORKS
+   paragraph, so a 640/360 grid would render a nearly empty column beside
+   a floating form. One boolean collapses it to the mobile layout. */
+@media (min-width: 900px) {
+  .mp--sparse .mp-body {
+    display: block;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .mp--sparse .mp-ask {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+}

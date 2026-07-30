@@ -29,18 +29,24 @@ export function initials(full: string): string {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'M';
 }
 
-export function ratingStars(rating: number): string {
-  const r = Math.round(rating);
-  return '★★★★★'.slice(0, Math.max(0, Math.min(5, r))).padEnd(5, '☆');
-}
-
-const WORK_TYPE_LABELS: Record<string, string> = {
-  mobile: 'Mobile, comes to you',
-  shop: 'Has their own shop',
-  both: 'Mobile or drop-off',
-};
+// The Myku app's real vocabulary (data/mockData.ts WorkType):
+// 'mobile' | 'waiting_area' | 'drop_off' | 'independent' | 'hybrid'.
+// 'shop' and 'both' are kept as aliases for the earliest schema rows.
+// Prototype-free so a stray value like "constructor" cannot return a function.
+const WORK_TYPE_LABELS: Record<string, string> = Object.assign(
+  Object.create(null) as Record<string, string>,
+  {
+    mobile: 'Mobile, comes to you',
+    hybrid: 'Mobile or drop-off',
+    independent: 'Has their own shop',
+    waiting_area: 'Has their own shop',
+    drop_off: 'Has their own shop',
+    shop: 'Has their own shop',
+    both: 'Mobile or drop-off',
+  }
+);
 
 export function workTypeLabel(wt: string | null | undefined): string | null {
   if (!wt) return null;
-  return WORK_TYPE_LABELS[wt] ?? null;
+  return WORK_TYPE_LABELS[wt.trim().toLowerCase()] ?? null;
 }

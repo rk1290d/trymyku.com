@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import QuoteForm from '@/components/QuoteForm';
+import AppStoreBadge from '@/components/AppStoreBadge';
 import {
   getMechanicPage,
   getServices,
@@ -10,17 +10,20 @@ import {
   getVerifiedJobs,
   getReviews,
 } from '@/lib/supabase';
-import {
-  timeAgo,
-  money,
-  firstName,
-  initials,
-  ratingStars,
-  workTypeLabel,
-} from '@/lib/format';
+import { timeAgo, money, firstName, initials, workTypeLabel } from '@/lib/format';
 import { SUPPORT_EMAIL } from '@/lib/site';
+import './profile.css';
 
 export const revalidate = 60;
+
+// The mechanic's own storefront, on paper. Myku is the quiet trust layer
+// underneath it, never the brand on top of it.
+export const viewport: Viewport = {
+  // Keep in sync with --paper and the body:has(.mp)/.mp-paper literal in
+  // profile.css. This is the Android status-bar tint.
+  themeColor: '#FAF7F2',
+  colorScheme: 'light',
+};
 
 type Params = { slug: string };
 
@@ -35,11 +38,17 @@ export async function generateMetadata({
 
   const city = page.service_city?.split(',')[0]?.trim();
   const spec = page.specialization || 'Independent mechanic';
-  const title = `${page.full_name} | ${city ? `Mechanic in ${city}` : 'Independent Mechanic'}`;
-  const description = `${spec}${city ? ` serving ${city} and nearby` : ''}. Real jobs, real prices, real reviews on Myku. Request a quote in one tap.`;
+  const first = firstName(page.full_name);
+  const title = `${page.full_name} | ${city ? `Mechanic in ${city}` : 'Independent mechanic'}`;
+  // States what the page is and what to do on it. Myku does not vouch,
+  // including inside a search snippet or a Messenger preview.
+  const description = `${spec}${city ? ` in ${city}` : ''}. Describe what you need and get a price from ${first}.`;
 
   return {
-    title,
+    // `absolute` opts this route out of the root layout's "%s | Myku Auto"
+    // template. The tab, the search headline and the preview title all lead
+    // with the mechanic; Myku is a 13px whisper on this page, not a suffix.
+    title: { absolute: title },
     description,
     alternates: { canonical: `/${page.slug}` },
     robots:
@@ -55,24 +64,15 @@ export async function generateMetadata({
   };
 }
 
-const PinIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const WrenchIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M20 6L9 17l-5-5" />
-  </svg>
-);
+// The only two SVGs on the page. Neutral on the credential line,
+// var(--verified) on the job-provenance mark and its legend.
+function Check({ v = false }: { v?: boolean }) {
+  return (
+    <svg className={v ? 'mp-ck v' : 'mp-ck'} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
 
 interface WallJob {
   key: string;
@@ -95,13 +95,25 @@ export default async function ProfilePage({
   const page = await getMechanicPage(slug);
   if (!page) notFound();
 
-  const [services, shared, verified, reviews] = await Promise.all([
+  const [rawServices, shared, verified, rawReviews] = await Promise.all([
     getServices(page.id),
     getSharedJobs(page.id),
     getVerifiedJobs(page.id),
     getReviews(page.id),
   ]);
 
+  // Non-empty content only. A blank service string renders an empty ruled
+  // row, and a rating with no words renders a hollow review row: an eyebrow,
+  // 24px of padding and an attribution with no voice in it. Both are the
+  // "empty box with a heading" the sparse brief forbids, reached through a
+  // data shape rather than a missing section.
+  const services = Array.from(
+    new Set(rawServices.map((s) => (s ?? '').trim()).filter(Boolean))
+  );
+  const reviews = rawReviews.filter((r) => Boolean(r.text?.trim()));
+
+  // Strictly chronological across both kinds. Platform jobs are never
+  // floated to the top: ranking them would read as Myku promoting them.
   const wall: WallJob[] = [
     ...verified.map((j) => ({
       key: `v-${j.id}`,
@@ -130,294 +142,442 @@ export default async function ProfilePage({
   const first = firstName(page.full_name);
   const ratingNum =
     typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
-  const hasRating = (page.review_count ?? 0) > 0 && ratingNum > 0;
-  const facts: string[] = [];
-  if (page.id_verified) facts.push('ID verified');
-  if (page.has_insurance) facts.push('Insurance on file');
-  if (page.has_certifications) facts.push('Certifications on file');
+  const reviewCount = page.review_count ?? 0;
+  const hasRating = reviewCount > 0 && ratingNum > 0;
   const work = workTypeLabel(page.work_type);
   const city = page.service_city?.trim() || null;
   const cityShort = city?.split(',')[0]?.trim() || null;
-  const unclaimed = page.web_status === 'unclaimed';
+  const unclaimed = page.web_status !== 'published';
+  // Suppresses the repeat ask, so a short page carries exactly one orange
+  // rectangle. Spec definition, unchanged.
+  const isSparse = wall.length === 0 && reviews.length === 0;
 
-  const stats: { value: React.ReactNode; label: string }[] = [];
+  // Paperwork checks are suppressed entirely on unclaimed pages. Attaching
+  // document claims to someone who has not agreed to the page is the worst
+  // trust failure available here.
+  const credentials: string[] = [];
+  if (!unclaimed) {
+    if (page.id_verified) credentials.push('ID verified');
+    if (page.has_insurance) credentials.push('Insurance on file');
+    if (page.has_certifications) credentials.push('Certifications on file');
+  }
+
+  // Eyebrow. Answers "is this a person near me" in under a second, and
+  // carries the unconfirmed state so it survives the banner scrolling away.
+  const eyebrow = [
+    cityShort ? `MECHANIC · ${cityShort.toUpperCase()}` : 'INDEPENDENT MECHANIC',
+    unclaimed ? 'UNCONFIRMED' : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  // Facts line. Fragment 1 has a literal fallback, so this line can never
+  // be empty. There is no "unavailable" state anywhere on this page.
+  const factFragments: React.ReactNode[] = [
+    page.specialization || 'Independent mechanic',
+  ];
+  if (work) factFragments.push(work);
+  if (page.available === true)
+    factFragments.push(
+      <span className="mp-avail" key="avail">
+        <span className="dot" aria-hidden="true" />
+        Taking new work
+      </span>
+    );
+
+  // Fact strip, fixed priority order, maximum 4 cells. Money first: it is
+  // the question every stranger arrives with.
+  const cells: { value: string; caption: string }[] = [];
+  if ((page.hourly_rate ?? 0) > 0)
+    cells.push({ value: `$${page.hourly_rate}/hr`, caption: 'Labor rate' });
+  if ((page.diagnostic_fee ?? 0) > 0)
+    cells.push({ value: `$${page.diagnostic_fee}`, caption: 'Diagnostic' });
   if (hasRating)
-    stats.push({
-      value: (
-        <>
-          {ratingNum.toFixed(1)} <span className="st">{ratingStars(ratingNum)}</span>
-        </>
-      ),
-      label: `${page.review_count} review${(page.review_count ?? 0) === 1 ? '' : 's'}`,
+    cells.push({
+      value: ratingNum.toFixed(1),
+      caption: `${reviewCount} review${reviewCount === 1 ? '' : 's'}`,
     });
-  if ((page.years_experience ?? 0) > 0)
-    stats.push({ value: <>{page.years_experience}+</>, label: 'years experience' });
-  if ((page.jobs_done ?? 0) > 0)
-    stats.push({ value: <>{page.jobs_done}</>, label: 'jobs on Myku' });
-  if (wall.length > 0 && stats.length < 3)
-    stats.push({ value: <>{wall.length}</>, label: 'documented jobs' });
+  if (wall.length > 0)
+    cells.push({ value: String(wall.length), caption: 'Jobs listed' });
+  const strip = cells.slice(0, 4);
 
-  const quotePanel = (
-    <section className="pp-quote-sec" id="quote">
-      <div className="pp-form-card">
-        <h2>Request a quote from {first}</h2>
-        <p className="s">
-          Describe the job and leave your number. {first} replies with a real
-          price. Your number is shared with {first} only.
-        </p>
-        <QuoteForm mechanicId={page.id} slug={page.slug} mechanicFirstName={first} />
+  // Gated on the paragraphs that actually render, not on the raw column. A
+  // whitespace-only bio is truthy and renders nothing, which would leave
+  // ABOUT as an eyebrow over an ink rule with no content beneath it.
+  const bioParas = (page.bio ?? '')
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const years = page.years_experience ?? 0;
+
+  const hasAbout =
+    bioParas.length > 0 ||
+    Boolean(city) ||
+    Boolean(work) ||
+    years > 0 ||
+    (page.certifications?.length ?? 0) > 0;
+
+  // The desktop 640/360 grid only makes sense when the left column has
+  // something in it. isSparse alone would collapse a page that has a full
+  // bio, a service area and a services list, costing it the sticky composer.
+  const thinColumn =
+    wall.length === 0 &&
+    reviews.length === 0 &&
+    services.length === 0 &&
+    !hasAbout;
+
+  // The disclosure never defines a mark that does not appear on this page.
+  const howParas: string[] = [
+    `${first} is an independent business. ${first} sets the prices, does the work, and owns the reputation.`,
+    // On an unclaimed page Myku has confirmed nothing, so it must not claim
+    // it has. Saying so here and denying it three screens down would be an
+    // overclaim by Myku about its own diligence.
+    unclaimed
+      ? 'Myku shows you what it has. Myku does not endorse or guarantee anyone’s work. You decide.'
+      : 'Myku confirms facts and shows them to you. Myku does not endorse or guarantee anyone’s work. You decide.',
+  ];
+  if (wall.length > 0)
+    howParas.push(
+      `Jobs marked Completed through Myku were done through the Myku platform. Jobs marked Shared by ${first} were listed by ${first}.`
+    );
+  if (credentials.length > 0)
+    howParas.push(
+      'ID verified, insurance on file and certifications on file mean Myku reviewed documents. They do not mean Myku recommends the work.'
+    );
+  if (unclaimed)
+    howParas.push(
+      // Carries the sentence the banner used to spend three lines on, so the
+      // banner can shrink to one line without losing the disclosure.
+      `${first} has not claimed this page. The details here came from public listings, and nothing on the page has been confirmed by ${first}.`
+    );
+
+  const jobRow = (j: WallJob) => (
+    <div className="mp-job" key={j.key}>
+      <div className="mp-job-b">
+        <div className="mp-job-r1">
+          <span className="mp-job-veh">{j.vehicle}</span>
+          {j.price ? <span className="mp-job-price tnum">{j.price}</span> : null}
+        </div>
+        {j.service ? <div className="mp-job-svc">{j.service}</div> : null}
+        {j.when || j.town ? (
+          <div className="mp-job-meta tnum">
+            {[j.when, j.town].filter(Boolean).join(' · ')}
+          </div>
+        ) : null}
+        {j.verified ? (
+          <div className="mp-prov v">
+            <Check v />
+            Completed through Myku
+          </div>
+        ) : (
+          <div className="mp-prov">Shared by {first}</div>
+        )}
       </div>
-      <p className="pp-note">Free to ask. No account, no download.</p>
-    </section>
+      {j.photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className="mp-job-thumb"
+          src={j.photo}
+          alt={`${j.vehicle}: ${j.service ?? 'job photo'}`}
+          width={56}
+          height={56}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : null}
+    </div>
   );
+
+  const reviewRow = (r: (typeof reviews)[number]) => {
+    const ago = timeAgo(r.created_at);
+    return (
+      <div className="mp-rev" key={r.id}>
+        {r.text ? <p>{r.text}</p> : null}
+        <div className="att tnum">
+          {`${r.rating} out of 5${ago ? ` · ${ago}` : ''}`}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
-      <Header cta={{ href: '#quote', label: 'Request a Quote' }} />
-      <main className="pp-page">
-        <div className="pp-hero">
-          <div className="pp-wrap pp-hero-in">
-            {unclaimed ? (
-              <div className="pp-claim">
-                <div>
-                  <b>This page hasn&apos;t been claimed yet.</b> The details come
-                  from public listings and haven&apos;t been confirmed by {first}.
-                  Are you {first}?{' '}
-                  <a href={`mailto:${SUPPORT_EMAIL}?subject=Claiming my Myku page (${page.slug})`}>
-                    Claim this page
-                  </a>
-                </div>
-              </div>
-            ) : null}
+      <div className="mp-paper" aria-hidden="true" />
+      <main className={thinColumn ? 'mp mp--sparse' : 'mp'}>
+        {/* Nothing above the composer navigates off-page. */}
+        <div className="mp-topbar">
+          <div className="mp-wrap">
+            <span>myku</span>
+          </div>
+        </div>
 
-            <div className="pp-idrow">
+        <div className="mp-wrap">
+          {/* One line. The full explanation lives in HOW MYKU WORKS and the
+              eyebrow carries UNCONFIRMED, so three lines of preamble above the
+              mechanic's own name buys nothing and costs the composer the
+              first screen. */}
+          {unclaimed ? (
+            <div className="mp-claim">
+              Not claimed yet. Are you {first}?{' '}
+              <a
+                href={`mailto:${SUPPORT_EMAIL}?subject=Claiming my Myku page (${page.slug})`}
+              >
+                Claim this page
+              </a>
+            </div>
+          ) : null}
+
+          <div className="mp-id">
+            <div className="mp-eyebrow">{eyebrow}</div>
+            <div className="mp-idrow">
               {page.photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  className="pp-avatar"
+                  className="mp-portrait"
                   src={page.photo_url}
-                  alt={`${page.full_name} profile photo`}
+                  alt={`${page.full_name}, mechanic`}
+                  width={72}
+                  height={72}
+                  loading="eager"
+                  decoding="async"
                 />
               ) : (
-                <div className="pp-avatar ph" aria-hidden="true">
+                <div className="mp-portrait ph" aria-hidden="true">
                   {initials(page.full_name)}
                 </div>
               )}
-              <div className="pp-id">
-                <h1 className="pp-name">{page.full_name}</h1>
-                {page.specialization ? (
-                  <div className="pp-spec">{page.specialization}</div>
-                ) : null}
-                <div className="pp-metarow">
-                  {cityShort ? (
-                    <span className="m">
-                      <PinIcon />
-                      {cityShort}
-                    </span>
-                  ) : null}
-                  {work ? (
-                    <span className="m">
-                      <WrenchIcon />
-                      {work}
-                    </span>
-                  ) : null}
-                  {page.available ? (
-                    <span className="m avail">
-                      <span className="d" />
-                      Taking new work
-                    </span>
-                  ) : null}
+              <div className="mp-idcol">
+                <h1 className="mp-name">{page.full_name}</h1>
+              </div>
+            </div>
+
+            <div className="mp-factline">
+              {factFragments.map((f, i) => (
+                // The separator is NOT aria-hidden: without it a screen
+                // reader runs the fragments together as one string.
+                <span key={i}>
+                  {i > 0 ? <span className="sep">·</span> : null}
+                  {f}
+                </span>
+              ))}
+            </div>
+
+            {credentials.length > 0 ? (
+              <>
+                <div className="mp-cred">
+                  <Check />
+                  {credentials.join(' · ')}
                 </div>
-              </div>
-            </div>
-
-            {facts.length > 0 ? (
-              <div className="pp-facts">
-                {facts.map((f) => (
-                  <span className="pp-fact" key={f}>
-                    <CheckIcon />
-                    {f}
-                  </span>
-                ))}
-              </div>
+                <div className="mp-qual">
+                  Myku checked these documents. That is not a recommendation.
+                </div>
+              </>
             ) : null}
-
-            {stats.length > 0 ? (
-              <div className={`pp-stats${stats.length === 2 ? ' n2' : stats.length === 1 ? ' n1' : ''}`}>
-                {stats.slice(0, 3).map((s2, i) => (
-                  <div className="pp-stat" key={i}>
-                    <b className="tnum">{s2.value}</b>
-                    <span>{s2.label}</span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="pp-hero-cta">
-              <a href="#quote" className="btn btn-primary">
-                Request a Quote
-              </a>
-              <p className="pp-note">
-                Free to ask. {first} replies with a real price, and you decide.
-              </p>
-            </div>
           </div>
         </div>
 
-        <div className="pp-wrap pp-grid">
-          <div className="pp-main">
-            {(page.bio || work || city || (page.hourly_rate ?? 0) > 0 || (page.diagnostic_fee ?? 0) > 0 || (page.certifications?.length ?? 0) > 0) && (
-              <section className="pp-sec">
-                <div className="pp-sec-t">
-                  <h2>About</h2>
-                </div>
-                {page.bio ? <p className="pp-bio">{page.bio}</p> : null}
-                <div className="pp-meta-rows">
-                  {city ? (
-                    <div className="pp-meta-row">
-                      <span className="k2">Service area</span>
-                      <span className="v">{city}</span>
-                    </div>
-                  ) : null}
-                  {work ? (
-                    <div className="pp-meta-row">
-                      <span className="k2">How {first} works</span>
-                      <span className="v">{work}</span>
-                    </div>
-                  ) : null}
-                  {(page.hourly_rate ?? 0) > 0 ? (
-                    <div className="pp-meta-row">
-                      <span className="k2">Hourly rate</span>
-                      <span className="v tnum">${page.hourly_rate}/hr</span>
-                    </div>
-                  ) : null}
-                  {(page.diagnostic_fee ?? 0) > 0 ? (
-                    <div className="pp-meta-row">
-                      <span className="k2">Diagnostic fee</span>
-                      <span className="v tnum">${page.diagnostic_fee}</span>
-                    </div>
-                  ) : null}
-                  {(page.certifications?.length ?? 0) > 0 ? (
-                    <div className="pp-meta-row">
-                      <span className="k2">Certifications</span>
-                      <span className="v">{page.certifications!.join(', ')}</span>
-                    </div>
-                  ) : null}
-                </div>
-              </section>
-            )}
-
-            {services.length > 0 ? (
-              <section className="pp-sec">
-                <div className="pp-sec-t">
-                  <h2>Services</h2>
-                </div>
-                <div className="pp-services">
-                  {services.map((s2) => (
-                    <span className="pp-service" key={s2}>
-                      {s2}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            <section className="pp-sec">
-              <div className="pp-sec-t">
-                <h2>Job history</h2>
-                {wall.length > 0 ? <span className="n">{wall.length} documented</span> : null}
-              </div>
-              {wall.length > 0 ? (
-                <div className="pp-jobs">
-                  {wall.map((j) => (
-                    <div className={`pp-job${j.verified ? ' vf' : ''}`} key={j.key}>
-                      <div className="pp-job-flex">
-                        <div className="pp-job-body">
-                          <div className="pp-job-r1">
-                            <span className="pp-job-veh">{j.vehicle}</span>
-                            {j.price ? (
-                              <span className="pp-job-price tnum">{j.price}</span>
-                            ) : null}
-                          </div>
-                          {j.service ? <div className="pp-job-svc">{j.service}</div> : null}
-                          <div className="pp-job-r2">
-                            <span className="pp-job-meta tnum">
-                              {[j.when, j.town].filter(Boolean).join(' · ')}
-                            </span>
-                            {j.verified ? (
-                              <span className="pp-job-badge vf">
-                                <CheckIcon />
-                                Myku verified
-                              </span>
-                            ) : (
-                              <span className="pp-job-badge sr">Shared by {first}</span>
-                            )}
-                          </div>
-                        </div>
-                        {j.photo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            className="pp-job-thumb"
-                            src={j.photo}
-                            alt={`${j.vehicle}: ${j.service ?? 'job photo'}`}
-                            loading="lazy"
-                          />
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        {/* The money question is never silent: this band always renders. */}
+        <div className="mp-band">
+          <div className="mp-band-in">
+            <div className={`mp-strip n${strip.length || 1}`}>
+              {strip.length > 0 ? (
+                strip.map((c) => (
+                  <div className="mp-cell" key={c.caption}>
+                    <b className="tnum">{c.value}</b>
+                    <span>{c.caption}</span>
+                  </div>
+                ))
               ) : (
-                <div className="pp-empty">
-                  {first} hasn&apos;t added job history yet. You can still request
-                  a quote.
+                <div className="mp-cell fb">
+                  {first} prices each job individually. Describe the work and you
+                  will get a number back.
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mp-wrap">
+          <div className="mp-body">
+            <section className="mp-ask" id="ask">
+              <span className="mp-anchor" id="quote" aria-hidden="true" />
+              {/* The heading and sub-line live INSIDE QuoteForm so the sent
+                  state swaps the whole ask at once. Left here they would sit
+                  above "Request sent." telling the visitor to fill in a form
+                  that no longer exists. */}
+              <QuoteForm
+                mechanicId={page.id}
+                slug={page.slug}
+                mechanicFirstName={first}
+                unclaimed={unclaimed}
+                services={services}
+              />
             </section>
 
-            {reviews.length > 0 ? (
-              <section className="pp-sec">
-                <div className="pp-sec-t">
-                  <h2>Reviews</h2>
-                  <span className="n">{reviews.length} shown</span>
-                </div>
-                <div className="pp-reviews">
-                  {reviews.map((r) => (
-                    <div className="pp-review" key={r.id}>
-                      <span className="st">{ratingStars(r.rating)}</span>
-                      {r.text ? <p>{r.text}</p> : null}
-                      <div className="dt">{timeAgo(r.created_at)}</div>
+            <div className="mp-col">
+              {wall.length > 0 ? (
+                <section className="mp-sec">
+                  <div className="mp-sec-h">
+                    <h2 className="mp-eyebrow">Work</h2>
+                    <span className="mp-sec-n tnum">{wall.length} listed</span>
+                  </div>
+                  <div className="mp-list">
+                    {/* Each mark name is set the way the mark itself is set,
+                        and the check glyph marks only the claim it belongs
+                        to rather than the whole sentence. */}
+                    <div className="mp-legend">
+                      <span className="m v">
+                        <Check v />
+                        Completed through Myku
+                      </span>{' '}
+                      means the job was done through the Myku platform.{' '}
+                      <span className="m">Shared by {first}</span> means {first}{' '}
+                      listed it.
                     </div>
-                  ))}
-                </div>
-              </section>
-            ) : null}
+                    {wall.slice(0, 10).map(jobRow)}
+                    {wall.length > 10 ? (
+                      <details className="mp-more">
+                        <summary>Show all {wall.length} jobs</summary>
+                        {wall.slice(10).map(jobRow)}
+                      </details>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
 
-            <div className="pp-trust">
-              <b>
-                We confirm facts. We do not endorse.{' '}
-                <span className="a">You decide.</span>
-              </b>
-              <p>
-                Myku is a marketplace. {first} is an independent business: their
-                prices, their work, their reputation. Verification means we
-                checked paperwork, not that we vouch for the work. Jobs marked
-                &quot;Shared by {first}&quot; are self-reported; &quot;Myku
-                verified&quot; jobs were completed through the platform.
-              </p>
+              {hasAbout ? (
+                <section className="mp-sec">
+                  <div className="mp-sec-h">
+                    <h2 className="mp-eyebrow">About</h2>
+                  </div>
+                  <div className="mp-list">
+                    {bioParas.length > 0 ? (
+                      <div className="mp-bio">
+                        {bioParas.map((p, i) => (
+                          <p key={i}>{p}</p>
+                        ))}
+                      </div>
+                    ) : null}
+                    {city ? (
+                      <div className="mp-row">
+                        <span className="k">Service area</span>
+                        <span className="v">{city}</span>
+                      </div>
+                    ) : null}
+                    {work ? (
+                      <div className="mp-row">
+                        <span className="k">How {first} works</span>
+                        <span className="v">{work}</span>
+                      </div>
+                    ) : null}
+                    {/* Hourly rate and diagnostic fee live in the fact strip,
+                        which always wins them on priority. Never print a
+                        price twice. */}
+                    {years > 0 ? (
+                      <div className="mp-row">
+                        <span className="k">Years working</span>
+                        <span className="v tnum">
+                          {years} {years === 1 ? 'year' : 'years'}
+                        </span>
+                      </div>
+                    ) : null}
+                    {(page.certifications?.length ?? 0) > 0 ? (
+                      <div className="mp-row">
+                        <span className="k">Certifications</span>
+                        <span className="v">
+                          {page.certifications!.join(', ')}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+
+              {services.length > 0 ? (
+                <section className="mp-sec">
+                  <div className="mp-sec-h">
+                    <h2 className="mp-eyebrow">Services</h2>
+                  </div>
+                  <div className="mp-list">
+                    <div className="mp-svcs">
+                      {services.map((s, i) => (
+                        <div key={`${s}-${i}`}>{s}</div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
+              {reviews.length > 0 ? (
+                <section className="mp-sec">
+                  <div className="mp-sec-h">
+                    <h2 className="mp-eyebrow">Reviews</h2>
+                    {hasRating ? (
+                      <span className="mp-sec-meta tnum">
+                        {ratingNum.toFixed(1)} out of 5 · {reviewCount} review
+                        {reviewCount === 1 ? '' : 's'}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mp-list">
+                    {reviews.slice(0, 5).map(reviewRow)}
+                    {reviews.length > 5 ? (
+                      // A delta, not a total: the query is capped at 20 while
+                      // the header prints the true review_count, so "Show all
+                      // 20" under "43 reviews" would read as a data error.
+                      <details className="mp-more">
+                        <summary>Show {reviews.length - 5} more reviews</summary>
+                        {reviews.slice(5).map(reviewRow)}
+                      </details>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
+
+              <section className="mp-how">
+                <h2 className="mp-eyebrow">How Myku works</h2>
+                {howParas.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </section>
+
+              {/* One orange rectangle exists on a sparse page. On a rich page
+                  the two are separated by the whole evidence body, so they can
+                  never be co-visible on a phone. */}
+              {!isSparse ? (
+                <section className="mp-repeat">
+                  <h2>Ready to ask {first}?</h2>
+                  <a className="mp-send" href="#ask">
+                    Send a request
+                  </a>
+                </section>
+              ) : null}
             </div>
           </div>
 
-          <aside className="pp-side">{quotePanel}</aside>
-        </div>
-
-        <div className="pp-stickybar">
-          <a href="#quote" className="btn btn-primary">
-            Request a Quote
-          </a>
+          <footer className="mp-footer">
+            <div className="who">
+              {page.full_name}
+              {cityShort ? ` · ${cityShort}` : ''}
+            </div>
+            <div className="note">
+              This page is hosted by <Link href="/">Myku</Link>.{' '}
+              {unclaimed
+                ? 'Myku does not endorse or guarantee anyone’s work.'
+                : 'Myku confirms facts and does not endorse or guarantee anyone’s work.'}
+            </div>
+            <div className="badgewrap">
+              <AppStoreBadge />
+            </div>
+            <div className="links">
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
+              <Link href="/support">Support</Link>
+            </div>
+          </footer>
         </div>
       </main>
-      <Footer />
     </>
   );
 }
