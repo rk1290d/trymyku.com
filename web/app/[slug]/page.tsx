@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import QuoteForm from '@/components/QuoteForm';
@@ -11,7 +12,7 @@ import {
   getReviews,
 } from '@/lib/supabase';
 import { timeAgo, money, firstName, initials, workTypeLabel } from '@/lib/format';
-import { SUPPORT_EMAIL } from '@/lib/site';
+import { SUPPORT_EMAIL, SITE_URL } from '@/lib/site';
 import './profile.css';
 
 export const revalidate = 60;
@@ -19,9 +20,9 @@ export const revalidate = 60;
 // The mechanic's own storefront, on paper. Myku is the quiet trust layer
 // underneath it, never the brand on top of it.
 export const viewport: Viewport = {
-  // Keep in sync with --paper and the body:has(.mp)/.mp-paper literal in
-  // profile.css. This is the Android status-bar tint.
-  themeColor: '#FAF7F2',
+  // Keep in sync with --ink in profile.css. The fascia band runs to the
+  // very top of the page, so the Android status bar merges into it.
+  themeColor: '#14120F',
   colorScheme: 'light',
 };
 
@@ -41,8 +42,13 @@ export async function generateMetadata({
   const first = firstName(page.full_name);
   const title = `${page.full_name} | ${city ? `Mechanic in ${city}` : 'Independent mechanic'}`;
   // States what the page is and what to do on it. Myku does not vouch,
-  // including inside a search snippet or a Messenger preview.
-  const description = `${spec}${city ? ` in ${city}` : ''}. Describe what you need and get a price from ${first}.`;
+  // including inside a search snippet or a Messenger preview. The unclaimed
+  // variant mirrors the composer's own promise: the mechanic has not agreed
+  // to reply, so the preview must not say they will.
+  const description =
+    page.web_status === 'published'
+      ? `${spec}${city ? ` in ${city}` : ''}. Describe what you need and get a price from ${first}.`
+      : `${spec}${city ? ` in ${city}` : ''}. Describe what you need and Myku will pass it to ${first}.`;
 
   return {
     // `absolute` opts this route out of the root layout's "%s | Myku Auto"
@@ -64,14 +70,30 @@ export async function generateMetadata({
   };
 }
 
-// The only two SVGs on the page. Neutral on the credential line,
-// var(--verified) on the job-provenance mark and its legend.
+// Check glyph. Neutral on the credential line, var(--verified) on the
+// job-provenance mark and its legend.
 function Check({ v = false }: { v?: boolean }) {
   return (
     <svg className={v ? 'mp-ck v' : 'mp-ck'} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M20 6 9 17l-5-5" />
     </svg>
   );
+}
+
+// Decorative quote glyph, recessed into the review card behind the words.
+// Pure ornament: aria-hidden, --paper-2 fill, sized in px so it never
+// touches the type scale.
+function Quote() {
+  return (
+    <svg className="mp-q" viewBox="0 0 32 28" aria-hidden="true">
+      <path d="M13.8 4.4C8 7 4.2 12 4.2 17.6c0 3.9 2.4 6.4 5.7 6.4 3 0 5.1-2.1 5.1-5.1 0-2.8-1.9-4.7-4.7-4.7-.4 0-.8 0-1.2.1.8-2.9 3.1-5.5 6.1-6.9l-1.4-3zm13.4 0C21.4 7 17.6 12 17.6 17.6c0 3.9 2.4 6.4 5.7 6.4 3 0 5.1-2.1 5.1-5.1 0-2.8-1.9-4.7-4.7-4.7-.4 0-.8 0-1.2.1.8-2.9 3.1-5.5 6.1-6.9l-1.4-3z" />
+    </svg>
+  );
+}
+
+// The eyebrow-and-hairline device every section header uses.
+function SecRule() {
+  return <span className="mp-sec-rule" aria-hidden="true" />;
 }
 
 interface WallJob {
@@ -114,25 +136,28 @@ export default async function ProfilePage({
 
   // Strictly chronological across both kinds. Platform jobs are never
   // floated to the top: ranking them would read as Myku promoting them.
+  // Whitespace-only fields are trimmed to null here so a shared job gets
+  // the same defenses a verified one does: no blank bold lead line, no
+  // empty price span, no dangling "today · " separator.
   const wall: WallJob[] = [
     ...verified.map((j) => ({
       key: `v-${j.id}`,
-      vehicle: j.vehicle || 'Vehicle',
-      service: j.service,
+      vehicle: j.vehicle?.trim() || 'Vehicle',
+      service: j.service?.trim() || null,
       price: money(j.price),
       when: timeAgo(j.completed_at),
-      town: j.town,
+      town: j.town?.trim() || null,
       verified: true,
       photo: null,
       ts: new Date(j.completed_at).getTime() || 0,
     })),
     ...shared.map((j) => ({
       key: `s-${j.id}`,
-      vehicle: j.vehicle,
-      service: j.service,
-      price: j.price_label,
+      vehicle: j.vehicle?.trim() || 'Vehicle',
+      service: j.service?.trim() || null,
+      price: j.price_label?.trim() || null,
       when: timeAgo(j.done_on),
-      town: j.town,
+      town: j.town?.trim() || null,
       verified: false,
       photo: j.photo_url,
       ts: j.done_on ? new Date(j.done_on).getTime() || 0 : 0,
@@ -171,19 +196,10 @@ export default async function ProfilePage({
     .filter(Boolean)
     .join(' · ');
 
-  // Facts line. Fragment 1 has a literal fallback, so this line can never
-  // be empty. There is no "unavailable" state anywhere on this page.
-  const factFragments: React.ReactNode[] = [
-    page.specialization || 'Independent mechanic',
-  ];
-  if (work) factFragments.push(work);
-  if (page.available === true)
-    factFragments.push(
-      <span className="mp-avail" key="avail">
-        <span className="dot" aria-hidden="true" />
-        Taking new work
-      </span>
-    );
+  // The specialization line has a literal fallback, so it can never be
+  // empty. There is no "unavailable" state anywhere on this page.
+  const specLine = page.specialization || 'Independent mechanic';
+  const hasMetaLine = Boolean(work) || page.available === true;
 
   // Fact strip, fixed priority order, maximum 4 cells. Money first: it is
   // the question every stranger arrives with.
@@ -211,12 +227,19 @@ export default async function ProfilePage({
 
   const years = page.years_experience ?? 0;
 
+  // Certifications get the same trim-and-drop pass services and reviews
+  // get: [''] must not conjure an About section, and ['ASE', ''] must not
+  // print a dangling comma.
+  const certs = (page.certifications ?? [])
+    .map((c) => (c ?? '').trim())
+    .filter(Boolean);
+
   const hasAbout =
     bioParas.length > 0 ||
     Boolean(city) ||
     Boolean(work) ||
     years > 0 ||
-    (page.certifications?.length ?? 0) > 0;
+    certs.length > 0;
 
   // The desktop 640/360 grid only makes sense when the left column has
   // something in it. isSparse alone would collapse a page that has a full
@@ -252,6 +275,40 @@ export default async function ProfilePage({
       `${first} has not claimed this page. The details here came from public listings, and nothing on the page has been confirmed by ${first}.`
     );
 
+  // Structured data, PUBLISHED pages only. Unclaimed pages are noindexed,
+  // and attaching business schema to a person who never agreed to the page
+  // would be a trust violation. Every field restates an on-page fact; the
+  // rating appears only when real platform reviews exist. No priceRange,
+  // telephone or hours: not held, never fabricated.
+  const jsonLd = unclaimed
+    ? null
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'AutoRepair',
+        name: page.full_name,
+        url: `${SITE_URL}/${page.slug}`,
+        ...(page.photo_url ? { image: page.photo_url } : {}),
+        description: `${specLine}${cityShort ? ` in ${cityShort}` : ''}. Independent mechanic on Myku.`,
+        ...(cityShort
+          ? {
+              address: {
+                '@type': 'PostalAddress',
+                addressLocality: cityShort,
+              },
+            }
+          : {}),
+        ...(city ? { areaServed: city } : {}),
+        ...(hasRating
+          ? {
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: ratingNum.toFixed(1),
+                reviewCount,
+              },
+            }
+          : {}),
+      };
+
   const jobRow = (j: WallJob) => (
     <div className="mp-job" key={j.key}>
       <div className="mp-job-b">
@@ -275,15 +332,17 @@ export default async function ProfilePage({
         )}
       </div>
       {j.photo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        // next/image serves a thumbnail-sized variant instead of the
+        // original multi-MB phone upload. Unknown hosts skip the optimizer
+        // rather than crash the page.
+        <Image
           className="mp-job-thumb"
           src={j.photo}
           alt={`${j.vehicle}: ${j.service ?? 'job photo'}`}
           width={56}
           height={56}
           loading="lazy"
-          decoding="async"
+          unoptimized={!j.photo.includes('.supabase.co/')}
         />
       ) : null}
     </div>
@@ -293,6 +352,7 @@ export default async function ProfilePage({
     const ago = timeAgo(r.created_at);
     return (
       <div className="mp-rev" key={r.id}>
+        <Quote />
         {r.text ? <p>{r.text}</p> : null}
         <div className="att tnum">
           {`${r.rating} out of 5${ago ? ` · ${ago}` : ''}`}
@@ -303,22 +363,23 @@ export default async function ProfilePage({
 
   return (
     <>
+      {jsonLd ? (
+        <script
+          type="application/ld+json"
+          // Escape < so a hostile display name can never close the tag.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+      ) : null}
       <div className="mp-paper" aria-hidden="true" />
       <main className={thinColumn ? 'mp mp--sparse' : 'mp'}>
-        {/* Nothing above the composer navigates off-page. */}
-        <div className="mp-topbar">
-          <div className="mp-wrap">
-            <span>myku</span>
-          </div>
-        </div>
-
-        <div className="mp-wrap">
-          {/* One line. The full explanation lives in HOW MYKU WORKS and the
-              eyebrow carries UNCONFIRMED, so three lines of preamble above the
-              mechanic's own name buys nothing and costs the composer the
-              first screen. */}
-          {unclaimed ? (
-            <div className="mp-claim">
+        {/* One slim line ABOVE the fascia. The full explanation lives in
+            HOW MYKU WORKS and the eyebrow carries UNCONFIRMED, so three
+            lines of preamble above the mechanic's own name buys nothing. */}
+        {unclaimed ? (
+          <div className="mp-claim">
+            <div className="mp-wrap">
               Not claimed yet. Are you {first}?{' '}
               <a
                 href={`mailto:${SUPPORT_EMAIL}?subject=Claiming my Myku page (${page.slug})`}
@@ -326,76 +387,95 @@ export default async function ProfilePage({
                 Claim this page
               </a>
             </div>
-          ) : null}
+          </div>
+        ) : null}
 
-          <div className="mp-id">
+        {/* THE FASCIA. The storefront sign: a deep-ink band from the very
+            top of the page, the top bar merged into it, nothing sticky.
+            Nothing above the composer navigates off-page. */}
+        <header className="mp-fascia">
+          <div className="mp-topbar">
+            <div className="mp-wrap">
+              <span>myku</span>
+            </div>
+          </div>
+          <div className="mp-wrap">
             <div className="mp-eyebrow">{eyebrow}</div>
-            <div className="mp-idrow">
-              {page.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  className="mp-portrait"
-                  src={page.photo_url}
-                  alt={`${page.full_name}, mechanic`}
-                  width={72}
-                  height={72}
-                  loading="eager"
-                  decoding="async"
-                />
-              ) : (
-                <div className="mp-portrait ph" aria-hidden="true">
-                  {initials(page.full_name)}
-                </div>
-              )}
-              <div className="mp-idcol">
-                <h1 className="mp-name">{page.full_name}</h1>
+            <h1 className="mp-name">{page.full_name}</h1>
+            <div className="mp-spec">{specLine}</div>
+            {hasMetaLine ? (
+              <div className="mp-factline">
+                {work ? <span>{work}</span> : null}
+                {/* The separator is NOT aria-hidden: without it a screen
+                    reader runs the fragments together as one string. */}
+                {work && page.available === true ? (
+                  <span className="sep">·</span>
+                ) : null}
+                {page.available === true ? (
+                  <span className="mp-avail">
+                    <span className="dot" aria-hidden="true" />
+                    Taking new work
+                  </span>
+                ) : null}
               </div>
-            </div>
-
-            <div className="mp-factline">
-              {factFragments.map((f, i) => (
-                // The separator is NOT aria-hidden: without it a screen
-                // reader runs the fragments together as one string.
-                <span key={i}>
-                  {i > 0 ? <span className="sep">·</span> : null}
-                  {f}
-                </span>
-              ))}
-            </div>
-
-            {credentials.length > 0 ? (
-              <>
-                <div className="mp-cred">
-                  <Check />
-                  {credentials.join(' · ')}
-                </div>
-                <div className="mp-qual">
-                  Myku checked these documents. That is not a recommendation.
-                </div>
-              </>
             ) : null}
           </div>
-        </div>
+        </header>
 
-        {/* The money question is never silent: this band always renders. */}
-        <div className="mp-band">
-          <div className="mp-band-in">
-            <div className={`mp-strip n${strip.length || 1}`}>
-              {strip.length > 0 ? (
-                strip.map((c) => (
-                  <div className="mp-cell" key={c.caption}>
-                    <b className="tnum">{c.value}</b>
-                    <span>{c.caption}</span>
+        {/* THE SHELF. The portrait half-overlaps the band edge; the fact
+            panel overlaps it slightly and carries one of the page's two
+            lifted shadows. The money question is never silent: the panel
+            always renders. */}
+        <div className="mp-wrap">
+          <div className="mp-shelf">
+            {page.photo_url ? (
+              // Sized for the 96px desktop slot; the optimizer's 2x variant
+              // covers retina. The original full-resolution upload never
+              // ships to a phone for a 72px portrait.
+              <Image
+                className="mp-portrait"
+                src={page.photo_url}
+                alt={`${page.full_name}, mechanic`}
+                width={96}
+                height={96}
+                priority
+                unoptimized={!page.photo_url.includes('.supabase.co/')}
+              />
+            ) : (
+              <div className="mp-portrait ph" aria-hidden="true">
+                {initials(page.full_name)}
+              </div>
+            )}
+            <div className="mp-panel">
+              <div className={`mp-strip n${strip.length || 1}`}>
+                {strip.length > 0 ? (
+                  strip.map((c) => (
+                    <div className="mp-cell" key={c.caption}>
+                      <b className="tnum">{c.value}</b>
+                      <span>{c.caption}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="mp-cell fb">
+                    {first} prices each job individually. Describe the work and
+                    you will get a number back.
                   </div>
-                ))
-              ) : (
-                <div className="mp-cell fb">
-                  {first} prices each job individually. Describe the work and you
-                  will get a number back.
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
+
+          {credentials.length > 0 ? (
+            <>
+              <div className="mp-cred">
+                <Check />
+                {credentials.join(' · ')}
+              </div>
+              <div className="mp-qual">
+                Myku checked these documents. That is not a recommendation.
+              </div>
+            </>
+          ) : null}
         </div>
 
         <div className="mp-wrap">
@@ -420,6 +500,7 @@ export default async function ProfilePage({
                 <section className="mp-sec">
                   <div className="mp-sec-h">
                     <h2 className="mp-eyebrow">Work</h2>
+                    <SecRule />
                     <span className="mp-sec-n tnum">{wall.length} listed</span>
                   </div>
                   <div className="mp-list">
@@ -450,6 +531,7 @@ export default async function ProfilePage({
                 <section className="mp-sec">
                   <div className="mp-sec-h">
                     <h2 className="mp-eyebrow">About</h2>
+                    <SecRule />
                   </div>
                   <div className="mp-list">
                     {bioParas.length > 0 ? (
@@ -482,12 +564,10 @@ export default async function ProfilePage({
                         </span>
                       </div>
                     ) : null}
-                    {(page.certifications?.length ?? 0) > 0 ? (
+                    {certs.length > 0 ? (
                       <div className="mp-row">
                         <span className="k">Certifications</span>
-                        <span className="v">
-                          {page.certifications!.join(', ')}
-                        </span>
+                        <span className="v">{certs.join(', ')}</span>
                       </div>
                     ) : null}
                   </div>
@@ -498,6 +578,7 @@ export default async function ProfilePage({
                 <section className="mp-sec">
                   <div className="mp-sec-h">
                     <h2 className="mp-eyebrow">Services</h2>
+                    <SecRule />
                   </div>
                   <div className="mp-list">
                     <div className="mp-svcs">
@@ -513,6 +594,7 @@ export default async function ProfilePage({
                 <section className="mp-sec">
                   <div className="mp-sec-h">
                     <h2 className="mp-eyebrow">Reviews</h2>
+                    <SecRule />
                     {hasRating ? (
                       <span className="mp-sec-meta tnum">
                         {ratingNum.toFixed(1)} out of 5 · {reviewCount} review
@@ -536,7 +618,10 @@ export default async function ProfilePage({
               ) : null}
 
               <section className="mp-how">
-                <h2 className="mp-eyebrow">How Myku works</h2>
+                <div className="mp-sec-h">
+                  <h2 className="mp-eyebrow">How Myku works</h2>
+                  <SecRule />
+                </div>
                 {howParas.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
@@ -556,13 +641,12 @@ export default async function ProfilePage({
             </div>
           </div>
 
+          {/* A hairline, one quiet line, the badge. */}
           <footer className="mp-footer">
-            <div className="who">
-              {page.full_name}
-              {cityShort ? ` · ${cityShort}` : ''}
-            </div>
             <div className="note">
-              This page is hosted by <Link href="/">Myku</Link>.{' '}
+              {page.full_name}
+              {cityShort ? ` · ${cityShort}` : ''}. This page is hosted by{' '}
+              <Link href="/">Myku</Link>.{' '}
               {unclaimed
                 ? 'Myku does not endorse or guarantee anyone’s work.'
                 : 'Myku confirms facts and does not endorse or guarantee anyone’s work.'}

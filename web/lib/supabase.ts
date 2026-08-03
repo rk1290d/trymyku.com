@@ -117,10 +117,12 @@ export async function getReviews(mechanicId: string): Promise<Review[]> {
   );
 }
 
-export async function getPublishedSlugs(): Promise<string[]> {
-  const rows = await rest<{ slug: string }[]>(
-    `web_mechanic_pages?web_status=eq.published&select=slug&limit=1000`,
+export async function getPublishedSlugs(): Promise<
+  { slug: string; created_at: string | null }[]
+> {
+  const rows = await rest<{ slug: string; created_at: string | null }[]>(
+    `web_mechanic_pages?web_status=eq.published&select=slug,created_at&limit=1000`,
     300
   );
-  return rows?.map((r) => r.slug) ?? [];
+  return rows ?? [];
 }

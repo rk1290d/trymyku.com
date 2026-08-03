@@ -4,19 +4,22 @@ import { getPublishedSlugs } from '@/lib/supabase';
 
 // Only published (claimed) profiles are listed. Unclaimed pages are
 // reachable by direct link only: never indexed, never discoverable.
+//
+// lastModified is a real timestamp or absent. Stamping every entry with
+// "now" on every generation tells crawlers the whole site changes
+// constantly, which teaches them to distrust the field.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getPublishedSlugs();
-  const now = new Date();
+  const pages = await getPublishedSlugs();
   return [
-    { url: `${SITE_URL}/`, lastModified: now, priority: 1 },
-    { url: `${SITE_URL}/mechanics`, lastModified: now, priority: 0.9 },
-    { url: `${SITE_URL}/customers`, lastModified: now, priority: 0.9 },
-    { url: `${SITE_URL}/support`, lastModified: now, priority: 0.4 },
-    { url: `${SITE_URL}/privacy`, lastModified: now, priority: 0.2 },
-    { url: `${SITE_URL}/terms`, lastModified: now, priority: 0.2 },
-    ...slugs.map((slug) => ({
+    { url: `${SITE_URL}/`, priority: 1 },
+    { url: `${SITE_URL}/mechanics`, priority: 0.9 },
+    { url: `${SITE_URL}/customers`, priority: 0.9 },
+    { url: `${SITE_URL}/support`, priority: 0.4 },
+    { url: `${SITE_URL}/privacy`, priority: 0.2 },
+    { url: `${SITE_URL}/terms`, priority: 0.2 },
+    ...pages.map(({ slug, created_at }) => ({
       url: `${SITE_URL}/${slug}`,
-      lastModified: now,
+      ...(created_at ? { lastModified: new Date(created_at) } : {}),
       priority: 0.8,
     })),
   ];

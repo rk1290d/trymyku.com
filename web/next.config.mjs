@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Profile photos come straight from Supabase storage as plain <img> tags,
-  // so no remotePatterns config is needed.
   poweredByHeader: false,
+  // Profile photos and job thumbnails render through next/image so a 72px
+  // portrait never ships the original multi-MB phone upload. Only Supabase
+  // storage hosts go through the optimizer; other hosts render unoptimized.
+  images: {
+    remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co' }],
+  },
   // The OG-image routes read display fonts from disk at runtime; make sure
   // the TTFs ship inside the serverless bundle on Vercel.
   outputFileTracingIncludes: {

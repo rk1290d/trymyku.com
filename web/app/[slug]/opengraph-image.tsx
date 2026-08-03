@@ -22,7 +22,12 @@ export const alt = 'Mechanic profile page';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-async function fonts() {
+// Read once per lambda instance, not once per card: a first-ever share of
+// a slug already pays cold start plus the photo fetch, and WhatsApp's
+// crawler timeout is short.
+let fontsPromise: ReturnType<typeof loadFonts> | null = null;
+
+async function loadFonts() {
   const [extraBold, medium] = await Promise.all([
     readFile(join(process.cwd(), 'assets/fonts/Jakarta-ExtraBold.ttf')),
     readFile(join(process.cwd(), 'assets/fonts/Jakarta-Medium.ttf')),
@@ -31,6 +36,30 @@ async function fonts() {
     { name: 'Jakarta', data: extraBold, weight: 800 as const, style: 'normal' as const },
     { name: 'Jakarta', data: medium, weight: 500 as const, style: 'normal' as const },
   ];
+}
+
+function fonts() {
+  fontsPromise ??= loadFonts();
+  return fontsPromise;
+}
+
+// The photo is fetched here, defended, and inlined as a data URI. Left as a
+// raw URL, a slow bucket, a dead link or a HEIC upload makes satori throw,
+// and the crawler gets a 500: the share lands with no card at all. On any
+// failure the card degrades to the initials plate instead of vanishing.
+async function safePhoto(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
+    if (!res.ok) return null;
+    const ct = (res.headers.get('content-type') ?? '').split(';')[0].trim();
+    if (ct !== 'image/png' && ct !== 'image/jpeg') return null;
+    const buf = await res.arrayBuffer();
+    // 0-byte legacy uploads exist; a >8MB original would bloat the render.
+    if (buf.byteLength === 0 || buf.byteLength > 8_000_000) return null;
+    return `data:${ct};base64,${Buffer.from(buf).toString('base64')}`;
+  } catch {
+    return null;
+  }
 }
 
 export default async function Image({
@@ -67,6 +96,7 @@ export default async function Image({
   }
 
   const unclaimed = page.web_status !== 'published';
+  const photo = page.photo_url ? await safePhoto(page.photo_url) : null;
 
   const ratingNum =
     typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
@@ -107,7 +137,7 @@ export default async function Image({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: 56 }}>
-          {page.photo_url ? (
+          {photo ? (
             <div
               style={{
                 display: 'flex',
@@ -120,7 +150,7 @@ export default async function Image({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={page.photo_url}
+                src={photo}
                 alt=""
                 width={240}
                 height={240}

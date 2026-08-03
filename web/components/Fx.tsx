@@ -9,6 +9,12 @@ export default function Fx() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Every element this layer targets lives on the marketing pages. On a
+    // profile page (the .mp main) it would attach a scroll listener, query
+    // the DOM and start a failsafe timer for nothing, inside the in-app
+    // browsers where the profile page matters most. Do no work there.
+    if (document.querySelector('.mp')) return;
+
     const hdr = document.getElementById('hdr');
     const onScroll = () => {
       if (hdr) hdr.classList.toggle('scrolled', (window.scrollY || 0) > 8);
