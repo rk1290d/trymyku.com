@@ -289,6 +289,11 @@ body:has(.mp) .bgfx { display: none; }
   display: flex;
   align-items: flex-start;
   gap: var(--s-4);
+  /* globals.css lifts every main/header/footer to z-index 1, and the fascia
+     is a <header>. Without a higher layer the band paints over the overlap
+     the negative margins below create, slicing the portrait in half. */
+  position: relative;
+  z-index: 2;
 }
 .mp-portrait {
   flex: none;
