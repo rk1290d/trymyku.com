@@ -225,13 +225,18 @@ body:has(.mp) .bgfx { display: none; }
   height: 44px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
-.mp-topbar span {
+/* Both topbar links live in the band's muted tone and brighten to paper
+   on hover: navigable, but never competing with the name below. */
+.mp-topbar a {
   font-size: var(--t-meta);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--band-muted);
+  text-decoration: none;
 }
+.mp-topbar a:hover { color: var(--paper); }
 
 .mp-fascia .mp-eyebrow {
   color: var(--band-muted);
@@ -1105,4 +1110,41 @@ body[data-lead-sent='1'] .mp-repeat {
     max-height: none;
     overflow: visible;
   }
+}
+
+/* ============================================================
+   BREAKPOINT 3: >=1200px. The desktop pass.
+   Up to here the page is a laptop composition; on a wide monitor
+   it floated in dead margin: a 1000px measure in a 1900px window,
+   a 44px name in a 270px band that was mostly empty ink. This
+   block scales the composition instead of just centering it. The
+   sign gets sign-sized type, the shelf gets a deeper overlap, the
+   money figures grow, and the composer earns more column. Nothing
+   below 1200px changes by a single pixel.
+   ============================================================ */
+@media (min-width: 1200px) {
+  .mp { --measure: 1200px; --t-name: 56px; --gutter: 32px; }
+  .mp-topbar .mp-wrap { height: 52px; }
+  .mp-fascia .mp-eyebrow { margin-top: var(--s-6); }
+  /* The sign's supporting lines step up one type token with it. */
+  .mp-spec,
+  .mp-factline { font-size: var(--t-prose); }
+  /* Overlap runway: the portrait hangs 60px below the band edge. */
+  .mp-fascia { padding-bottom: 72px; }
+  .mp-portrait { width: 120px; height: 120px; margin-top: -60px; }
+  .mp-portrait.ph { font-size: 28px; }
+  .mp-panel { margin-top: -20px; }
+  .mp-cell { padding: 18px var(--s-5); }
+  /* The money figures alone get one size above t-head: the panel
+     exists to answer the money question, and at this width 22px
+     read as a footnote inside a 500px cell. */
+  .mp-cell b { font-size: 26px; }
+  .mp-body { grid-template-columns: minmax(0, 1fr) 400px; column-gap: var(--s-8); }
+  .mp-col { max-width: 720px; }
+}
+
+/* The sign keeps pace on genuinely wide monitors. Type only: the
+   measure stops at 1280px so line lengths stay readable. */
+@media (min-width: 1600px) {
+  .mp { --measure: 1280px; --t-name: 64px; }
 }

@@ -392,11 +392,17 @@ export default async function ProfilePage({
 
         {/* THE FASCIA. The storefront sign: a deep-ink band from the very
             top of the page, the top bar merged into it, nothing sticky.
-            Nothing above the composer navigates off-page. */}
+            The top bar navigates: the wordmark and the explicit ask both go
+            home. A visitor who wants to know what Myku is must not have to
+            hunt for the footer's last line, and the page's owner must be
+            able to reach his own site from his own storefront. Both links
+            stay in the band's muted tone: present, never louder than the
+            mechanic's name below them. */}
         <header className="mp-fascia">
           <div className="mp-topbar">
             <div className="mp-wrap">
-              <span>myku</span>
+              <Link href="/">myku</Link>
+              <Link href="/">What is Myku?</Link>
             </div>
           </div>
           <div className="mp-wrap">
@@ -429,15 +435,15 @@ export default async function ProfilePage({
         <div className="mp-wrap">
           <div className="mp-shelf">
             {page.photo_url ? (
-              // Sized for the 96px desktop slot; the optimizer's 2x variant
+              // Sized for the 120px desktop slot; the optimizer's 2x variant
               // covers retina. The original full-resolution upload never
               // ships to a phone for a 72px portrait.
               <Image
                 className="mp-portrait"
                 src={page.photo_url}
                 alt={`${page.full_name}, mechanic`}
-                width={96}
-                height={96}
+                width={120}
+                height={120}
                 priority
                 unoptimized={!page.photo_url.includes('.supabase.co/')}
               />
