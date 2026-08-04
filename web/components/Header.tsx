@@ -12,7 +12,9 @@ export default function Header({
         <Link href="/" className="brand" aria-label="Myku home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Myku logo" width={40} height={40} />
-          <span className="wm">Myku</span>
+          <span className="wm">
+            Myku<span className="dot">.</span>
+          </span>
         </Link>
         <span className="nav-right">
           {cta ? (

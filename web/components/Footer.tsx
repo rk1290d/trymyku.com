@@ -9,7 +9,9 @@ export default function Footer() {
         <Link href="/" className="foot-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Myku logo" width={34} height={34} />
-          <span className="wm">Myku</span>
+          <span className="wm">
+            Myku<span className="dot">.</span>
+          </span>
         </Link>
         <div className="foot-badge">
           <AppStoreBadge />

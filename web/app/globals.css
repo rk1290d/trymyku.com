@@ -59,7 +59,10 @@ header.site.scrolled { border-bottom-color: var(--border); background: rgba(10,1
 .nav { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 12px; }
 .brand { display: inline-flex; align-items: center; gap: 11px; flex-shrink: 0; }
 .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
-.brand .wm { font-family: var(--font-disp), sans-serif; font-size: 21px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); }
+/* The wordmark: white "Myku", orange period. Echoes the logo tile's
+   M-plus-dot at word scale. */
+.brand .wm { font-family: var(--font-disp), sans-serif; font-size: 21px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); }
+.wm .dot { color: var(--accent); }
 .nav-right { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .nav-cta { font-size: 14.5px; font-weight: 700; color: var(--text-2); display: none; align-items: center; gap: 7px;
   padding: 9px 16px; border: 1px solid var(--border-2); border-radius: 10px; white-space: nowrap;
@@ -377,7 +380,7 @@ select.inp { appearance: none; -webkit-appearance: none; cursor: pointer; paddin
 footer.site { border-top: 1px solid var(--border); padding: 52px 0 40px; text-align: center; }
 .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
-.foot-brand .wm { font-family: var(--font-disp), sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); }
+.foot-brand .wm { font-family: var(--font-disp), sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); }
 .foot-badge { margin: 4px 0 18px; }
 .foot-social { display: flex; justify-content: center; gap: 12px; margin: 2px 0 18px; }
 .foot-social a { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }

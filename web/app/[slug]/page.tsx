@@ -429,7 +429,9 @@ export default async function ProfilePage({
               <Link href="/" className="mp-brand" aria-label="Myku home">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/logo.png" alt="" width={22} height={22} />
-                <span>Myku</span>
+                <span>
+                  Myku<span className="dot">.</span>
+                </span>
               </Link>
               <Link href="/">What is Myku?</Link>
             </div>

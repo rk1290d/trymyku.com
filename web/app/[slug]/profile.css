@@ -237,11 +237,14 @@ body:has(.mp) .bgfx { display: none; }
   text-decoration: none;
 }
 .mp-topbar a:hover { color: var(--paper); }
-/* The brand: the black-and-orange mark plus the capitalized wordmark.
-   The logo carries the orange; the wordmark sits in paper. */
+/* The brand: the black-and-orange mark plus the capitalized wordmark,
+   white with an orange period, same as the marketing pages. The dot is
+   a brand mark, not a third job for orange: it belongs to the wordmark
+   the way the white dot belongs to the logo tile. */
 .mp-brand { display: inline-flex; align-items: center; gap: 8px; }
-.mp-brand img { width: 22px; height: 22px; border-radius: 6px; display: block; }
+.mp-brand img { width: 22px; height: 22px; border-radius: 5px; display: block; }
 .mp-topbar a.mp-brand { color: var(--paper); }
+.mp-brand .dot { color: var(--accent); }
 
 .mp-fascia .mp-eyebrow {
   color: var(--band-muted);
