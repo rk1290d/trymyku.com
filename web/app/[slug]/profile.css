@@ -16,8 +16,9 @@
      --sh-2 lifts exactly two moments: the fact panel and the
      composer card. --sh-1 rests on the send control. Nothing
      else casts.
-   - Orange has exactly 2 jobs: the send control's fill, and the
-     focus state of the composer's fields
+   - Orange has 2 working jobs (the send control's fill, the focus
+     state of the composer's fields) plus the brand accents: the
+     fascia's top rule, the wordmark's period, the availability dot
    - Zero @keyframes. Transitions on interaction only, 150ms.
    ============================================================ */
 
@@ -47,13 +48,15 @@
   --band-muted:  #A9A199;
   --band-rule:   rgba(250,247,242,0.14);
 
-  /* ORANGE HAS EXACTLY TWO JOBS
+  /* ORANGE: TWO WORKING JOBS PLUS THE BRAND ACCENTS
      1. The fill of the send control (form submit + the repeat-ask
         anchor). One component, two placements.
      2. The focus state of the composer's fields.
-     Nowhere else: no orange text, no orange eyebrows, no orange
-     price pills, no orange borders, no orange ring, no orange
-     selection, no orange logo, no orange focus outline. */
+     Brand accents (fixed set, chosen with Rohaan 2026-08-03): the
+     fascia's 3px top rule, the wordmark's period, the availability
+     dot, and the orange inside the logo image itself.
+     Nowhere else: no orange headlines, no orange price pills, no
+     orange borders on cards, no orange selection or focus outline. */
 
   /* ---- TYPE SCALE: 6 tokens, 7 values, integers only ---- */
   --t-name:   34px;  /* mechanic name only, h1 */
@@ -214,6 +217,9 @@ body:has(.mp) .bgfx { display: none; }
 .mp-fascia {
   background: var(--ink);
   color: var(--paper);
+  /* The brand's signature: one orange rule across the very top of the
+     sign, the same black-plus-orange the logo and the app wear. */
+  border-top: 3px solid var(--accent);
   /* Bottom padding is the overlap runway: the portrait hangs 36px
      (48px at >=720px) below this edge and must not touch the text. */
   padding-bottom: var(--s-7);
@@ -287,7 +293,8 @@ body:has(.mp) .bgfx { display: none; }
   width: 7px;
   height: 7px;
   border-radius: var(--r-pill);
-  background: var(--paper);
+  /* Orange, like the wordmark's period: the sign's one live signal. */
+  background: var(--accent);
   flex: none;
 }
 
@@ -733,7 +740,9 @@ body:has(.mp) .bgfx { display: none; }
   flex: none;
   max-width: 40%;
   text-align: right;
-  font-size: var(--t-body);
+  /* One step above the row's body type: on a storefront the number is
+     the first thing a customer scans for. */
+  font-size: var(--t-prose);
   font-weight: 700;
   color: var(--ink);
   overflow-wrap: anywhere;
