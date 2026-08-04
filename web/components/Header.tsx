@@ -9,12 +9,11 @@ export default function Header({
   return (
     <header className="site" id="hdr">
       <div className="container nav">
+        {/* The top bar carries the mark alone; the wordmark lives in the
+            footer. The logo IS the brand up here. */}
         <Link href="/" className="brand" aria-label="Myku home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Myku logo" width={40} height={40} />
-          <span className="wm">
-            Myku<span className="dot">.</span>
-          </span>
+          <img src="/logo.png" alt="Myku" width={40} height={40} />
         </Link>
         <span className="nav-right">
           {cta ? (

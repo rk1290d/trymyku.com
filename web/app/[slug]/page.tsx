@@ -213,9 +213,17 @@ export default async function ProfilePage({
       value: ratingNum.toFixed(1),
       caption: `${reviewCount} review${reviewCount === 1 ? '' : 's'}`,
     });
+  if ((page.years_experience ?? 0) > 0)
+    cells.push({
+      value: String(page.years_experience),
+      caption: `Year${page.years_experience === 1 ? '' : 's'} working`,
+    });
   if (wall.length > 0)
     cells.push({ value: String(wall.length), caption: 'Jobs listed' });
   const strip = cells.slice(0, 4);
+  // Never print a fact twice: the About list only carries years when the
+  // strip had no room for it.
+  const yearsInStrip = strip.some((c) => c.caption.endsWith('working'));
 
   // Gated on the paragraphs that actually render, not on the raw column. A
   // whitespace-only bio is truthy and renders nothing, which would leave
@@ -322,11 +330,11 @@ export default async function ProfilePage({
             {[j.when, j.town].filter(Boolean).join(' · ')}
           </div>
         ) : null}
-        {/* The legend card is gone; each mark explains itself. The title
-            covers hover, and HOW MYKU WORKS carries the sentence for
-            everyone else. The glyph is an info mark, not a warning: the
-            mechanic's own listings are never flagged as suspect on his
-            own page. */}
+        {/* The legend card is gone; each mark explains itself. The shared
+            mark is a real disclosure: tapping the row's label opens one
+            quiet line, no JS involved. The glyph is an info mark, not a
+            warning: the mechanic's own listings are never flagged as
+            suspect on his own page. */}
         {j.verified ? (
           <div
             className="mp-prov v"
@@ -336,21 +344,26 @@ export default async function ProfilePage({
             Completed through Myku
           </div>
         ) : (
-          <div className="mp-prov" title={`${first} listed this job`}>
-            Shared by {first}
-            <svg
-              className="mp-prov-i"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 11v5M12 8v.1" />
-            </svg>
-          </div>
+          <details className="mp-provx">
+            <summary className="mp-prov">
+              Shared by {first}
+              <svg
+                className="mp-prov-i"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 11v5M12 8v.1" />
+              </svg>
+            </summary>
+            <div className="mp-prov-note">
+              {first} listed this job. Myku has not confirmed it.
+            </div>
+          </details>
         )}
       </div>
       {j.photo ? (
@@ -428,10 +441,7 @@ export default async function ProfilePage({
                   as the rest of the ecosystem. */}
               <Link href="/" className="mp-brand" aria-label="Myku home">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="" width={22} height={22} />
-                <span>
-                  Myku<span className="dot">.</span>
-                </span>
+                <img src="/logo.png" alt="Myku" width={22} height={22} />
               </Link>
               <Link href="/">What is Myku?</Link>
             </div>
@@ -584,7 +594,7 @@ export default async function ProfilePage({
                     {/* Hourly rate and diagnostic fee live in the fact strip,
                         which always wins them on priority. Never print a
                         price twice. */}
-                    {years > 0 ? (
+                    {years > 0 && !yearsInStrip ? (
                       <div className="mp-row">
                         <span className="k">Years working</span>
                         <span className="v tnum">

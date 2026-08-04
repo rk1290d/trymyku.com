@@ -782,6 +782,21 @@ body:has(.mp) .bgfx { display: none; }
 .mp-prov.v { color: var(--verified); }
 .mp-prov .mp-ck { margin-right: 5px; vertical-align: -1px; display: inline-block; }
 .mp-prov-i { width: 13px; height: 13px; margin-left: 5px; vertical-align: -2px; display: inline-block; }
+/* The shared mark is a native disclosure: tap to open one line. */
+.mp-provx { margin-top: var(--s-2); }
+.mp-provx .mp-prov { margin-top: 0; cursor: pointer; list-style: none; }
+.mp-provx .mp-prov::-webkit-details-marker { display: none; }
+.mp-provx[open] .mp-prov { color: var(--ink-2); }
+.mp-prov-note {
+  margin-top: var(--s-1);
+  text-align: right;
+  font-size: var(--t-meta);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
 .mp-job-thumb {
   flex: none;
   width: 56px;
