@@ -18,7 +18,15 @@ export default function SupportPage() {
           <h1>Myku Support</h1>
           <p style={{ marginTop: 6 }}>Need help with the Myku app? We&apos;re here.</p>
 
-          <div className="note-card">
+          <div
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 14,
+              padding: '18px 20px',
+              marginTop: 18,
+            }}
+          >
             <p>
               <strong>Email us:</strong>{' '}
               <a href="mailto:support@trymyku.com">support@trymyku.com</a>

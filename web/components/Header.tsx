@@ -1,18 +1,20 @@
 import Link from 'next/link';
+import AppStoreBadge from './AppStoreBadge';
 
-// The marketing top bar: the same quiet band strip the storefront
-// pages open with. One wordmark, one audience link, nothing sticky,
-// no logo box. The band below (the hero) carries the loud part.
 export default function Header({
   cta,
 }: {
   cta?: { href: string; label: string };
 }) {
   return (
-    <header className="site">
+    <header className="site" id="hdr">
       <div className="container nav">
-        <Link href="/" className="brand" aria-label="Myku home">
-          <span className="wm">myku</span>
+        <Link href="/" className="brand" aria-label="Myku Auto home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Myku Auto logo" width={40} height={40} />
+          <span className="wm">
+            Myku <span className="auto">Auto</span>
+          </span>
         </Link>
         <span className="nav-right">
           {cta ? (
@@ -23,6 +25,7 @@ export default function Header({
               </svg>
             </Link>
           ) : null}
+          <AppStoreBadge small />
         </span>
       </div>
     </header>

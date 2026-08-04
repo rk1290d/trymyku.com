@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
+import Fx from '@/components/Fx';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
 
@@ -37,9 +38,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // The ink band runs to the very top of every page, marketing and
-  // storefront alike, so the browser chrome merges into the band.
-  themeColor: '#14120F',
+  themeColor: '#0a0a0a',
 };
 
 export default function RootLayout({
@@ -48,7 +47,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jakarta.variable}`}>
       <body>
+        <div className="bgfx" aria-hidden="true">
+          <div className="warm" />
+          <div className="grid" />
+          <div className="noise" />
+        </div>
         {children}
+        <Fx />
         <Script src="/track.js" strategy="lazyOnload" />
       </body>
     </html>
