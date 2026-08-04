@@ -490,10 +490,30 @@ body:has(.mp) .bgfx { display: none; }
 }
 .mp-chip:hover { border-color: var(--ink-3); }
 .mp-chip:active { transform: translateY(1px); }
+/* Selected state (structured single-select): ink fill, paper text. The
+   old text-injection "used" state kept the same look, so the visual
+   language of a tapped chip survives the semantics change. */
+.mp-chip.sel,
 .mp-chip.used {
   background: var(--ink);
   color: var(--paper);
   border-color: var(--ink);
+}
+/* The timing row reads as a sub-question, not a second service list:
+   same controls, one step smaller and tighter under their label. */
+.mp-chips.when { margin-top: 0; }
+.mp-chips.when .mp-chip {
+  min-height: 34px;
+  padding: var(--s-1) var(--s-3);
+  font-size: var(--t-meta);
+}
+/* The quoting tax dies on this line: the mechanic's own ballpark,
+   spoken before anyone has to ask for it. Meta tone, not a price tag. */
+.mp-price-hint {
+  margin-top: var(--s-2);
+  font-size: var(--t-meta);
+  font-weight: 600;
+  color: var(--ink-2);
 }
 
 .mp-form { margin-top: var(--s-3); }
@@ -890,6 +910,16 @@ body:has(.mp) .bgfx { display: none; }
   color: var(--ink-2);
   overflow-wrap: anywhere;
 }
+/* The mechanic's own ballpark, on the rows he chose to price. Ink and
+   bold because a price is a fact, not a footnote; on its own line so
+   priced and unpriced rows keep the same left edge. */
+.mp-svc-price {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--t-meta);
+  font-weight: 700;
+  color: var(--ink);
+}
 .mp-svcs > div:nth-child(-n + 2) { border-top: 0; }
 /* An orphan on the last row spans it, so its rule runs the full width.
    A hairline that stops dead halfway across is, on a page built from
@@ -1105,8 +1135,10 @@ body[data-lead-sent='1'] .mp-repeat {
    only conversion event, which reads as broken and hides the button behind
    a gesture nobody is prompted to make. On those screens, stop pinning: the
    composer scrolls with the page and every visitor gets the whole card.
-   The pin returns the moment there is room for it. */
-@media (min-width: 900px) and (max-height: 800px) {
+   The pin returns the moment there is room for it. (Cutoff raised from
+   800px on 2026-08-04: the booking composer added a timing row and a
+   visible vehicle field, so the expanded card now runs ~850px.) */
+@media (min-width: 900px) and (max-height: 940px) {
   .mp-ask {
     position: static;
     max-height: none;

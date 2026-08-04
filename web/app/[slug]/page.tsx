@@ -47,7 +47,7 @@ export async function generateMetadata({
   // to reply, so the preview must not say they will.
   const description =
     page.web_status === 'published'
-      ? `${spec}${city ? ` in ${city}` : ''}. Describe what you need and get a price from ${first}.`
+      ? `${spec}${city ? ` in ${city}` : ''}. Pick the job and book ${first} through Myku.`
       : `${spec}${city ? ` in ${city}` : ''}. Describe what you need and Myku will pass it to ${first}.`;
 
   return {
@@ -129,9 +129,16 @@ export default async function ProfilePage({
   // 24px of padding and an attribution with no voice in it. Both are the
   // "empty box with a heading" the sparse brief forbids, reached through a
   // data shape rather than a missing section.
-  const services = Array.from(
-    new Set(rawServices.map((s) => (s ?? '').trim()).filter(Boolean))
-  );
+  // Dedupe by trimmed name, first row wins its price. The price is the
+  // mechanic's own choice per service: null means he chose not to say.
+  const seen = new Map<string, number | null>();
+  for (const row of rawServices) {
+    const label = (row.service ?? '').trim();
+    if (!label || seen.has(label)) continue;
+    const p = typeof row.price_from === 'number' && row.price_from > 0 ? row.price_from : null;
+    seen.set(label, p);
+  }
+  const services = Array.from(seen, ([label, priceFrom]) => ({ label, priceFrom }));
   const reviews = rawReviews.filter((r) => Boolean(r.text?.trim()));
 
   // Strictly chronological across both kinds. Platform jobs are never
@@ -504,8 +511,8 @@ export default async function ProfilePage({
                   ))
                 ) : (
                   <div className="mp-cell fb">
-                    {first} prices each job individually. Describe the work and
-                    you will get a number back.
+                    {first} prices each job individually. Book the work and you
+                    will get a number back.
                   </div>
                 )}
               </div>
@@ -538,7 +545,10 @@ export default async function ProfilePage({
                 slug={page.slug}
                 mechanicFirstName={first}
                 unclaimed={unclaimed}
-                services={services}
+                services={services.map((s) => ({
+                  name: s.label,
+                  priceFrom: s.priceFrom,
+                }))}
               />
             </section>
 
@@ -620,8 +630,18 @@ export default async function ProfilePage({
                   </div>
                   <div className="mp-list">
                     <div className="mp-svcs">
-                      {services.map((s, i) => (
-                        <div key={`${s}-${i}`}>{s}</div>
+                      {/* The price is the mechanic's own choice per service:
+                          rows without one print the name alone, and the two
+                          kinds sit together without apology. */}
+                      {services.map((s) => (
+                        <div key={s.label}>
+                          {s.label}
+                          {s.priceFrom ? (
+                            <span className="mp-svc-price tnum">
+                              from ${s.priceFrom}
+                            </span>
+                          ) : null}
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -670,9 +690,9 @@ export default async function ProfilePage({
                   never be co-visible on a phone. */}
               {!isSparse ? (
                 <section className="mp-repeat">
-                  <h2>Ready to ask {first}?</h2>
+                  <h2>Ready to book {first}?</h2>
                   <a className="mp-send" href="#ask">
-                    Send a request
+                    Book {first}
                   </a>
                 </section>
               ) : null}

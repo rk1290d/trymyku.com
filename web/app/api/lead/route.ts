@@ -71,6 +71,17 @@ export async function POST(req: NextRequest) {
       : null;
   const description =
     typeof body.description === 'string' ? body.description.trim().slice(0, 1500) : '';
+  // Structured booking fields (2026-08-04). Service is free text from the
+  // mechanic's own list; timing is a closed enum mirrored by a DB CHECK.
+  const service =
+    typeof body.service === 'string' && body.service.trim()
+      ? body.service.trim().slice(0, 120)
+      : null;
+  const timing =
+    typeof body.preferred_timing === 'string' &&
+    ['asap', 'this_week', 'flexible'].includes(body.preferred_timing)
+      ? body.preferred_timing
+      : null;
 
   // Canonical phone: strip any extension ("ext 22", "x22") from the
   // dialable value, then keep digits only with a single leading + allowed.
@@ -82,12 +93,15 @@ export async function POST(req: NextRequest) {
   // Bounds live on the DIGITS (7-15, the real shape of a phone number). The
   // raw cap only exists to bound garbage: a formatted number with an
   // extension ("+1 (208) 555-0142 ext 9") is 23 chars and must not bounce.
+  // A booking is valid with a service and no prose, or prose and no
+  // service. Mirrors the DB check exactly: rejecting here what the DB
+  // would accept (or vice versa) turns into a user-facing 502.
   if (
     !UUID_RE.test(mechanicId) ||
     digits.length < 7 ||
     digits.length > 15 ||
     phone.length > 32 ||
-    description.length < 5
+    (description.length < 5 && service === null)
   ) {
     return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
   }
@@ -112,6 +126,8 @@ export async function POST(req: NextRequest) {
       customer_phone: normalizedPhone,
       vehicle,
       description,
+      service,
+      preferred_timing: timing,
       source: 'web',
     }),
   });

@@ -86,11 +86,16 @@ export async function getMechanicPage(slug: string): Promise<MechanicPage | null
   return rows?.[0] ?? null;
 }
 
-export async function getServices(mechanicId: string): Promise<string[]> {
-  const rows = await rest<{ service: string }[]>(
-    `web_mechanic_services?mechanic_id=eq.${mechanicId}&select=service`
+export interface ServiceRow {
+  service: string;
+  price_from: number | null;
+}
+
+export async function getServices(mechanicId: string): Promise<ServiceRow[]> {
+  const rows = await rest<ServiceRow[]>(
+    `web_mechanic_services?mechanic_id=eq.${mechanicId}&select=service,price_from`
   );
-  return rows?.map((r) => r.service) ?? [];
+  return rows ?? [];
 }
 
 export async function getSharedJobs(mechanicId: string): Promise<SharedJob[]> {
