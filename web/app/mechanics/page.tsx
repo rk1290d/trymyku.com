@@ -24,8 +24,6 @@ export default function MechanicsPage() {
       <Header cta={{ href: '/customers', label: 'I Need a Mechanic' }} />
       <main>
         <section className="hero" id="hero">
-          <div className="aurora a1" aria-hidden="true" />
-          <div className="aurora a2" aria-hidden="true" />
           <div className="container hero-grid">
             <div className="hero-copy">
               <div className="pill reveal">

@@ -28,8 +28,6 @@ export default function Home() {
       <Header cta={{ href: '/mechanics', label: "I'm a Mechanic" }} />
       <main>
         <section className="hero" id="hero">
-          <div className="aurora a1" aria-hidden="true" />
-          <div className="aurora a2" aria-hidden="true" />
           <div className="container hero-grid">
             <div className="hero-copy">
               <div className="pill reveal">
@@ -165,13 +163,11 @@ export default function Home() {
           </div>
         </section>
 
+        {/* The index line: every service, set small between two
+            hairlines, like the index of a printed catalog. */}
         <div className="marquee" aria-hidden="true">
           <div className="mq-track">
-            {[0, 1].map((i) => (
-              <span key={i} style={{ display: 'contents' }}>
-                <span>Brakes</span><span>Diagnostics</span><span>Oil changes</span><span>Suspension</span><span>Electrical</span><span>Engine</span><span>A/C and heating</span><span>Batteries</span><span>Tires</span><span>Transmission</span><span className="soon">and more, over time</span>
-              </span>
-            ))}
+            <span>Brakes</span><span>Diagnostics</span><span>Oil changes</span><span>Suspension</span><span>Electrical</span><span>Engine</span><span>A/C and heating</span><span>Batteries</span><span>Tires</span><span>Transmission</span><span className="soon">and more, over time</span>
           </div>
         </div>
 
@@ -289,11 +285,11 @@ export default function Home() {
           <div className="container">
             <div className="lede">
               <div className="rule reveal" />
-              <p className="reveal" style={{ fontSize: 'clamp(18px, 2.5vw, 23px)', fontWeight: 500, letterSpacing: '-0.015em', lineHeight: 1.5, color: 'var(--text-2)', marginBottom: 26 }}>
+              <p className="reveal">
                 Finding a mechanic used to mean knowing someone, or gambling on a shop
                 and hoping. <span className="hl">The problem was never a shortage of mechanics. It was that finding the right one was left to chance.</span>
               </p>
-              <p className="reveal" style={{ fontSize: 'clamp(18px, 2.5vw, 23px)', fontWeight: 500, letterSpacing: '-0.015em', lineHeight: 1.5, color: 'var(--text-2)', marginBottom: 0 }}>
+              <p className="reveal">
                 Myku is a marketplace, not a repair shop. We connect you with independent
                 mechanics, keep the facts transparent, and let you choose. We do not
                 employ them, set their prices, or do the work. It starts with mechanics
