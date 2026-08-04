@@ -9,12 +9,10 @@ export default function Header({
   return (
     <header className="site" id="hdr">
       <div className="container nav">
-        <Link href="/" className="brand" aria-label="Myku Auto home">
+        <Link href="/" className="brand" aria-label="Myku home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Myku Auto logo" width={40} height={40} />
-          <span className="wm">
-            Myku <span className="auto">Auto</span>
-          </span>
+          <img src="/logo.png" alt="Myku logo" width={40} height={40} />
+          <span className="wm">Myku</span>
         </Link>
         <span className="nav-right">
           {cta ? (

@@ -60,7 +60,6 @@ header.site.scrolled { border-bottom-color: var(--border); background: rgba(10,1
 .brand { display: inline-flex; align-items: center; gap: 11px; flex-shrink: 0; }
 .brand img { width: 40px; height: 40px; border-radius: 10px; display: block; }
 .brand .wm { font-family: var(--font-disp), sans-serif; font-size: 21px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); }
-.wm .auto { color: var(--text); }
 .nav-right { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .nav-cta { font-size: 14.5px; font-weight: 700; color: var(--text-2); display: none; align-items: center; gap: 7px;
   padding: 9px 16px; border: 1px solid var(--border-2); border-radius: 10px; white-space: nowrap;
@@ -221,9 +220,7 @@ header.site.scrolled { border-bottom-color: var(--border); background: rgba(10,1
 @media (min-width: 820px) {
   .steps { grid-template-columns: repeat(3,1fr); gap: 28px; max-width: none; }
   .steps::before { content: ''; position: absolute; top: 31px; left: 17%; right: 17%; height: 2px; z-index: 0;
-    background: linear-gradient(90deg, transparent, var(--accent-line) 12%, var(--accent-line) 88%, transparent);
-    transform: scaleX(0.001); transform-origin: center; transition: transform 1.1s var(--ease) 0.25s; }
-  .steps.in::before { transform: scaleX(1); }
+    background: linear-gradient(90deg, transparent, var(--accent-line) 12%, var(--accent-line) 88%, transparent); }
 }
 
 /* ---- Audience cards (home) ---- */
@@ -260,10 +257,9 @@ header.site.scrolled { border-bottom-color: var(--border); background: rgba(10,1
 .tchip { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; color: var(--text-2);
   background: var(--teal-soft); border: 1px solid var(--teal-line); padding: 9px 15px; border-radius: 999px; }
 .tchip svg { width: 15px; height: 15px; }
-.tchip .ck { stroke: var(--teal); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 22; stroke-dashoffset: 22; }
-.trust-panel.in .tchip .ck { transition: stroke-dashoffset 0.6s ease; stroke-dashoffset: 0; }
-.trust-panel.in .tchip:nth-child(2) .ck { transition-delay: 0.15s; }
-.trust-panel.in .tchip:nth-child(3) .ck { transition-delay: 0.30s; }
+/* Checks render drawn: no JS-gated stroke reveal, so the trust facts
+   are visible in every rendering context. */
+.tchip .ck { stroke: var(--teal); stroke-width: 2.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .trust-line { font-family: var(--font-disp), sans-serif; font-size: clamp(19px,3vw,26px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
 .trust-line .a { color: var(--teal); }
 .trust-note { font-size: 14.5px; color: var(--muted); max-width: 560px; margin: 0 auto; }
@@ -382,7 +378,6 @@ footer.site { border-top: 1px solid var(--border); padding: 52px 0 40px; text-al
 .foot-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .foot-brand img { width: 34px; height: 34px; border-radius: 9px; }
 .foot-brand .wm { font-family: var(--font-disp), sans-serif; font-size: 18px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent); }
-.foot-brand .wm .auto { color: var(--text); }
 .foot-badge { margin: 4px 0 18px; }
 .foot-social { display: flex; justify-content: center; gap: 12px; margin: 2px 0 18px; }
 .foot-social a { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
@@ -395,10 +390,12 @@ footer.site { border-top: 1px solid var(--border); padding: 52px 0 40px; text-al
 .foot-email:hover { color: var(--accent); }
 .foot-copy { color: var(--muted-2); font-size: 13px; }
 
-/* ---- Reveal ---- */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
-.reveal.in { opacity: 1; transform: none; }
-.d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
+/* ---- Reveal ----
+   Content is NEVER hidden by default: without JS (crawlers, reader
+   modes, slow devices) the page must render complete. The observer
+   in Fx adds .in, which only exists so the transition can play for
+   elements that start below the fold. */
+.reveal { opacity: 1; transform: none; transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
 
 /* ---- Legal / simple pages ---- */
 .page { max-width: 760px; margin: 0 auto; padding: 48px 22px 70px; }

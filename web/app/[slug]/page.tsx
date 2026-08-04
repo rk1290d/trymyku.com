@@ -322,13 +322,35 @@ export default async function ProfilePage({
             {[j.when, j.town].filter(Boolean).join(' · ')}
           </div>
         ) : null}
+        {/* The legend card is gone; each mark explains itself. The title
+            covers hover, and HOW MYKU WORKS carries the sentence for
+            everyone else. The glyph is an info mark, not a warning: the
+            mechanic's own listings are never flagged as suspect on his
+            own page. */}
         {j.verified ? (
-          <div className="mp-prov v">
+          <div
+            className="mp-prov v"
+            title="This job was completed through the Myku platform"
+          >
             <Check v />
             Completed through Myku
           </div>
         ) : (
-          <div className="mp-prov">Shared by {first}</div>
+          <div className="mp-prov" title={`${first} listed this job`}>
+            Shared by {first}
+            <svg
+              className="mp-prov-i"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 11v5M12 8v.1" />
+            </svg>
+          </div>
         )}
       </div>
       {j.photo ? (
@@ -401,7 +423,14 @@ export default async function ProfilePage({
         <header className="mp-fascia">
           <div className="mp-topbar">
             <div className="mp-wrap">
-              <Link href="/">myku</Link>
+              {/* The real mark: the storefront page stays the mechanic's,
+                  but it visibly belongs to the same black-and-orange brand
+                  as the rest of the ecosystem. */}
+              <Link href="/" className="mp-brand" aria-label="Myku home">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="" width={22} height={22} />
+                <span>Myku</span>
+              </Link>
               <Link href="/">What is Myku?</Link>
             </div>
           </div>
@@ -513,15 +542,6 @@ export default async function ProfilePage({
                     {/* Each mark name is set the way the mark itself is set,
                         and the check glyph marks only the claim it belongs
                         to rather than the whole sentence. */}
-                    <div className="mp-legend">
-                      <span className="m v">
-                        <Check v />
-                        Completed through Myku
-                      </span>{' '}
-                      means the job was done through the Myku platform.{' '}
-                      <span className="m">Shared by {first}</span> means {first}{' '}
-                      listed it.
-                    </div>
                     {wall.slice(0, 10).map(jobRow)}
                     {wall.length > 10 ? (
                       <details className="mp-more">

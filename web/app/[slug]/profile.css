@@ -237,6 +237,11 @@ body:has(.mp) .bgfx { display: none; }
   text-decoration: none;
 }
 .mp-topbar a:hover { color: var(--paper); }
+/* The brand: the black-and-orange mark plus the capitalized wordmark.
+   The logo carries the orange; the wordmark sits in paper. */
+.mp-brand { display: inline-flex; align-items: center; gap: 8px; }
+.mp-brand img { width: 22px; height: 22px; border-radius: 6px; display: block; }
+.mp-topbar a.mp-brand { color: var(--paper); }
 
 .mp-fascia .mp-eyebrow {
   color: var(--band-muted);
@@ -697,21 +702,8 @@ body:has(.mp) .bgfx { display: none; }
 .mp-more:last-child .mp-rev:last-child { border-bottom: 0; }
 
 /* ---- WORK ---- */
-.mp-legend {
-  padding: var(--s-3) var(--s-4);
-  border-bottom: 1px solid var(--rule);
-  font-size: var(--t-meta);
-  line-height: 1.55;
-  color: var(--ink-3);
-}
-.mp-legend .mp-ck { margin-right: 5px; vertical-align: -1px; display: inline-block; }
-/* The mark names are set the way the marks themselves are set, so the
-   definition and the thing it defines are recognisably the same object. */
-.mp-legend .m {
-  font-weight: 600;
-  color: var(--ink-2);
-}
-.mp-legend .m.v { color: var(--verified); }
+/* The provenance marks explain themselves in place (title on hover,
+   HOW MYKU WORKS in prose); the old legend card is gone. */
 
 .mp-job {
   display: flex;
@@ -777,6 +769,7 @@ body:has(.mp) .bgfx { display: none; }
 }
 .mp-prov.v { color: var(--verified); }
 .mp-prov .mp-ck { margin-right: 5px; vertical-align: -1px; display: inline-block; }
+.mp-prov-i { width: 13px; height: 13px; margin-left: 5px; vertical-align: -2px; display: inline-block; }
 .mp-job-thumb {
   flex: none;
   width: 56px;
