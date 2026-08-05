@@ -106,6 +106,56 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
   }
 
+  // Resolve the mechanic server-side before storing anything. Two things
+  // arrive from the browser that must never be taken on trust:
+  //   - slug: stored on the row and printed into the notification ("a
+  //     request came in from trymyku.com/<slug>"). A forged value would put
+  //     an attacker-chosen string in a Myku-branded message, so the real
+  //     slug is read from the mechanic's own row and the body's is ignored.
+  //   - service: becomes the headline of the mechanic's push. Only his own
+  //     service list, the fixed fallback chips, or the not-sure sentinel are
+  //     allowed through; anything else is dropped rather than rejected, so a
+  //     surprising value never costs the customer their booking.
+  // Missing from the public view also means not web-visible: a permanent no.
+  const [pageRes, svcRes] = await Promise.all([
+    fetch(
+      `${SUPABASE_URL}/rest/v1/web_mechanic_pages?id=eq.${mechanicId}&select=slug&limit=1`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } },
+    ),
+    fetch(
+      `${SUPABASE_URL}/rest/v1/web_mechanic_services?mechanic_id=eq.${mechanicId}&select=service`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } },
+    ),
+  ]);
+  const pageRows = pageRes.ok ? ((await pageRes.json()) as { slug: string | null }[]) : null;
+  if (!pageRows || pageRows.length === 0) {
+    return NextResponse.json({ error: 'page not accepting requests' }, { status: 410 });
+  }
+  const realSlug = pageRows[0].slug ?? null;
+
+  const ownServices = svcRes.ok
+    ? ((await svcRes.json()) as { service: string }[]).map((r) => (r.service ?? '').trim())
+    : [];
+  const ALLOWED_FALLBACK = [
+    "Won't start",
+    'Brakes',
+    'Check engine light',
+    'Oil change',
+    'AC or heat',
+    'Not sure / something else',
+  ];
+  const serviceAllowed =
+    service !== null &&
+    [...ownServices, ...ALLOWED_FALLBACK].some(
+      (s) => s.toLowerCase() === service.toLowerCase(),
+    );
+  const safeService = serviceAllowed ? service : null;
+  // Dropping an unrecognised service must not also drop the whole request:
+  // if it was the only thing describing the job, the prose rule applies.
+  if (safeService === null && description.length < 5) {
+    return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
+  }
+
   // Generate the id here: anon can insert but never read rows back, and the
   // push notifier needs the id to target this exact lead.
   const leadId = crypto.randomUUID();
@@ -121,12 +171,12 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({
       id: leadId,
       mechanic_id: mechanicId,
-      slug,
+      slug: realSlug,
       customer_name: name,
       customer_phone: normalizedPhone,
       vehicle,
       description,
-      service,
+      service: safeService,
       preferred_timing: timing,
       source: 'web',
     }),
@@ -139,6 +189,18 @@ export async function POST(req: NextRequest) {
     // a different sentence for it.
     if (res.status === 401 || res.status === 403) {
       return NextResponse.json({ error: 'page not accepting requests' }, { status: 410 });
+    }
+    // The DB-side per-mechanic cap raises check_violation, which PostgREST
+    // returns as 400. Telling that customer "could not save" reads as a bug
+    // in Myku and loses the booking; 429 lets the composer say "try again
+    // shortly", which is what actually happened.
+    if (res.status === 400) {
+      const detail = await res.text();
+      if (detail.includes('23514') || detail.toLowerCase().includes('rate')) {
+        return NextResponse.json({ error: 'too many requests' }, { status: 429 });
+      }
+      console.error(`lead insert rejected: ${detail.slice(0, 200)} mechanic=${mechanicId}`);
+      return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
     }
     console.error(`lead insert failed: status ${res.status} mechanic=${mechanicId}`);
     return NextResponse.json({ error: 'could not save' }, { status: 502 });

@@ -511,8 +511,8 @@ export default async function ProfilePage({
                   ))
                 ) : (
                   <div className="mp-cell fb">
-                    {first} prices each job individually. Book the work and you
-                    will get a number back.
+                    {first} prices each job individually. Send the details and
+                    he sets the price.
                   </div>
                 )}
               </div>

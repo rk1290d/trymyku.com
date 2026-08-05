@@ -219,9 +219,9 @@ export default function QuoteForm({
       if (status === 400) {
         setErr('Check your phone number and the details, then try again.');
       } else if (status === 410) {
-        setErr('This page is no longer taking bookings.');
+        setErr('This page is no longer taking booking requests.');
       } else if (status === 429) {
-        setErr('Too many requests from this connection. Please wait a minute and try again.');
+        setErr('This page is busy right now. Please wait a minute and try again.');
       } else {
         setErr('Something went wrong. Please try again, or email support@trymyku.com.');
       }
@@ -235,9 +235,11 @@ export default function QuoteForm({
   }, [done]);
 
   if (done) {
-    // The install ask lives after the conversion, never before it. And the
-    // sent copy never claims the booking is confirmed: the mechanic
-    // confirms, Myku carries.
+    // The install ask lives after the conversion, never before it. Every
+    // sentence here states something MYKU does or a fact about where the
+    // request now sits. Nothing promises the mechanic will reply: Myku
+    // cannot compel an independent business to answer, so it must not
+    // promise on his behalf.
     return (
       <div className="mp-sent">
         <h2 tabIndex={-1} ref={sentRef}>
@@ -245,8 +247,8 @@ export default function QuoteForm({
         </h2>
         <p>
           {unclaimed
-            ? `Myku will pass this to ${mechanicFirstName}. If ${mechanicFirstName} can take the job, you will hear back at the number you left.`
-            : `${mechanicFirstName} will call or text the number you left. Nothing is booked until the two of you agree.`}
+            ? `Myku will pass this to ${mechanicFirstName}. Nothing is booked until the two of you agree.`
+            : `Your request is in ${mechanicFirstName}'s Myku inbox, with your number. Nothing is booked until the two of you agree.`}
         </p>
         <p className="inst">
           Myku is the free app behind this page. It keeps your request, the
@@ -270,7 +272,7 @@ export default function QuoteForm({
       <p className="mp-ask-sub">
         {unclaimed
           ? `Pick the job and leave your number. Myku passes the request to ${mechanicFirstName}.`
-          : `Pick the job and leave your number. ${mechanicFirstName} replies with a price.`}
+          : `Pick the job and leave your number. ${mechanicFirstName} sets the price.`}
       </p>
 
       {/* Structured selection, not text injection: the chip IS the answer.
@@ -295,8 +297,8 @@ export default function QuoteForm({
           service, the ballpark answers before anyone has to ask it. */}
       {selectedOffer?.priceFrom ? (
         <p className="mp-price-hint">
-          Starts at ${selectedOffer.priceFrom}. Exact price once{' '}
-          {mechanicFirstName} sees the details.
+          Starts at ${selectedOffer.priceFrom}. {mechanicFirstName} sets the
+          exact price for your job.
         </p>
       ) : null}
 
@@ -444,10 +446,14 @@ export default function QuoteForm({
         <div className="mp-err" id="qf-err" role="alert">
           {err}
         </div>
+        {/* Never "your number goes to him only": when the mechanic has no
+            reachable device Myku's own safety net routes the request to
+            admin so it does not die silently, so exclusivity is a promise
+            the system is built to break. */}
         <p className="mp-reassure">
           {unclaimed
             ? `Free. No account needed. Myku passes your request to ${mechanicFirstName}.`
-            : `Free. No account needed. Your number goes to ${mechanicFirstName} only.`}
+            : `Free. No account needed. Myku delivers your number to ${mechanicFirstName}.`}
         </p>
       </form>
     </>

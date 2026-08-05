@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { getMechanicPage } from '@/lib/supabase';
+import { getMechanicPage, SUPABASE_URL } from '@/lib/supabase';
 import { initials } from '@/lib/format';
 
 // THE LINK PREVIEW.
@@ -47,9 +47,37 @@ function fonts() {
 // raw URL, a slow bucket, a dead link or a HEIC upload makes satori throw,
 // and the crawler gets a 500: the share lands with no card at all. On any
 // failure the card degrades to the initials plate instead of vanishing.
-async function safePhoto(url: string): Promise<string | null> {
+// Only these hosts are ever fetched. photo_url is a database value a
+// mechanic can influence, and this code runs server-side on Vercel: without
+// an allowlist, "https://x" pointing at a private address turns card
+// rendering into a server-side request forgery primitive. Scheme and host
+// are checked BEFORE the request, because the existing content-type and
+// size checks only inspect the response, which is far too late.
+function fetchableImage(raw: string): string | null {
+  let u: URL;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(2500) });
+    u = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (u.protocol !== 'https:') return null;
+  let supabaseHost = '';
+  try {
+    supabaseHost = new URL(SUPABASE_URL).hostname;
+  } catch {
+    return null;
+  }
+  const allowed = u.hostname === supabaseHost || u.hostname === 'images.unsplash.com';
+  return allowed ? u.toString() : null;
+}
+
+async function safePhoto(rawUrl: string): Promise<string | null> {
+  const url = fetchableImage(rawUrl);
+  if (!url) return null;
+  try {
+    // redirect: 'error' closes the bypass where an allowlisted host 302s to
+    // an internal address.
+    const res = await fetch(url, { signal: AbortSignal.timeout(2500), redirect: 'error' });
     if (!res.ok) return null;
     const ct = (res.headers.get('content-type') ?? '').split(';')[0].trim();
     if (ct !== 'image/png' && ct !== 'image/jpeg') return null;
