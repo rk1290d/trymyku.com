@@ -429,6 +429,38 @@ body:has(.mp) .bgfx { display: none; }
   box-shadow: var(--sh-2);
   padding: var(--s-5);
 }
+/* PREVIEW STATE. An unclaimed page is shown to the mechanic, not offered to
+   customers, so the ask is replaced by the claim prompt. Recessed rather than
+   lifted: it is an explanation, not a conversion surface, and it must not
+   read as a disabled form the visitor could somehow enable. */
+.mp-preview {
+  background: var(--paper-2);
+  border: 1px dashed var(--rule);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  box-shadow: none;
+}
+.mp-preview h2 {
+  font-family: var(--font-disp), var(--font-inter), sans-serif;
+  font-size: var(--t-head);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.mp-preview p {
+  margin-top: var(--s-3);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.mp-preview-claim { color: var(--ink-3); }
+.mp-preview-claim a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .mp-ask h2 {
   display: flex;
   align-items: center;

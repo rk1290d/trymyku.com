@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import QuoteForm from '@/components/QuoteForm';
-import AppStoreBadge from '@/components/AppStoreBadge';
 import {
   getMechanicPage,
   getServices,
@@ -47,8 +46,8 @@ export async function generateMetadata({
   // to reply, so the preview must not say they will.
   const description =
     page.web_status === 'published'
-      ? `${spec}${city ? ` in ${city}` : ''}. Pick the job and book ${first} through Myku.`
-      : `${spec}${city ? ` in ${city}` : ''}. Describe what you need and Myku will pass it to ${first}.`;
+      ? `${spec}${city ? ` in ${city}` : ''}. Pick the job and get a price from ${first} through Myku.`
+      : `${spec}${city ? ` in ${city}` : ''}. A preview page. ${first} has not claimed it and it is not taking requests.`;
 
   return {
     // `absolute` opts this route out of the root layout's "%s | Myku Auto"
@@ -536,20 +535,45 @@ export default async function ProfilePage({
           <div className="mp-body">
             <section className="mp-ask" id="ask">
               <span className="mp-anchor" id="quote" aria-hidden="true" />
-              {/* The heading and sub-line live INSIDE QuoteForm so the sent
-                  state swaps the whole ask at once. Left here they would sit
-                  above "Request sent." telling the visitor to fill in a form
-                  that no longer exists. */}
-              <QuoteForm
-                mechanicId={page.id}
-                slug={page.slug}
-                mechanicFirstName={first}
-                unclaimed={unclaimed}
-                services={services.map((s) => ({
-                  name: s.label,
-                  priceFrom: s.priceFrom,
-                }))}
-              />
+              {/* An unclaimed page is a PREVIEW: it exists so the mechanic can
+                  be shown his own page before he decides. He has not agreed to
+                  be listed and does not know it exists, so it must not take
+                  requests on his behalf. The ask is replaced by the claim
+                  prompt until he publishes it himself. */}
+              {unclaimed ? (
+                <div className="mp-preview">
+                  <h2>This page is not live yet</h2>
+                  <p>
+                    {first} has not claimed it, so it is not taking requests.
+                    The details here came from public listings and none of them
+                    have been confirmed by {first}.
+                  </p>
+                  <p className="mp-preview-claim">
+                    Are you {first}?{' '}
+                    <a
+                      href={`mailto:${SUPPORT_EMAIL}?subject=Claiming my Myku page (${page.slug})`}
+                    >
+                      Claim this page
+                    </a>{' '}
+                    and you decide what it says before anyone sees it.
+                  </p>
+                </div>
+              ) : (
+                /* The heading and sub-line live INSIDE QuoteForm so the sent
+                   state swaps the whole ask at once. Left here they would sit
+                   above "Request sent." telling the visitor to fill in a form
+                   that no longer exists. */
+                <QuoteForm
+                  mechanicId={page.id}
+                  slug={page.slug}
+                  mechanicFirstName={first}
+                  unclaimed={unclaimed}
+                  services={services.map((s) => ({
+                    name: s.label,
+                    priceFrom: s.priceFrom,
+                  }))}
+                />
+              )}
             </section>
 
             <div className="mp-col">
@@ -688,11 +712,11 @@ export default async function ProfilePage({
               {/* One orange rectangle exists on a sparse page. On a rich page
                   the two are separated by the whole evidence body, so they can
                   never be co-visible on a phone. */}
-              {!isSparse ? (
+              {!isSparse && !unclaimed ? (
                 <section className="mp-repeat">
-                  <h2>Ready to book {first}?</h2>
+                  <h2>Ready to get a price from {first}?</h2>
                   <a className="mp-send" href="#ask">
-                    Book {first}
+                    Get a quote
                   </a>
                 </section>
               ) : null}
@@ -709,9 +733,10 @@ export default async function ProfilePage({
                 ? 'Myku does not endorse or guarantee anyone’s work.'
                 : 'Myku confirms facts and does not endorse or guarantee anyone’s work.'}
             </div>
-            <div className="badgewrap">
-              <AppStoreBadge />
-            </div>
+            {/* No App Store badge on a mechanic's storefront. A customer's
+                first job must never hit a download pitch: it costs the
+                conversion, and the mechanic stops sharing a link that loses
+                him work. The app is pitched on the customer's SECOND job. */}
             <div className="links">
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>

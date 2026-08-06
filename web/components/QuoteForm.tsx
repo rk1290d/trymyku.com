@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import AppStoreBadge from '@/components/AppStoreBadge';
 
 // The booking composer on every public profile page. It is the only
 // conversion event on that page, so it sits in normal document flow in the
@@ -235,28 +234,22 @@ export default function QuoteForm({
   }, [done]);
 
   if (done) {
-    // The install ask lives after the conversion, never before it. Every
-    // sentence here states something MYKU does or a fact about where the
-    // request now sits. Nothing promises the mechanic will reply: Myku
-    // cannot compel an independent business to answer, so it must not
-    // promise on his behalf.
+    // No app pitch here. This is the customer's FIRST job, and a download ask
+    // at the moment of conversion costs the customer and, downstream, costs
+    // the mechanic the reason he shares the link at all. Every sentence
+    // states something MYKU does or a fact about where the request now sits.
+    // Nothing promises the mechanic will reply: Myku cannot compel an
+    // independent business to answer, so it must not promise on his behalf.
     return (
       <div className="mp-sent">
         <h2 tabIndex={-1} ref={sentRef}>
-          Booking request sent.
+          Request sent.
         </h2>
         <p>
           {unclaimed
-            ? `Myku will pass this to ${mechanicFirstName}. Nothing is booked until the two of you agree.`
-            : `Your request is in ${mechanicFirstName}'s Myku inbox, with your number. Nothing is booked until the two of you agree.`}
+            ? `Myku will pass this to ${mechanicFirstName} with the number you left.`
+            : `Your request is in ${mechanicFirstName}'s Myku inbox, with the number you left.`}
         </p>
-        <p className="inst">
-          Myku is the free app behind this page. It keeps your request, the
-          reply, and the record of the work in one place.
-        </p>
-        <div className="badgewrap">
-          <AppStoreBadge />
-        </div>
       </div>
     );
   }
