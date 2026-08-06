@@ -2,18 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// The booking composer on every public profile page. It is the only
-// conversion event on that page, so it sits in normal document flow in the
-// upper third rather than behind an anchor jump. The ask changed on
-// 2026-08-04: the mechanic shares this link with people he is already
-// talking to, so "leave your number and he will reply" undersold the
-// moment. The page now takes a booking request: pick the job, say when,
-// leave the number. Works identically on claimed and unclaimed pages; on
-// unclaimed pages the request is the reason the mechanic signs up.
+// The quote composer on every published profile page. It is the only
+// conversion event on that page. The ask is "get a price", never "book":
+// nothing here may promise the mechanic will reply, confirm or accept, so
+// every sentence states either something MYKU does or a fact about where the
+// request now sits. Myku cannot compel an independent business to answer.
 
-// The one chip that is always present. It carries the "I don't know what
-// is wrong" customer, the persona the whole product exists for, so it can
-// never be dropped no matter what the mechanic's service list looks like.
+// The one chip that is always present. It carries the "I don't know what is
+// wrong" customer, the persona the whole product exists for, so it can never
+// be dropped no matter what the mechanic's service list looks like.
 const NOT_SURE = 'Not sure / something else';
 
 // Hardcoded fallbacks for pages with no usable service list. These are why
@@ -26,11 +23,14 @@ const FALLBACK_SERVICES = [
   'AC or heat',
 ];
 
-// Service names are free text. A chip is one nowrap line, and the composer's
-// whole fold budget assumes at most two chip rows on a 390px screen, so only
-// chip-sized labels are allowed to drive the set. Anything longer falls back
-// to the hardcoded five, which is the same safety net the sparse page uses.
-const MAX_CHIP_CHARS = 22;
+// Service names are free text. Chips WRAP to a second line rather than being
+// dropped: the labels that used to exceed the old one-line budget were
+// exactly the specialties a mechanic's bio leads with ("Suspension and
+// steering", "Batteries and electrical"), so silently removing them from the
+// ask cost him the lead or dumped it into "Not sure" one screen below a list
+// that advertised them. The cap now only guards against a paragraph pasted
+// into a service field.
+const MAX_CHIP_CHARS = 34;
 
 export interface ServiceOffer {
   name: string;
@@ -49,12 +49,14 @@ export default function QuoteForm({
   mechanicFirstName,
   unclaimed = false,
   services = [],
+  sectionNum,
 }: {
   mechanicId: string;
   slug: string;
   mechanicFirstName: string;
   unclaimed?: boolean;
   services?: ServiceOffer[];
+  sectionNum?: string;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [timing, setTiming] = useState<string | null>(null);
@@ -88,11 +90,11 @@ export default function QuoteForm({
     }
   }, []);
 
-  // The bottom repeat-ask anchor lands as a keyboard, not a shrug.
-  // Deliberately NOT run on mount: a cold load of /slug#ask must not open
-  // the keyboard before the visitor has read the mechanic's name (WCAG
-  // 3.2.1). The delegated click covers the repeat tap, where the hash is
-  // already '#ask' and no hashchange fires.
+  // The in-page asks land as a keyboard, not a shrug. Deliberately NOT run on
+  // mount: a cold load of /slug#quote must not open the keyboard before the
+  // visitor has read the mechanic's name (WCAG 3.2.1). The delegated click
+  // covers a repeat tap, where the hash is already set and no hashchange
+  // fires.
   useEffect(() => {
     const onHash = () => {
       const h = window.location.hash;
@@ -140,14 +142,26 @@ export default function QuoteForm({
         .replace(/^-+|-+$/g, '');
     const target = norm(want);
     if (!target) return;
-    const hit = chipServices.find((s) => norm(s.name) === target);
+    // Match against EVERY service he offers, not just the five that became
+    // chips. The mechanic builds these links from his own service list, so a
+    // link to a real service must never land on a page with nothing selected.
+    // A service outside the chip row still preselects and still shows its
+    // price hint; it simply has no chip to light up.
+    const hit =
+      chipServices.find((s) => norm(s.name) === target) ??
+      services.find((s) => norm(s.name) === target);
     if (hit) setSelected(hit.name);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on mount
   }, []);
 
+  // Also looks beyond the chip row: a deep link can select a service that has
+  // no chip, and it must still carry its price hint and its exact name into
+  // the payload.
   const selectedOffer =
     selected && selected !== NOT_SURE
-      ? chipServices.find((s) => s.name === selected) ?? null
+      ? chipServices.find((s) => s.name === selected) ??
+        services.find((s) => s.name === selected) ??
+        null
       : null;
 
   const taPlaceholder =
@@ -186,6 +200,9 @@ export default function QuoteForm({
     const digits = phone.replace(/[^\d]/g, '');
     if (digits.length < 7 || digits.length > 15) {
       setBad('phone');
+      // Describes only what MYKU does with the number. It must never promise
+      // that the mechanic will send back a price, least of all in the one
+      // message a visitor is guaranteed to read.
       setErr('Please enter a valid phone number.');
       phoneRef.current?.focus();
       return;
@@ -203,8 +220,8 @@ export default function QuoteForm({
           customer_phone: phone.trim(),
           vehicle: vehicle.trim() || null,
           description: desc.trim(),
-          // Structured booking fields. NOT_SURE deliberately maps to null:
-          // "not sure" is an absence of a service, not a service.
+          // Structured fields. NOT_SURE deliberately maps to null: "not sure"
+          // is an absence of a service, not a service.
           service: selectedOffer ? selectedOffer.name : null,
           preferred_timing: timing,
           hp,
@@ -218,7 +235,7 @@ export default function QuoteForm({
       if (status === 400) {
         setErr('Check your phone number and the details, then try again.');
       } else if (status === 410) {
-        setErr('This page is no longer taking booking requests.');
+        setErr('This page is no longer taking quote requests.');
       } else if (status === 429) {
         setErr('This page is busy right now. Please wait a minute and try again.');
       } else {
@@ -236,10 +253,8 @@ export default function QuoteForm({
   if (done) {
     // No app pitch here. This is the customer's FIRST job, and a download ask
     // at the moment of conversion costs the customer and, downstream, costs
-    // the mechanic the reason he shares the link at all. Every sentence
-    // states something MYKU does or a fact about where the request now sits.
-    // Nothing promises the mechanic will reply: Myku cannot compel an
-    // independent business to answer, so it must not promise on his behalf.
+    // the mechanic the reason he shares the link at all. Nothing promises the
+    // mechanic will reply.
     return (
       <div className="mp-sent">
         <h2 tabIndex={-1} ref={sentRef}>
@@ -256,71 +271,84 @@ export default function QuoteForm({
 
   return (
     <>
-      <h2>
-        <svg className="mp-wrench" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-        </svg>
-        Book {mechanicFirstName} on Myku
-      </h2>
-      <p className="mp-ask-sub">
+      {sectionNum ? <span className="mp-sec-num">{sectionNum} · Your quote</span> : null}
+      <h2>Get a price from {mechanicFirstName}</h2>
+      <p className="mp-lead">
         {unclaimed
           ? `Pick the job and leave your number. Myku passes the request to ${mechanicFirstName}.`
-          : `Pick the job and leave your number. ${mechanicFirstName} sets the price.`}
+          : `Pick the job and leave your number. Myku passes it to ${mechanicFirstName}, who sets the price.`}
       </p>
 
-      {/* Structured selection, not text injection: the chip IS the answer.
-          One selectable at a time; tapping again releases it. */}
-      <div className="mp-chips" role="group" aria-label="What do you need done?">
-        {[...chipServices.map((s) => s.name), NOT_SURE].map((c) => {
-          const sel = selected === c;
-          return (
-            <button
-              className={sel ? 'mp-chip sel' : 'mp-chip'}
-              type="button"
-              key={c}
-              aria-pressed={sel}
-              onClick={() => toggleService(c)}
-            >
-              {c}
-            </button>
-          );
-        })}
-      </div>
-      {/* The quoting tax dies here: when the mechanic chose to price this
-          service, the ballpark answers before anyone has to ask it. */}
-      {selectedOffer?.priceFrom ? (
-        <p className="mp-price-hint">
-          Starts at ${selectedOffer.priceFrom}. {mechanicFirstName} sets the
-          exact price for your job.
+      {/* Submitting requires JS. Giving the fields `name` attributes so a
+          no-JS submit "worked" would put the customer's phone number into a
+          URL query string, which is the one place it must never go. So the
+          form says so plainly instead of silently discarding what they
+          typed. Everything else on this page reads fine without JS. */}
+      <noscript>
+        <p className="mp-noscript">
+          Sending needs JavaScript switched on. Turn it on and reload, and this
+          form will reach {mechanicFirstName}.
         </p>
-      ) : null}
-
+      </noscript>
       <form className="mp-form" onSubmit={submit} noValidate>
-        <textarea
-          ref={taRef}
-          className={`mp-inp ta${bad === 'desc' ? ' bad' : ''}`}
-          id="qf-desc"
-          aria-label="Describe what you need"
-          aria-invalid={bad === 'desc'}
-          aria-describedby="qf-err"
-          placeholder={taPlaceholder}
-          enterKeyHint="enter"
-          maxLength={1500}
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-        />
+        {/* Structured selection, not text injection: the chip IS the answer.
+            One selectable at a time; tapping again releases it. */}
+        <div className="mp-fgroup">
+          <span className="mp-flabel" id="qf-job-lbl">
+            The job
+          </span>
+          <div className="mp-chips" role="group" aria-labelledby="qf-job-lbl">
+            {[...chipServices.map((s) => s.name), NOT_SURE].map((c) => {
+              const sel = selected === c;
+              return (
+                <button
+                  className={sel ? 'mp-chip sel' : 'mp-chip'}
+                  type="button"
+                  key={c}
+                  aria-pressed={sel}
+                  onClick={() => toggleService(c)}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+          {/* The quoting tax dies here: when the mechanic chose to price this
+              service, the ballpark answers before anyone has to ask it. */}
+          {selectedOffer?.priceFrom ? (
+            <p className="mp-price-hint">
+              Starts at ${selectedOffer.priceFrom}. {mechanicFirstName} sets the exact price for
+              your job.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="mp-fgroup">
+          <label className="mp-flabel" htmlFor="qf-desc">
+            What is going on
+          </label>
+          <textarea
+            ref={taRef}
+            className={`mp-inp${bad === 'desc' ? ' bad' : ''}`}
+            id="qf-desc"
+            aria-label="Describe what you need"
+            aria-invalid={bad === 'desc'}
+            aria-describedby="qf-err"
+            placeholder={taPlaceholder}
+            enterKeyHint="enter"
+            maxLength={1500}
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+          />
+        </div>
 
         {/* Timing is one tap and optional, but it is the mechanic's triage
             signal: "today" and "whenever" are different phone calls. */}
-        <div className="mp-field">
-          <span className="mp-lbl" id="qf-when-lbl">
-            When do you need it?
+        <div className="mp-fgroup">
+          <span className="mp-flabel" id="qf-when-lbl">
+            When
           </span>
-          <div
-            className="mp-chips when"
-            role="group"
-            aria-labelledby="qf-when-lbl"
-          >
+          <div className="mp-chips seg" role="group" aria-labelledby="qf-when-lbl">
             {TIMING_OPTIONS.map((t) => {
               const sel = timing === t.value;
               return (
@@ -338,44 +366,44 @@ export default function QuoteForm({
           </div>
         </div>
 
-        {/* Vehicle is promoted out of the disclosure: a booking without the
-            car is a phone call the mechanic still has to make. Optional all
-            the same; an empty box must never block the send. */}
-        <div className="mp-field">
-          <label className="mp-lbl" htmlFor="qf-vehicle">
-            Your vehicle
-          </label>
-          <input
-            className="mp-inp"
-            id="qf-vehicle"
-            type="text"
-            autoComplete="off"
-            placeholder="2015 Honda Civic"
-            maxLength={80}
-            value={vehicle}
-            onChange={(e) => setVehicle(e.target.value)}
-          />
-        </div>
-
-        <div className="mp-field">
-          <label className="mp-lbl" htmlFor="qf-phone">
-            Your number
-          </label>
-          <input
-            ref={phoneRef}
-            className={`mp-inp${bad === 'phone' ? ' bad' : ''}`}
-            id="qf-phone"
-            aria-invalid={bad === 'phone'}
-            aria-describedby="qf-err"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            enterKeyHint="send"
-            placeholder="(555) 555-5555"
-            maxLength={32}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+        {/* Vehicle and phone. The vehicle is optional; an empty box must never
+            block the send. The phone is the only required field. */}
+        <div className="mp-fgroup mp-two">
+          <div>
+            <label className="mp-flabel" htmlFor="qf-vehicle">
+              Your vehicle
+            </label>
+            <input
+              className="mp-inp"
+              id="qf-vehicle"
+              type="text"
+              autoComplete="off"
+              placeholder="2015 Honda Civic"
+              maxLength={80}
+              value={vehicle}
+              onChange={(e) => setVehicle(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="mp-flabel" htmlFor="qf-phone">
+              Your number <span className="req">*</span>
+            </label>
+            <input
+              ref={phoneRef}
+              className={`mp-inp${bad === 'phone' ? ' bad' : ''}`}
+              id="qf-phone"
+              aria-invalid={bad === 'phone'}
+              aria-describedby="qf-err"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              enterKeyHint="send"
+              placeholder="(555) 555-5555"
+              maxLength={32}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
         </div>
 
         <button
@@ -401,8 +429,8 @@ export default function QuoteForm({
           </svg>
         </button>
         <div id="qf-opt" hidden={!showOpt}>
-          <div className="mp-field">
-            <label className="mp-lbl" htmlFor="qf-name">
+          <div className="mp-fgroup">
+            <label className="mp-flabel" htmlFor="qf-name">
               Your name
             </label>
             <input
@@ -419,7 +447,10 @@ export default function QuoteForm({
           </div>
         </div>
 
-        {/* Honeypot: name maps to nothing in any autofill vocabulary. */}
+        {/* Honeypot: the field name maps to nothing in any autofill
+            vocabulary. The API returns a fake 201 when it arrives non-empty,
+            so a bot sees success and nothing is stored. Both halves must
+            survive any restyle: the spam lands on the mechanic, not on Myku. */}
         <div className="mp-hp" aria-hidden="true">
           <label htmlFor="qf-note">Leave this field empty</label>
           <input
@@ -433,21 +464,33 @@ export default function QuoteForm({
           />
         </div>
 
-        <button className="mp-send" type="submit" disabled={busy}>
-          {busy ? 'Sending…' : `Book ${mechanicFirstName}`}
-        </button>
+        <div className="mp-submit">
+          <button className="mp-btn mp-btn-o mp-btn-xl mp-mag" type="submit" disabled={busy}>
+            <span className="lbl">
+              {busy ? 'Sending…' : 'Get my price'}
+              {busy ? null : (
+                <span className="mp-arrow" aria-hidden="true">
+                  &#8594;
+                </span>
+              )}
+            </span>
+          </button>
+          {/* Never "your number goes to him only": when the mechanic has no
+              reachable device Myku's own safety net routes the request to
+              admin so it does not die silently, so exclusivity is a promise
+              the system is built to break. */}
+          <p className="mp-sub">
+            {unclaimed
+              ? `Free · No account needed · Myku passes your request to ${mechanicFirstName}`
+              : `Free · No account needed · Myku delivers your number to ${mechanicFirstName}`}
+          </p>
+        </div>
+
+        {/* ALWAYS in the DOM with height reserved, so the layout never jumps
+            and the live region is not created at announce time. */}
         <div className="mp-err" id="qf-err" role="alert">
           {err}
         </div>
-        {/* Never "your number goes to him only": when the mechanic has no
-            reachable device Myku's own safety net routes the request to
-            admin so it does not die silently, so exclusivity is a promise
-            the system is built to break. */}
-        <p className="mp-reassure">
-          {unclaimed
-            ? `Free. No account needed. Myku passes your request to ${mechanicFirstName}.`
-            : `Free. No account needed. Myku delivers your number to ${mechanicFirstName}.`}
-        </p>
       </form>
     </>
   );

@@ -1,1413 +1,1687 @@
 /* ============================================================
    PUBLIC MECHANIC PAGE  ::  trymyku.com/<slug>
-   THE STOREFRONT COMPOSER
+   KINETIC INK — the approved storefront design, ported.
 
-   Every rule below is scoped to .mp (the <main> of the profile
-   route) or to a body:has(.mp) escape hatch. Tokens are declared
-   on the scope, never on :root, so the dark marketing site is
+   Every rule is scoped to .mp (the <main> of the profile route)
+   or to a body:has(.mp) / html:has(.mp) escape hatch. Tokens are
+   declared on the scope, never on :root, so the marketing site is
    untouched.
 
-   SYSTEM SUMMARY
-   - 7 font sizes: 11 / 13 / 15 / 17 / 22 / 34 (44 at >=720px)
-   - 3 radii: 4px (controls + images), 12px (containers: fascia
-     portrait, fact panel, composer card, ledger frames, trust
-     block, claim/sent blocks), 999px (chips + the 7px dot)
-   - 2 shadows, both neutral ink alpha, no colored glows.
-     --sh-2 lifts exactly two moments: the fact panel and the
-     composer card. --sh-1 rests on the send control. Nothing
-     else casts.
-   - Orange has 2 working jobs (the send control's fill, the focus
-     state of the composer's fields) plus the brand accents: the
-     fascia's top rule, the wordmark's period, the availability dot
-   - Zero @keyframes. Transitions on interaction only, 150ms.
+   COLOUR CONTRACT (the part that is load-bearing, not taste):
+   - --mp-o (#F97316) is MYKU. It is the CTA fill, the section
+     numbers, the hero ink stroke, the composer rail. It never
+     marks a claim Myku has not checked.
+   - --mp-teal (#12626E) is the ONE semantic colour. It appears
+     only on work Myku itself confirmed ran through the platform.
+   - Self-reported work carries NEUTRAL steel. It is differently
+     sourced, not second class, so it gets the same badge shape,
+     the same rhythm and the same provenance line as verified
+     work; it simply does not get to wear the platform's colour.
+     (The prototype had these two inverted: the mechanic's own
+     listings wore Myku orange while Myku's own confirmation wore
+     a colour used nowhere else. A skimming customer decodes
+     orange as Myku, so the semantics read backwards.)
    ============================================================ */
 
 .mp {
-  /* ---- COLOR: 12 solids + 2 alphas ----
-     Solids: paper, paper-2, field, rule, ink, ink-2, ink-3,
-     accent, verified, danger, band-muted, and the color-mix
-     input border (ink-3 at 40% on field, approx #C5C2BC).
-     Alphas: accent-ring (orange job 2) and band-rule (hairlines
-     on the ink fascia). */
-  --paper:       #FAF7F2;               /* page ground, warm, not pure white */
-  --paper-2:     #F1EDE5;               /* recessed: claim strip, trust block, quote glyph, hovers */
-  --field:       #FFFFFF;               /* input fills, chips, and the lifted panels */
-  --rule:        #CDC5B6;               /* every 1px hairline on paper/white */
-  --ink:         #14120F;               /* the fascia ground, name, headings, prices, send label */
-  --ink-2:       #57514A;               /* body prose */
-  --ink-3:       #6F6A61;               /* meta, eyebrows, placeholders */
-  --accent:      #F97316;               /* ORANGE, exactly 2 jobs */
-  --accent-ring: rgba(249,115,22,0.20); /* the only alpha of orange that exists, part of job 2 */
-  --verified:    #12626E;               /* the ONE semantic colour, job provenance mark only */
-  --danger:      #B3261E;               /* form validation text + invalid field border */
+  /* ---- INK + PAPER ---- */
+  --mp-ink:      #08090B;
+  --mp-ink-1:    #0D0F13;
+  --mp-ink-2:    #14171D;
+  --mp-ink-3:    #1D222A;
+  --mp-paper:    #F5F2ED;
+  --mp-paper-2:  #EBE7DF;
+  --mp-paper-3:  #DFDAD0;
 
-  /* BAND TONES. The fascia is --ink; these two exist only on it.
-     --band-muted is 7.3:1 against #14120F, so it clears 4.5:1
-     for the 11px eyebrow and every other small run on the band.
-     --band-rule is the hairline weight for rules on ink. */
-  --band-muted:  #A9A199;
-  --band-rule:   rgba(250,247,242,0.14);
+  /* Neutrals. --mp-steel is the muted voice on ink (5.0:1 on
+     #08090B); --mp-slate is the muted voice on paper (5.2:1 on
+     #F5F2ED). Every small run picks the one for its ground. */
+  --mp-steel:    #7C8592;
+  --mp-steel-2:  #A8B0BB;
+  --mp-slate:    #6F6960;
+  --mp-slate-2:  #5A544A;
 
-  /* ORANGE: TWO WORKING JOBS PLUS THE BRAND ACCENTS
-     1. The fill of the send control (form submit + the repeat-ask
-        anchor). One component, two placements.
-     2. The focus state of the composer's fields.
-     Brand accents (fixed set, chosen with Rohaan 2026-08-03): the
-     fascia's 3px top rule, the wordmark's period, the availability
-     dot, and the orange inside the logo image itself.
-     Nowhere else: no orange headlines, no orange price pills, no
-     orange borders on cards, no orange selection or focus outline. */
+  /* ---- MYKU ORANGE ---- */
+  --mp-o:        #F97316;
+  --mp-o-hot:    #FF9A4D;
+  --mp-o-deep:   #C2530A;   /* the only orange with 4.5:1 on paper */
 
-  /* ---- TYPE SCALE: 6 tokens, 7 values, integers only ---- */
-  --t-name:   34px;  /* mechanic name only, h1 */
-  --t-head:   22px;  /* section-level headings + fact-strip figures + initials */
-  --t-prose:  17px;  /* bio, review text, all form controls, button labels */
-  --t-body:   15px;  /* job lines, service rows, chips, band fact lines */
-  --t-meta:   13px;  /* dates, labels, credential line, legend, footnotes */
-  --t-micro:  11px;  /* eyebrows, strip captions, provenance marks */
+  /* ---- PLATFORM VERIFICATION TEAL ----
+     Used ONLY on work Myku itself confirmed. Never decorative,
+     never next to a claim Myku has not checked, never on
+     paperwork: a reviewed document is not a completed job. */
+  --mp-teal:      #12626E;
+  --mp-teal-deep: #0C4A54;
 
-  /* ---- RADII: exactly 3 ---- */
-  --r-sm:   4px;    /* inputs, send, images, badge */
-  --r-lg:   12px;   /* containers and the fascia portrait */
-  --r-pill: 999px;  /* chips (controls) and the 7px availability dot */
+  --mp-sans:  var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mp-serif: ui-serif, Georgia, 'Iowan Old Style', 'Times New Roman', 'Noto Serif', serif;
+  --mp-mono:  ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace;
 
-  /* ---- SPACING: one scale ---- */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 24px;
-  --s-6: 32px;
-  --s-7: 48px;
-  --s-8: 64px;
+  --mp-pad:  clamp(18px, 5.2vw, 64px);
+  --mp-maxw: 1180px;
+  --mp-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 
-  /* ---- SHADOWS: exactly 2 ---- */
-  --sh-1: 0 1px 2px rgba(20,18,15,0.06);
-  --sh-2: 0 6px 24px -12px rgba(20,18,15,0.18);
-
-  /* ---- LAYOUT ---- */
-  --gutter:  16px;
-  --measure: 640px;
-
-  /* ---- BASE ---- */
-  background: var(--paper);
-  color: var(--ink);
-  color-scheme: light;
-  min-height: 100vh;
   position: relative;
   z-index: 1;
-  padding-bottom: 0;
-  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-  font-size: var(--t-body);
-  line-height: 1.5;
+  background: var(--mp-paper);
+  color: var(--mp-ink);
+  color-scheme: dark;
+  font-family: var(--mp-sans);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-/* ---- KILL THE DARK MARKETING ATMOSPHERE ---- */
-/* body and .mp-paper are not descendants of .mp, so they cannot read its
-   tokens and must restate the literal.
-   KEEP #FAF7F2 BELOW IN SYNC WITH --paper ABOVE. The themeColor export in
-   page.tsx is #14120F on purpose: the fascia now runs to the very top of
-   the page, so the Android status bar merges into the band, not the paper. */
+/* ---- KILL THE DARK MARKETING ATMOSPHERE ----
+   body and .mp-paper-fallback are not descendants of .mp, so they cannot
+   read its tokens and must restate the literal.
+   KEEP #08090B BELOW IN SYNC WITH --mp-ink ABOVE. The themeColor export in
+   page.tsx is the same value: the header band runs to the very top of the
+   page, so the Android status bar merges into it. */
+html:has(.mp),
 body:has(.mp),
-.mp-paper { background: #FAF7F2; }
-/* 1. :has() route, for browsers that support it */
+.mp-paper-fallback { background: #08090B; }
+/* 1. :has() route, for browsers that support it. The marketing aurora would
+      otherwise drift behind this page's own canvas mesh. */
 body:has(.mp) .bgfx { display: none; }
-/* 2. Fallback opaque layer, so a browser without :has() never renders
-      drifting orange auroras behind a light page. */
-.mp-paper {
+/* 2. Fallback opaque layer, so a browser without :has() never renders the
+      marketing atmosphere behind this page. */
+.mp-paper-fallback {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
 }
 
-/* ---- SELECTION + FOCUS (orange stays at 2 jobs) ---- */
-.mp ::selection { background: var(--ink); color: var(--paper); }
-.mp :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r-sm); }
-.mp .mp-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring); outline: none; }
-.mp .mp-inp:focus-visible { outline: none; }
-/* Focus rings on the ink fascia flip to paper, or they vanish. */
-.mp-fascia :focus-visible { outline-color: var(--paper); }
-
-/* ---- MOTION: zero @keyframes in this entire file ---- */
-.mp a,
-.mp button,
-.mp summary,
-.mp .mp-inp,
-.mp .mp-optlink .chev {
-  transition: background-color 150ms ease, border-color 150ms ease,
-    color 150ms ease, box-shadow 150ms ease, filter 150ms ease,
-    transform 150ms ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mp *,
-  .mp *::before,
-  .mp *::after { transition: none !important; animation: none !important; }
-  html:has(.mp) { scroll-behavior: auto; }
-}
-
-/* ---- SHARED PRIMITIVES ---- */
-.mp .tnum { font-feature-settings: 'tnum' 1; }
+.mp *,
+.mp *::before,
+.mp *::after { box-sizing: border-box; }
+.mp img,
+.mp svg { display: block; max-width: 100%; }
+/* Form-control font reset. Deliberately UNSCOPED and at :where() specificity
+   (0,0,0): scoping it to `.mp` raised it to (0,1,1), which beat every
+   single-class rule that follows and silently reset the submit CTA, the
+   service chips and every input back to browser defaults. This reset must
+   always lose to the component that styles the control. */
+:where(button, input, textarea, select) { font: inherit; color: inherit; }
 .mp a { color: inherit; text-decoration: none; }
-.mp img { max-width: 100%; display: block; }
+.mp ::selection { background: var(--mp-o); color: #140800; }
+.mp .tnum { font-variant-numeric: tabular-nums; }
 
+/* Focus rings pick the colour that actually clears 3:1 on their ground:
+   deep orange on paper, hot orange on ink. */
+.mp :focus-visible {
+  outline: 2px solid var(--mp-o-deep);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.mp-ink :focus-visible,
+.mp-hdr :focus-visible,
+.mp-dock :focus-visible { outline-color: var(--mp-o-hot); }
+
+/* ---- PRIMITIVES ---- */
 .mp-wrap {
-  max-width: var(--measure);
+  max-width: var(--mp-maxw);
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding-left: var(--mp-pad);
+  padding-right: var(--mp-pad);
 }
-
-/* Eyebrows: the page's only uppercase device. font-family: inherit keeps
-   the section <h2>s in Inter, so Jakarta stays reserved for the moments
-   of voice. */
-.mp-eyebrow {
-  font-family: inherit;
-  font-size: var(--t-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  line-height: 1.4;
-}
-
-/* Check glyph, two colours: neutral on the credential line, --verified on
-   the provenance mark and its legend. */
-.mp-ck {
-  width: 12px;
-  height: 12px;
-  flex: none;
-  fill: none;
-  stroke: var(--ink-3);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.mp-ck.v { stroke: var(--verified); stroke-width: 2.4; width: 11px; height: 11px; }
-
-/* ============================================================
-   1. UNCLAIMED STRIP
-   One slim line ABOVE the fascia. The full disclosure lives in
-   HOW MYKU WORKS; the eyebrow carries UNCONFIRMED after this
-   scrolls away.
-   ============================================================ */
-.mp-claim {
-  background: var(--paper-2);
-  border-bottom: 1px solid var(--rule);
-  font-size: var(--t-meta);
-  line-height: 1.5;
-  color: var(--ink-2);
-}
-.mp-claim .mp-wrap { padding-top: var(--s-2); padding-bottom: var(--s-2); }
-.mp-claim a {
-  color: var(--ink);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  white-space: nowrap;
-}
-.mp-claim a:hover { color: var(--ink-2); }
-
-/* ============================================================
-   2. THE FASCIA
-   The storefront sign. A deep-ink band running full-bleed from
-   the very top of the page; the top bar merges into it; the
-   paper page begins beneath it. Nothing sticks on scroll.
-   ============================================================ */
-.mp-fascia {
-  background: var(--ink);
-  color: var(--paper);
-  /* The brand's signature: one orange rule across the very top of the
-     sign, the same black-plus-orange the logo and the app wear. */
-  border-top: 3px solid var(--accent);
-  /* Bottom padding is the overlap runway: the portrait hangs 36px
-     (48px at >=720px) below this edge and must not touch the text. */
-  padding-bottom: var(--s-7);
-}
-.mp-topbar {
-  border-bottom: 1px solid var(--band-rule);
-}
-.mp-topbar .mp-wrap {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-/* Both topbar links live in the band's muted tone and brighten to paper
-   on hover: navigable, but never competing with the name below. */
-.mp-topbar a {
-  font-size: var(--t-meta);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--band-muted);
-  text-decoration: none;
-}
-.mp-topbar a:hover { color: var(--paper); }
-/* The brand: the black-and-orange mark plus the capitalized wordmark,
-   white with an orange period, same as the marketing pages. The dot is
-   a brand mark, not a third job for orange: it belongs to the wordmark
-   the way the white dot belongs to the logo tile. */
-.mp-brand { display: inline-flex; align-items: center; gap: 8px; }
-.mp-brand img { width: 22px; height: 22px; border-radius: 5px; display: block; }
-.mp-topbar a.mp-brand { color: var(--paper); }
-.mp-brand .dot { color: var(--accent); }
-
-.mp-fascia .mp-eyebrow {
-  color: var(--band-muted);
-  margin-top: var(--s-5);
-  margin-bottom: var(--s-3);
-}
-.mp-name {
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-name);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.08;
-  color: var(--paper);
-  overflow-wrap: anywhere;
-}
-/* The specialization line: paper-white, the second-loudest thing on the sign. */
-.mp-spec {
-  margin-top: var(--s-3);
-  font-size: var(--t-body);
-  font-weight: 500;
-  color: var(--paper);
-  line-height: 1.5;
-}
-/* The meta line: work type and the availability dot, in the band tone. */
-.mp-factline {
-  margin-top: var(--s-1);
-  font-size: var(--t-body);
-  font-weight: 400;
-  color: var(--band-muted);
-  line-height: 1.5;
-}
-.mp-factline .sep { padding: 0 var(--s-2); }
-.mp-avail {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-1);
-  white-space: nowrap;
-}
-.mp-avail .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--r-pill);
-  /* Orange, like the wordmark's period: the sign's one live signal. */
-  background: var(--accent);
-  flex: none;
-}
-
-/* ============================================================
-   3. THE SHELF
-   The seam between sign and paper. The portrait half-overlaps
-   the band edge (classic storefront portrait); the fact panel
-   overlaps it slightly and carries one of the page's two lifted
-   shadows. This is the page's one moment of depth.
-   ============================================================ */
-.mp-shelf {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-4);
-  /* globals.css lifts every main/header/footer to z-index 1, and the fascia
-     is a <header>. Without a higher layer the band paints over the overlap
-     the negative margins below create, slicing the portrait in half. */
+.mp-ink {
+  background: var(--mp-ink);
+  color: #EDEFF2;
   position: relative;
-  z-index: 2;
+  isolation: isolate;
 }
-.mp-portrait {
-  flex: none;
-  width: 72px;
-  height: 72px;
-  margin-top: -36px; /* half the portrait, over the band edge */
-  border-radius: var(--r-lg);
-  object-fit: cover;
-  border: 2px solid var(--paper);
-  background: var(--paper-2);
+.mp-ink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background-image: var(--mp-grain);
+  opacity: 0.055;
+  mix-blend-mode: overlay;
 }
-/* Square-ish, not circular: a circle reads social profile, a rounded
-   square reads business. */
-.mp-portrait.ph {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--t-head);
-  font-weight: 700;
-  color: var(--ink-3);
-  letter-spacing: 0.01em;
+.mp-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--mp-grain);
+  opacity: 0.035;
+  mix-blend-mode: multiply;
 }
-.mp-panel {
-  flex: 1;
-  min-width: 0;
-  margin-top: -16px; /* slight overlap over the band edge */
-  background: var(--field);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-lg);
-  box-shadow: var(--sh-2);
-  overflow: hidden;
-}
-/* A 1px-gap grid whose gaps ARE the hairlines, so it self-heals
-   at 1, 2, 3 or 4 cells with no extra rules. */
-.mp-strip {
-  display: grid;
-  gap: 1px;
-  background: var(--rule);
-  grid-template-columns: minmax(0, 1fr);
-}
-.mp-strip.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.mp-strip.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.mp-strip.n4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.mp-cell {
-  background: var(--field);
-  padding: 14px var(--s-4);
-  min-width: 0;
-}
-/* Values wrap rather than ellipsize: "$1,250/hr" truncated to "$1,2…" in
-   the one panel built to answer the money question would be a truthfulness
-   hazard, not an overflow fix. */
-.mp-cell b {
-  display: block;
-  font-size: var(--t-head);
-  font-weight: 700;
-  line-height: 1.15;
-  color: var(--ink);
-  overflow-wrap: break-word;
-}
-.mp-cell span {
-  display: block;
-  margin-top: var(--s-1);
-  font-size: var(--t-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+
+.mp-eyebrow {
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--ink-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Fallback cell: not an absence, a positive statement about how this
-   business prices. The money question is never silent. */
-.mp-cell.fb {
-  font-size: var(--t-body);
-  font-weight: 500;
-  color: var(--ink-2);
-  line-height: 1.5;
-}
-
-/* Credential line, on paper, under the shelf. The qualification sits
-   adjacent to the claim, same size, same breath. That adjacency is the
-   whole mechanism. */
-.mp-cred {
-  margin-top: var(--s-4);
-  font-size: var(--t-meta);
-  font-weight: 500;
-  color: var(--ink-2);
-  line-height: 1.5;
-}
-.mp-cred .mp-ck { margin-right: 6px; vertical-align: -1px; display: inline-block; }
-.mp-qual {
-  margin-top: var(--s-1);
-  font-size: var(--t-meta);
-  font-weight: 400;
-  color: var(--ink-3);
-  line-height: 1.5;
-}
-
-/* ============================================================
-   4. THE ASK  (the only conversion event on the page)
-   A real card at every width: white, ruled, r-lg, and the second
-   of the page's two lifted shadows.
-   ============================================================ */
-/* Zero-height alias so the legacy #quote deep link still lands on the ask. */
-.mp-anchor { display: block; height: 0; scroll-margin-top: var(--s-4); }
-.mp-ask {
-  margin-top: var(--s-5);
-  scroll-margin-top: var(--s-4);
-  min-width: 0;
-  background: var(--field);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-lg);
-  box-shadow: var(--sh-2);
-  padding: var(--s-5);
-}
-/* PREVIEW STATE. An unclaimed page is shown to the mechanic, not offered to
-   customers, so the ask is replaced by the claim prompt. Recessed rather than
-   lifted: it is an explanation, not a conversion surface, and it must not
-   read as a disabled form the visitor could somehow enable. */
-.mp-preview {
-  background: var(--paper-2);
-  border: 1px dashed var(--rule);
-  border-radius: var(--r-lg);
-  padding: var(--s-5);
-  box-shadow: none;
-}
-.mp-preview h2 {
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-head);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: var(--ink);
-}
-.mp-preview p {
-  margin-top: var(--s-3);
-  font-size: var(--t-body);
-  line-height: 1.6;
-  color: var(--ink-2);
-}
-.mp-preview-claim { color: var(--ink-3); }
-.mp-preview-claim a {
-  color: var(--ink);
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--mp-steel);
+  margin: 0;
 }
-.mp-ask h2 {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-head);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: var(--ink);
-  overflow-wrap: anywhere;
-}
-/* The composer's anchor glyph. Ink, small, no circle behind it. */
-.mp-wrench {
-  width: 18px;
-  height: 18px;
-  flex: none;
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.mp-ask-sub {
-  margin-top: var(--s-2);
-  font-size: var(--t-body);
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--ink-2);
-}
+.mp-eyebrow .sep { color: var(--mp-o); }
 
-/* Starter chips. They exist because a blank textarea is the number one
-   abandonment point in any free-text lead form. Pills are allowed here:
-   chips are controls. Used state = ink fill, paper text, so the card
-   remembers what the visitor already tapped. */
-.mp-chips {
-  margin-top: var(--s-4);
+.mp-sec-head {
   display: flex;
+  align-items: baseline;
+  gap: 14px;
   flex-wrap: wrap;
-  gap: var(--s-2);
+  margin-bottom: clamp(22px, 4vw, 40px);
 }
-.mp-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: var(--s-2) var(--s-4);
-  background: var(--field);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-pill);
-  font-family: inherit;
-  font-size: var(--t-body);
-  font-weight: 600;
-  color: var(--ink);
-  white-space: nowrap;
-  cursor: pointer;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mp-chip:hover { border-color: var(--ink-3); }
-.mp-chip:active { transform: translateY(1px); }
-/* Selected state (structured single-select): ink fill, paper text. The
-   old text-injection "used" state kept the same look, so the visual
-   language of a tapped chip survives the semantics change. */
-.mp-chip.sel,
-.mp-chip.used {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
-}
-/* The timing row reads as a sub-question, not a second service list:
-   same controls, one step smaller and tighter under their label. */
-.mp-chips.when { margin-top: 0; }
-.mp-chips.when .mp-chip {
-  min-height: 34px;
-  padding: var(--s-1) var(--s-3);
-  font-size: var(--t-meta);
-}
-/* The quoting tax dies on this line: the mechanic's own ballpark,
-   spoken before anyone has to ask for it. Meta tone, not a price tag. */
-.mp-price-hint {
-  margin-top: var(--s-2);
-  font-size: var(--t-meta);
-  font-weight: 600;
-  color: var(--ink-2);
-}
-
-.mp-form { margin-top: var(--s-3); }
-.mp-lbl {
-  display: block;
-  margin-bottom: var(--s-2);
-  font-size: var(--t-meta);
-  font-weight: 600;
-  color: var(--ink-2);
-}
-/* Input border: --ink-3 at 40% over the white fill. The color-mix line
-   is a progressive enhancement; a browser without it falls back to the
-   plain hairline on the line above. */
-.mp-inp {
-  display: block;
-  width: 100%;
-  background: var(--field);
-  border: 1px solid var(--rule);
-  border-color: color-mix(in srgb, var(--ink-3) 40%, var(--field));
-  border-radius: var(--r-sm);
-  color: var(--ink);
-  font-family: inherit;
-  font-size: var(--t-prose);
-  line-height: 1.5;
-  padding: 0 14px;
-  height: 52px;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.mp-inp::placeholder { color: var(--ink-3); opacity: 1; }
-.mp-inp.ta {
-  height: auto;
-  min-height: 104px;
-  padding: 14px;
-  resize: vertical;
-}
-.mp-inp.bad { border-color: var(--danger); }
-.mp-field { margin-top: var(--s-3); }
-
-/* The optional-fields disclosure. Quiet by default, underline on hover,
-   chevron rotates when open. */
-.mp-optlink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-1);
-  margin-top: var(--s-3);
-  background: none;
-  border: 0;
-  padding: 0;
-  font-family: inherit;
-  font-size: var(--t-meta);
-  font-weight: 600;
-  color: var(--ink-3);
-  cursor: pointer;
-  min-height: 40px;
-}
-.mp-optlink:hover {
-  color: var(--ink-2);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-}
-.mp-optlink .chev {
-  width: 12px;
-  height: 12px;
-  flex: none;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.mp-optlink[aria-expanded='true'] .chev { transform: rotate(180deg); }
-
-/* THE SEND CONTROL. Orange job 1. Ink label, because #14120F on #F97316
-   is 6.65:1 and white would be 2.80:1. No sheen, no gradient. */
-.mp-send {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 52px;
-  margin-top: var(--s-4);
-  background: var(--accent);
-  color: var(--ink);
-  border: 0;
-  border-radius: var(--r-sm);
-  box-shadow: var(--sh-1);
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-prose);
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  text-align: center;
-}
-.mp-send:hover { filter: brightness(0.95); }
-.mp-send:active { transform: translateY(1px); filter: brightness(0.95); }
-.mp-send:disabled { opacity: 0.55; filter: none; transform: none; cursor: default; }
-
-/* min-height reserved so the layout never jumps when validation fires */
-.mp-err {
-  min-height: 18px;
-  margin-top: var(--s-2);
-  font-size: var(--t-meta);
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--danger);
-}
-.mp-reassure {
-  margin-top: var(--s-3);
-  text-align: center;
-  font-size: var(--t-meta);
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--ink-3);
-}
-
-/* Sent state. It replaces the composer INSIDE the same card, so it
-   carries no ground of its own. The words are the message. */
-.mp-sent { background: transparent; border-radius: 0; padding: 0; }
-/* h2, not h3: the outline must not skip a level when the form unmounts.
-   The heading takes programmatic focus (tabIndex -1) so a screen reader
-   hears the confirmation instead of being dropped to <body>. */
-.mp-sent h2 {
-  display: block; /* neutralize the composer heading's flex row */
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-head);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: var(--ink);
-}
-.mp-sent p {
-  margin-top: var(--s-2);
-  font-size: var(--t-body);
-  font-weight: 400;
-  line-height: 1.55;
-  color: var(--ink-2);
-}
-/* The install ask lives after the conversion, never before it. */
-.mp-sent .inst {
-  margin-top: var(--s-5);
-  font-size: var(--t-meta);
-  color: var(--ink-3);
-  line-height: 1.5;
-}
-.mp-sent .badgewrap { margin-top: var(--s-3); }
-
-/* Honeypot. Off-screen, never focusable. The input is invisible but its
-   UA-default 13.333px would still show up in a computed type census, so
-   it is pinned to the scale. */
-.mp-hp {
-  position: absolute !important;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-.mp-hp input,
-.mp-hp label {
-  font-family: inherit;
-  font-size: var(--t-meta);
-}
-
-/* ============================================================
-   5-8. EVIDENCE SECTIONS
-   One device page-wide: an 11px eyebrow with a hairline running
-   off it on the same line, then a framed ledger. Rows live inside
-   the frame, separated by internal hairlines. An omitted section
-   still leaves no gap.
-   ============================================================ */
-.mp-sec { margin-top: var(--s-6); min-width: 0; }
-.mp-sec-h {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  margin-bottom: var(--s-3);
-}
-/* The hairline that runs off the eyebrow. flex-fill, never shorter
-   than 16px. */
-.mp-sec-rule {
-  flex: 1;
-  min-width: 16px;
-  height: 1px;
-  background: var(--rule);
-}
-.mp-sec-n {
-  font-size: var(--t-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+.mp-sec-head h2 {
+  font-size: clamp(36px, 8vw, 88px);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  font-weight: 900;
+  margin: 0;
   text-transform: uppercase;
-  color: var(--ink-3);
-  white-space: nowrap;
-  flex: none;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.mp-sec-num {
+  font-family: var(--mp-mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--mp-o);
+  font-weight: 700;
+  align-self: flex-start;
+  padding-top: 0.35em;
+}
+.mp-rule {
+  flex: 1 1 60px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.16;
+  min-width: 40px;
 }
 .mp-sec-meta {
-  font-size: var(--t-meta);
-  font-weight: 500;
-  color: var(--ink-3);
-  white-space: nowrap;
-  flex: none;
-}
-/* THE LEDGER FRAME. White ground, one rule around, internal hairlines
-   between rows. Resting: no shadow (only the panel and the composer cast). */
-.mp-list {
-  background: var(--field);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-}
-/* The frame closes the ledger; the last row never draws its own rule. */
-.mp-list > :last-child { border-bottom: 0; }
-.mp-list > :last-child > summary { border-bottom: 0; }
-.mp-more:last-child .mp-job:last-child,
-.mp-more:last-child .mp-rev:last-child { border-bottom: 0; }
-
-/* ---- WORK ---- */
-/* The provenance marks explain themselves in place (title on hover,
-   HOW MYKU WORKS in prose); the old legend card is gone. */
-
-.mp-job {
-  display: flex;
-  gap: var(--s-3);
-  padding: var(--s-4);
-  border-bottom: 1px solid var(--rule);
-}
-.mp-job-b { flex: 1; min-width: 0; }
-.mp-job-r1 {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--s-3);
-}
-.mp-job-veh {
-  font-size: var(--t-body);
-  font-weight: 700;
-  color: var(--ink);
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-/* ONE size always. A long free-text price wraps, it never shrinks. */
-.mp-job-price {
-  flex: none;
-  max-width: 40%;
-  text-align: right;
-  /* One step above the row's body type: on a storefront the number is
-     the first thing a customer scans for. */
-  font-size: var(--t-prose);
-  font-weight: 700;
-  color: var(--ink);
-  overflow-wrap: anywhere;
-}
-.mp-job-svc {
-  margin-top: var(--s-1);
-  font-size: var(--t-body);
-  font-weight: 400;
-  color: var(--ink-2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.mp-job-meta {
-  margin-top: var(--s-2);
-  font-size: var(--t-meta);
-  font-weight: 400;
-  color: var(--ink-3);
-}
-/* THE PROVENANCE MARK. Fixed right position, always the last line of
-   every row, so it occupies a place the eye learns in two rows. Both
-   kinds carry identical size, weight and tracking: self-reported work
-   is differently sourced, not second class, and platform work is a
-   fact, not a prize. */
-.mp-prov {
-  margin-top: var(--s-2);
-  text-align: right;
-  font-size: var(--t-micro);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  line-height: 1.4;
-  color: var(--ink-3);
+  color: var(--mp-slate);
+  align-self: flex-start;
+  padding-top: 0.5em;
 }
-.mp-prov.v { color: var(--verified); }
-.mp-prov .mp-ck { margin-right: 5px; vertical-align: -1px; display: inline-block; }
-.mp-prov-i { width: 13px; height: 13px; margin-left: 5px; vertical-align: -2px; display: inline-block; }
-/* The shared mark is a native disclosure: tap to open one line. */
-.mp-provx { margin-top: var(--s-2); }
-.mp-provx .mp-prov { margin-top: 0; cursor: pointer; list-style: none; }
-.mp-provx .mp-prov::-webkit-details-marker { display: none; }
-.mp-provx[open] .mp-prov { color: var(--ink-2); }
-.mp-prov-note {
-  margin-top: var(--s-1);
-  text-align: right;
-  font-size: var(--t-meta);
-  font-weight: 400;
-  letter-spacing: normal;
-  text-transform: none;
-  color: var(--ink-3);
-  line-height: 1.5;
-}
-.mp-job-thumb {
-  flex: none;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--r-sm);
-  object-fit: cover;
-  border: 1px solid var(--rule);
-  background: var(--paper-2);
-}
+.mp-ink .mp-sec-meta { color: var(--mp-steel); }
 
-/* Native disclosure for overflow. Zero JavaScript. */
-.mp-more { display: block; }
-.mp-more > summary {
-  list-style: none;
-  padding: 14px var(--s-4);
-  border-bottom: 1px solid var(--rule);
-  font-size: var(--t-meta);
-  font-weight: 700;
-  color: var(--ink);
-  cursor: pointer;
+/* ============================================================
+   CLAIM STRIP (unclaimed preview only)
+   Above everything. The eyebrow carries UNCONFIRMED so this can
+   stay one line without losing the disclosure.
+   ============================================================ */
+.mp-claim {
+  background: #12141A;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.28);
+  color: #C9CFD8;
+  font-family: var(--mp-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 0;
+}
+.mp-claim a {
+  color: var(--mp-o-hot);
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.mp-hdr {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  /* Opaque ink base FIRST: the header sits above the hero in flow, so at
+     scroll 0 a translucent bar samples whatever is behind it. The
+     translucency layers on top only where there is something dark. */
+  background: #0A0B0E;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .mp-hdr {
+    background: linear-gradient(rgba(8, 9, 11, 0.72), rgba(8, 9, 11, 0.72)) padding-box, #0A0B0E border-box;
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  }
+}
+.mp-hdr-in {
+  max-width: var(--mp-maxw);
+  margin: 0 auto;
+  padding: 10px var(--mp-pad);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* The mark does NOT navigate. It is the one thread tying the mechanic's
+   storefront back to the platform, but the homepage recruits customers into
+   a multi-quote flow that lists his competitors, and a visitor who arrived
+   on a link HE shared must never be one tap from that. */
+.mp-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mp-tile {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex: 0 0 auto;
+  display: block;
+  overflow: hidden;
+  box-shadow: 0 6px 18px -8px rgba(249, 115, 22, 0.55);
+}
+.mp-tile img { width: 100%; height: 100%; object-fit: contain; border-radius: 9px; }
+.mp-hdr-cta { margin-left: auto; }
+/* After a successful send the page's loudest controls would lead to a
+   composer that now reads "Request sent." */
+body[data-lead-sent='1'] .mp-hdr-cta,
+body[data-lead-sent='1'] .mp-dock { display: none; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.mp-hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+  /* Static ground. With JavaScript off (or before the canvas paints) the
+     hero must already look like the hero, not like a black rectangle. */
+  background:
+    radial-gradient(70% 46% at 78% 12%, rgba(249, 115, 22, 0.20), transparent 66%),
+    radial-gradient(74% 50% at 22% 30%, rgba(16, 52, 102, 0.55), transparent 68%),
+    radial-gradient(60% 44% at 52% 88%, rgba(96, 116, 146, 0.30), transparent 70%),
+    linear-gradient(180deg, #0B1017 0%, #08090B 62%);
+}
+.mp-mesh {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  z-index: 0;
+  opacity: 0.95;
+}
+.mp-spark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.mp-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 78% at 78% 6%, rgba(249, 115, 22, 0.13), transparent 62%),
+    linear-gradient(180deg, rgba(8, 9, 11, 0.42) 0%, rgba(8, 9, 11, 0.06) 34%, rgba(8, 9, 11, 0.62) 82%, var(--mp-ink) 100%);
+}
+.mp-streak {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.16;
+  background: repeating-linear-gradient(97deg, rgba(255, 255, 255, 0.10) 0 1px, transparent 1px 4px);
+  -webkit-mask-image: radial-gradient(90% 65% at 50% 35%, #000, transparent 78%);
+  mask-image: radial-gradient(90% 65% at 50% 35%, #000, transparent 78%);
+}
+.mp-bloom {
+  position: absolute;
+  z-index: 2;
+  width: 42vmax;
+  height: 42vmax;
+  left: 0;
+  top: 0;
+  margin: -21vmax 0 0 -21vmax;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.4), rgba(249, 115, 22, 0.08) 42%, transparent 68%);
+  transition: opacity 0.5s ease;
+}
+/* Type selector needed: `.mp svg { display: block }` above outranks a bare
+   class, so a plain `.mp-hero-mark { display:none }` never took effect and
+   the dial rendered on phones it was designed to sit out. */
+.mp svg.mp-hero-mark {
+  position: absolute;
+  right: -10%;
+  top: 6%;
+  width: min(52vw, 640px);
+  z-index: 1;
+  opacity: 0.11;
+  display: none;
+  animation: mpSpin 120s linear infinite;
+}
+@keyframes mpSpin { to { transform: rotate(360deg); } }
+
+.mp-hero-in {
+  position: relative;
+  z-index: 5;
+  padding-top: clamp(40px, 10vh, 100px);
+  padding-bottom: clamp(26px, 4vw, 46px);
+}
+.mp-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(16px, 3vw, 26px);
+}
+.mp-hero-eyebrow .mp-ln {
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--mp-o), transparent);
+  flex: 1;
+  animation: mpLnGrow 1.4s 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes mpLnGrow { to { width: 100%; } }
+
+.mp-name {
+  font-size: clamp(56px, 16.5vw, 208px);
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0;
+  color: #F2F4F7;
+  overflow-wrap: anywhere;
+}
+/* Names are free text and are NEVER truncated or ellipsized. Long ones step
+   the scale down instead, so the biggest type on the page still fits the
+   phone it is read on. */
+.mp-name.nm-mid  { font-size: clamp(44px, 12.5vw, 152px); }
+.mp-name.nm-long { font-size: clamp(34px, 9.4vw, 112px); }
+.mp-name span { display: block; }
+.mp-name .r2 { padding-left: 0.055em; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .mp-name {
+    background-image: linear-gradient(96deg,
+      #5C6470 0%, #C7CCD4 9%, #FFFFFF 15%, #9AA2AD 22%,
+      #5A616C 32%, #E6E9ED 41%, #8A919B 49%,
+      #C2530A 57%, #FF9A4D 61%, #FFD9B5 64%, #F97316 67%, #7C3F12 72%,
+      #6E7580 80%, #EFF2F5 90%, #5C6470 100%);
+    background-size: 280% 100%;
+    background-position: 0% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: mpSheen 11s linear infinite;
+    filter: drop-shadow(0 14px 40px rgba(0, 0, 0, 0.55));
+  }
+}
+@keyframes mpSheen { to { background-position: -280% 0; } }
+
+.mp-underink { width: min(560px, 86%); height: 16px; margin: 14px 0 0; overflow: visible; }
+.mp-underink path {
+  fill: none;
+  stroke: var(--mp-o);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: mpDrawIn 1.6s 0.8s cubic-bezier(0.5, 0, 0.35, 1) forwards;
+  filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.55));
+}
+@keyframes mpDrawIn { to { stroke-dashoffset: 0; } }
+
+.mp-spec {
+  font-family: var(--mp-serif);
+  font-size: clamp(20px, 4.6vw, 32px);
+  line-height: 1.24;
+  margin: clamp(20px, 4vw, 30px) 0 0;
+  max-width: 19ch;
+  color: #DDE1E7;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.mp-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: clamp(20px, 3.6vw, 28px); }
+.mp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mp-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.045);
+  color: #D6DAE1;
+}
+.mp-pill.live {
+  border-color: rgba(249, 115, 22, 0.5);
+  color: #FFD3AE;
+  background: rgba(249, 115, 22, 0.09);
+}
+/* The availability dot does NOT pulse. A pulsing presence dot is the visual
+   grammar of live, real-time status; behind it is a flag the mechanic
+   toggled in the app at some unknown time, and a static caption cannot
+   outrun motion. */
+.mp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mp-o);
+  flex: 0 0 auto;
+}
+
+.mp-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(26px, 4.4vw, 38px); }
+
+/* ---------- buttons ---------- */
+.mp-btn {
+  --bx: 0px;
+  --by: 0px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 26px;
+  border-radius: 14px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  text-align: center;
+  transform: translate3d(var(--bx), var(--by), 0);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease, filter 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mp-btn > .lbl {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1);
+}
+.mp-btn-o {
+  background: linear-gradient(160deg, var(--mp-o-hot), var(--mp-o) 42%, var(--mp-o-deep));
+  /* Near-black on orange is 6.9:1. White would be 2.8:1. */
+  color: #180A02;
+  box-shadow: 0 10px 30px -10px rgba(249, 115, 22, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+}
+.mp-btn-o::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 34%, rgba(255, 255, 255, 0.65) 50%, transparent 66%);
+  transform: translateX(-70%);
+  transition: opacity 0.3s;
+}
+.mp-btn-o:hover::before { opacity: 1; animation: mpBtnSheen 0.9s ease forwards; }
+@keyframes mpBtnSheen { to { transform: translateX(70%); } }
+.mp-btn-o:hover { box-shadow: 0 16px 44px -12px rgba(249, 115, 22, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+.mp-btn-o[disabled] { opacity: 0.62; cursor: default; }
+.mp-btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: #E9ECF1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.mp-btn-ghost:hover { background: rgba(255, 255, 255, 0.11); border-color: rgba(255, 255, 255, 0.38); }
+.mp-btn:active { filter: brightness(0.94); }
+.mp-btn.pressed { transition: transform 0.5s cubic-bezier(0.2, 1.55, 0.4, 1); }
+.mp-btn-sm { min-height: 40px; padding: 0 16px; font-size: 14px; border-radius: 11px; }
+.mp-btn-xl { min-height: 62px; font-size: 18px; border-radius: 16px; width: 100%; }
+.mp-arrow { transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
+.mp-btn:hover .mp-arrow { transform: translateX(4px); }
+
+/* ---------- fact strip ---------- */
+.mp-facts {
+  position: relative;
+  z-index: 5;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: clamp(30px, 5vw, 52px);
+}
+/* The strip carries 1 to 4 cells and the grid heals itself at every count,
+   so the band is never half-ruled with an empty right half. The 1px gaps ARE
+   the hairlines. */
+.mp-facts-in { display: grid; grid-template-columns: repeat(2, 1fr); }
+.mp-facts-in.n1 { grid-template-columns: 1fr; }
+/* Three cells below 760px: two up, the third spanning, so a caption like
+   YEARS WORKING never has to survive a 100px column. */
+.mp-facts-in.n3 .mp-fact:last-child { grid-column: 1 / -1; }
+.mp-fact {
+  padding: clamp(18px, 3.4vw, 28px) clamp(6px, 2vw, 10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+.mp-fact:nth-child(2n) { border-right: 0; }
+.mp-fact:nth-child(n + 3) { border-bottom: 0; }
+.mp-fact:last-child { border-right: 0; }
+.mp-fact .v {
+  font-family: var(--mp-serif);
+  font-size: clamp(30px, 8vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #fff;
+  display: block;
+  font-variant-numeric: tabular-nums;
+  /* Values WRAP, never ellipsize. Truncating "$1,250/hr" to "$1,2..." in the
+     one panel built to answer the money question is a truthfulness hazard,
+     not an overflow fix. */
+  overflow-wrap: anywhere;
+}
+/* Masked slide-up. The true number is always the only number rendered. */
+.mp-msk {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  line-height: 1.18;
+  padding: 0.12em 0.05em 0.14em;
+  margin: -0.12em -0.05em -0.14em;
+}
+.mp-msk > i { display: block; font-style: normal; line-height: 1.18; }
+/* SCRIPT-GATED. Every rule that hides content JavaScript is then responsible
+   for revealing sits behind (scripting: enabled). With JavaScript off, or in
+   a browser that does not support the query, nothing is ever hidden and the
+   page renders complete. */
+@media (scripting: enabled) {
+  .mp-msk > i { transform: translateY(112%); transition: transform 0.95s cubic-bezier(0.16, 0.9, 0.2, 1); }
+  .mp-fact.in .mp-msk > i { transform: none; }
+  .mp-fact:nth-child(2) .mp-msk > i { transition-delay: 0.09s; }
+  .mp-fact:nth-child(3) .mp-msk > i { transition-delay: 0.18s; }
+  .mp-fact:nth-child(4) .mp-msk > i { transition-delay: 0.27s; }
+}
+.mp-fact .u {
+  font-size: 0.42em;
+  letter-spacing: 0.02em;
+  color: var(--mp-o);
+  font-family: var(--mp-sans);
+  font-weight: 800;
+  vertical-align: 0.42em;
+  margin-left: 0.08em;
+}
+.mp-fact .k {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mp-steel);
+}
+.mp-fact::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background: var(--mp-o);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mp-fact.in::before { width: 100%; }
+.mp-fact:nth-child(2).in::before { transition-delay: 0.08s; }
+.mp-fact:nth-child(3).in::before { transition-delay: 0.16s; }
+.mp-fact:nth-child(4).in::before { transition-delay: 0.24s; }
+/* No cells at all: one positive sentence about how the business prices,
+   never a blank and never an "unavailable". */
+.mp-fact.fb {
+  grid-column: 1 / -1;
+  border-right: 0;
+  font-family: var(--mp-serif);
+  font-size: clamp(19px, 3.6vw, 26px);
+  line-height: 1.35;
+  color: #E4E8EE;
+  max-width: 30ch;
+}
+/* The provenance line for the numbers above it. The page is scrupulous
+   about the mechanic's work history and must not be silent about his
+   numbers, which sit in the most authoritative slot on the page. */
+.mp-facts-note {
+  margin: 0;
+  padding: 0 clamp(6px, 2vw, 10px) clamp(18px, 3vw, 24px);
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: var(--mp-steel-2);
+  max-width: 62ch;
+}
+
+/* ============================================================
+   WORK WALL
+   ============================================================ */
+.mp-work {
+  background: var(--mp-paper);
+  color: var(--mp-ink);
+  position: relative;
+  padding: clamp(56px, 9vw, 110px) 0 clamp(46px, 7vw, 90px);
+}
+.mp-work::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(var(--mp-paper-3) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mp-paper-3) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, #000, transparent 75%);
+  mask-image: radial-gradient(70% 60% at 50% 0%, #000, transparent 75%);
+}
+.mp-work .mp-wrap { position: relative; }
+.mp-cards { display: grid; gap: clamp(14px, 2.4vw, 20px); grid-template-columns: 1fr; }
+
+.mp-card {
+  /* One accent token per card. Self-reported work is neutral steel;
+     Myku-confirmed work is teal. The two never half-mix. */
+  --acc: #5C6675;
+  --acc-strong: rgba(92, 102, 117, 0.5);
+  --acc-soft: rgba(92, 102, 117, 0.18);
+  --acc-wash: rgba(92, 102, 117, 0.09);
+  position: relative;
+  background: linear-gradient(152deg, #FFFFFF 0%, #FBF9F5 52%, #F2EFE8 100%);
+  border: 1px solid #E4DFD5;
+  border-radius: 20px;
+  padding: clamp(20px, 3.6vw, 30px);
+  overflow: hidden;
+  min-height: clamp(230px, 42vw, 282px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(20, 16, 10, 0.05), 0 18px 40px -24px rgba(20, 16, 10, 0.4);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease,
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (scripting: enabled) {
+  .mp-card { opacity: 0; transform: translateY(26px); }
+  .mp-card.in { opacity: 1; transform: none; }
+}
+/* drafting grid inside the ticket */
+.mp-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(#CFC8BA 1px, transparent 1px),
+    linear-gradient(90deg, #CFC8BA 1px, transparent 1px);
+  background-size: 19px 19px;
+  opacity: 0.4;
+  -webkit-mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+  mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+}
+.mp-rail {
+  position: absolute;
+  left: 0;
+  top: clamp(20px, 3.6vw, 30px);
+  bottom: clamp(20px, 3.6vw, 30px);
+  width: 3px;
+  background: linear-gradient(180deg, var(--acc), var(--acc-soft));
+  border-radius: 0 3px 3px 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.9s 0.15s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.mp-card.in .mp-rail { transform: none; }
+.mp-card:nth-child(2) { transition-delay: 0.07s; }
+.mp-card:nth-child(3) { transition-delay: 0.14s; }
+.mp-card:nth-child(4) { transition-delay: 0.21s; }
+.mp-card:hover {
+  border-color: var(--acc-strong);
+  box-shadow: 0 1px 2px rgba(20, 16, 10, 0.05), 0 26px 60px -26px rgba(20, 16, 10, 0.45);
+}
+.mp-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+  background: radial-gradient(280px 200px at var(--mx, 50%) var(--my, 0%), var(--acc-wash), transparent 70%);
+}
+.mp-card:hover::before { opacity: 1; }
+
+/* ---------- VERIFIED TICKET ----------
+   A job Myku itself confirmed. This is the only place on the page a check
+   mark is truthful, so it is the only place one appears. The card gains
+   weight (heavier ring, deeper shadow, wider rail) rather than the
+   self-reported cards losing any: a mechanic's own listings must never read
+   as warnings on his own storefront. */
+.mp-card.ver {
+  --acc: var(--mp-teal);
+  --acc-strong: rgba(18, 98, 110, 0.55);
+  --acc-soft: rgba(18, 98, 110, 0.18);
+  --acc-wash: rgba(18, 98, 110, 0.10);
+  background: linear-gradient(152deg, #FFFFFF 0%, #F8FBFB 50%, #EAF2F2 100%);
+  border-color: #C7DADC;
+  box-shadow:
+    0 1px 2px rgba(10, 42, 48, 0.06),
+    0 22px 50px -24px rgba(8, 52, 60, 0.5),
+    inset 0 0 0 1px rgba(18, 98, 110, 0.12);
+}
+.mp-card.ver:hover {
+  box-shadow:
+    0 1px 2px rgba(10, 42, 48, 0.06),
+    0 30px 66px -26px rgba(8, 52, 60, 0.55),
+    inset 0 0 0 1px rgba(18, 98, 110, 0.2);
+}
+.mp-card.ver .mp-rail { width: 5px; border-radius: 0 4px 4px 0; }
+.mp-card.ver::after { opacity: 0.3; }
+
+.mp-card-body { position: relative; z-index: 2; max-width: 66%; flex: 1 1 auto; min-width: 0; }
+/* A card with the mechanic's own photograph gives that photo the plate
+   slot, so the picture he took of his own job is never lost to a drawing
+   Myku made up about it. */
+.mp-card.pic .mp-card-body { max-width: 58%; }
+.mp-card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+
+/* Both marks: same shape, same rhythm, same size, so neither reads as an
+   exception. Only the Myku-confirmed one carries a platform colour. */
+.mp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font-family: var(--mp-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #4A5260;
+  background: rgba(92, 102, 117, 0.09);
+  border: 1px solid rgba(92, 102, 117, 0.34);
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+.mp-badge svg { width: 11px; height: 11px; flex: 0 0 auto; }
+.mp-badge.ver {
+  color: var(--mp-teal-deep);
+  background: rgba(18, 98, 110, 0.11);
+  border-color: rgba(18, 98, 110, 0.36);
+}
+.mp-badge.ver svg { width: 12.5px; height: 12.5px; }
+/* Every card states its provenance in one line, so the caveat on a
+   self-reported card is a symmetry, not a flag raised against it. This
+   sentence is what the whole trust model rests on, so it is not the
+   quietest text on the card it governs. */
+.mp-notconf,
+.mp-conf {
+  display: block;
+  width: 100%;
+  order: 99;
+  font-family: var(--mp-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  margin-top: 8px;
+}
+.mp-notconf { color: var(--mp-slate-2); }
+.mp-conf { color: #1B5560; font-weight: 600; }
+
+.mp-card h3 {
+  font-size: clamp(24px, 5.2vw, 33px);
+  line-height: 1.02;
+  letter-spacing: -0.038em;
+  font-weight: 900;
+  margin: 14px 0 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.mp-card .job { margin: 9px 0 0; color: #524D45; font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
+.mp-card-foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px dashed #D5CFC2;
+}
+/* The work wall is a resume, not a price list. What he DID is the headline;
+   what it cost is quiet supporting evidence. Forward-looking pricing lives
+   on the services list. */
+.mp-price {
+  font-family: var(--mp-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+  color: #3F3A33;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* "Job total" is a Myku-authored caption and is reserved for the platform's
+   own transaction record. A self-reported price is free text the mechanic
+   typed ("80-120", "parts only", "call me"), so it prints verbatim with no
+   caption stamped on top of it. */
+.mp-price .lbl {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7A7266;
+  font-weight: 700;
+}
+.mp-when {
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mp-slate);
+  text-align: right;
+  line-height: 1.7;
+  flex: 0 0 auto;
+}
+/* Publishing a price is optional, so a card can legitimately have none. The
+   footer then becomes one deliberate left-aligned block on the card's own
+   left margin, rather than a two-column row with an empty first column and
+   a date stranded at the right. It reads as a footer with one thing in it,
+   which is what it is. */
+.mp-card-foot.noprice { justify-content: flex-start; align-items: center; }
+.mp-card-foot.noprice .mp-when { text-align: left; font-size: 11.5px; color: var(--mp-slate-2); line-height: 1.5; }
+
+/* blueprint plate */
+.mp-plate {
+  position: absolute;
+  right: -7%;
+  top: -3%;
+  width: min(56%, 250px);
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.45s ease;
+}
+.mp-plate .ln { fill: none; stroke: #26313E; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.46; }
+.mp-plate .acc { fill: none; stroke: var(--acc); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.mp-plate .dash { stroke-dasharray: 3 4; opacity: 0.3; }
+@media (scripting: enabled) {
+  .mp-plate .ln > *:not(.dash),
+  .mp-plate .acc > * { stroke-dasharray: 560; stroke-dashoffset: 560; }
+  .mp-card.in .mp-plate .ln > *:not(.dash),
+  .mp-card.in .mp-plate .acc > * { animation: mpDrawIn 1.15s cubic-bezier(0.5, 0, 0.3, 1) forwards; }
+}
+.mp-card.in .mp-plate .ln > *:nth-child(1) { animation-delay: 0.10s; }
+.mp-card.in .mp-plate .ln > *:nth-child(2) { animation-delay: 0.16s; }
+.mp-card.in .mp-plate .ln > *:nth-child(3) { animation-delay: 0.22s; }
+.mp-card.in .mp-plate .ln > *:nth-child(4) { animation-delay: 0.28s; }
+.mp-card.in .mp-plate .ln > *:nth-child(5) { animation-delay: 0.34s; }
+.mp-card.in .mp-plate .ln > *:nth-child(6) { animation-delay: 0.40s; }
+.mp-card.in .mp-plate .ln > *:nth-child(7) { animation-delay: 0.46s; }
+.mp-card.in .mp-plate .ln > *:nth-child(8) { animation-delay: 0.52s; }
+.mp-card.in .mp-plate .ln > *:nth-child(9) { animation-delay: 0.58s; }
+.mp-card.in .mp-plate .acc > * { animation-delay: 0.62s; }
+.mp-card:hover .mp-plate { opacity: 1; }
+/* On one-up phone cards the plate sits directly behind the provenance
+   caveat, which is the one line on the card that must stay easy to read. */
+@media (max-width: 759px) {
+  .mp-plate { opacity: 0.5; }
+}
+
+/* the mechanic's own photo, in the plate slot */
+.mp-pic {
+  position: absolute;
+  right: clamp(14px, 2.6vw, 22px);
+  top: clamp(14px, 2.6vw, 22px);
+  z-index: 1;
+  width: min(38%, 152px);
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(20, 16, 10, 0.14);
+  box-shadow: 0 10px 24px -14px rgba(20, 16, 10, 0.6);
+}
+
+/* overflow disclosure, zero JavaScript */
+.mp-more { margin-top: clamp(14px, 2.4vw, 20px); }
+.mp-more > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid var(--mp-paper-3);
+  background: #FFFFFF;
+  font-family: var(--mp-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--mp-slate-2);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 .mp-more > summary::-webkit-details-marker { display: none; }
-.mp-more > summary::marker { content: ''; }
-/* The summary vanishes once expanded, as specified, but via the clip
-   pattern rather than display:none. display:none would delete the element
-   that currently holds focus, dropping a keyboard or switch user to <body>
-   and back to the top of the document. Clipped, it keeps its place in the
-   focus order and stays available as the collapse control. */
+.mp-more > summary:hover { border-color: #BDB6A8; background: var(--mp-paper); }
+/* CLIPPED, not display:none. display:none deletes the element that
+   currently holds focus and drops a keyboard or switch user to <body> and
+   the top of the document. */
 .mp-more[open] > summary {
   position: absolute;
   width: 1px;
   height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
   padding: 0;
   border: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
+  min-height: 0;
 }
+.mp-more .mp-cards { margin-top: clamp(14px, 2.4vw, 20px); }
 
-/* ---- ABOUT ---- */
-.mp-bio {
-  padding: var(--s-4);
-  font-size: var(--t-prose);
-  font-weight: 400;
-  line-height: 1.65;
-  color: var(--ink-2);
-}
-.mp-bio p + p { margin-top: var(--s-3); }
-.mp-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--s-4);
-  padding: 14px var(--s-4);
-  border-bottom: 1px solid var(--rule);
-  align-items: baseline;
-}
-/* A bio above the fact rows needs the seam between prose and ledger. */
-.mp-bio + .mp-row { border-top: 1px solid var(--rule); }
-.mp-row .k {
-  font-size: var(--t-meta);
-  font-weight: 400;
-  color: var(--ink-3);
-}
-.mp-row .v {
-  font-size: var(--t-body);
-  font-weight: 600;
-  color: var(--ink);
-  text-align: right;
-  overflow-wrap: anywhere;
-  min-width: 0;
-}
-
-/* ---- SERVICES ---- */
-/* A ruled list reads as a menu of what this business does.
-   Rules are border-TOP here so the frame's own edge closes the menu
-   and the first row sits clean under the frame. */
-.mp-svcs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--s-5);
-}
-.mp-svcs > div {
-  padding: var(--s-3) var(--s-4);
-  border-top: 1px solid var(--rule);
-  font-size: var(--t-body);
-  font-weight: 500;
-  color: var(--ink-2);
-  overflow-wrap: anywhere;
-}
-/* The mechanic's own ballpark, on the rows he chose to price. Ink and
-   bold because a price is a fact, not a footnote; on its own line so
-   priced and unpriced rows keep the same left edge. */
-.mp-svc-price {
-  display: block;
-  margin-top: 2px;
-  font-size: var(--t-meta);
-  font-weight: 700;
-  color: var(--ink);
-}
-.mp-svcs > div:nth-child(-n + 2) { border-top: 0; }
-/* An orphan on the last row spans it, so its rule runs the full width.
-   A hairline that stops dead halfway across is, on a page built from
-   hairlines, the most legible possible mistake. */
-.mp-svcs > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
-
-/* ---- REVIEWS ---- */
-.mp-rev {
-  position: relative;
-  padding: var(--s-5) var(--s-4);
-  border-bottom: 1px solid var(--rule);
-}
-/* Decorative quote glyph, recessed into the card behind the words. */
-.mp-q {
+/* ============================================================
+   ABOUT — ink band
+   ============================================================ */
+.mp-bio { padding: clamp(60px, 10vw, 120px) 0 clamp(52px, 8vw, 100px); position: relative; overflow: hidden; }
+.mp-bio-mark {
   position: absolute;
-  top: var(--s-3);
-  left: var(--s-2);
-  width: 44px;
-  height: 38px;
-  fill: var(--paper-2);
-  pointer-events: none;
+  right: -16%;
+  top: -10%;
+  width: min(70vw, 620px);
+  z-index: 0;
+  opacity: 0.16;
+  animation: mpSpin 90s linear infinite;
 }
-.mp-rev p {
-  position: relative;
-  font-size: var(--t-prose);
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--ink-2);
+.mp-bio .mp-wrap { position: relative; z-index: 5; }
+.mp-bio-p {
+  margin: 0 0 clamp(16px, 2.6vw, 22px);
+  color: #BAC2CC;
+  font-size: clamp(16px, 2.3vw, 19px);
+  line-height: 1.7;
+  max-width: 46ch;
   overflow-wrap: anywhere;
 }
-.mp-rev .att {
-  position: relative;
-  margin-top: var(--s-3);
-  font-size: var(--t-meta);
-  font-weight: 400;
-  color: var(--ink-3);
+.mp-bio-p:first-child::first-letter {
+  font-family: var(--mp-serif);
+  font-size: 2.6em;
+  float: left;
+  line-height: 0.86;
+  padding: 0.06em 0.12em 0 0;
+  color: var(--mp-o);
 }
+.mp-bio-p:last-child { margin-bottom: 0; }
 
-/* ============================================================
-   9. HOW MYKU WORKS
-   The trust block: recessed paper, compact, quietly framed. A
-   filing label, not a marketing panel.
-   ============================================================ */
-.mp-how {
-  margin-top: var(--s-6);
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-lg);
-  padding: var(--s-4);
-}
-.mp-how .mp-sec-h { margin-bottom: var(--s-3); }
-.mp-how p {
-  font-size: var(--t-meta);
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--ink-3);
-}
-.mp-how p + p { margin-top: var(--s-3); }
-
-/* ============================================================
-   10. REPEAT ASK  (rich pages only, mobile and tablet only)
-   ============================================================ */
-.mp-repeat {
-  margin-top: var(--s-6);
-  text-align: center;
-}
-/* After a successful send the composer it points at says "Request sent."
-   and the focus handler no-ops, so the page's loudest control would lead
-   to a dead end. QuoteForm stamps the flag on <body> when done. */
-body[data-lead-sent='1'] .mp-repeat {
-  display: none;
-}
-.mp-repeat h2 {
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-head);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: var(--ink);
-  margin-bottom: var(--s-4);
-}
-/* The SAME orange control, not a ghost button. */
-.mp-repeat .mp-send { margin-top: 0; }
-
-/* ============================================================
-   11. FOOTER  (local paper variant)
-   A hairline, one quiet line, the badge, the legal links.
-   ============================================================ */
-.mp-footer {
-  margin-top: var(--s-7);
-  border-top: 1px solid var(--rule);
-  padding: var(--s-6) 0;
-  text-align: center;
-}
-.mp-footer > * + * { margin-top: var(--s-3); }
-.mp-footer .note {
-  font-size: var(--t-meta);
-  font-weight: 400;
-  line-height: 1.55;
-  color: var(--ink-3);
-}
-.mp-footer .note a {
-  color: var(--ink-3);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-}
-.mp-footer .note a:hover { color: var(--ink); }
-.mp-footer .links {
+/* Paperwork checks. A DIFFERENT mark from job provenance, on purpose: a
+   reviewed document is not a completed job, and the teal check must never
+   migrate onto it. The qualification sits adjacent to the claim, same size,
+   same breath. That adjacency IS the feature: never render one without the
+   other, and never render either on an unclaimed page. */
+.mp-cred {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-4);
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: clamp(26px, 4vw, 36px);
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 15px;
+  color: #D2D8E0;
+  line-height: 1.5;
 }
-.mp-footer .links a {
-  font-size: var(--t-meta);
-  font-weight: 500;
-  color: var(--ink-3);
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-}
-.mp-footer .links a:hover { color: var(--ink); }
-.mp-footer .badgewrap { display: flex; justify-content: center; }
+.mp-cred svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 3px; color: var(--mp-steel-2); }
+.mp-qual { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: #99A1AC; max-width: 46ch; }
 
-/* ============================================================
-   APP STORE BADGE, paper variant.
-   Scoped override of the global .appstore: the ink OUTLINE
-   version, not the black glossy marketing badge. It also pulls
-   the badge's two half-pixel type sizes back onto this page's
-   integer scale.
-   ============================================================ */
-.mp .appstore {
-  background: transparent;
-  border: 1px solid var(--ink);
-  border-radius: var(--r-sm);
-  height: 36px;
-  padding: 0 14px;
-  gap: var(--s-2);
-  color: var(--ink);
-  box-shadow: none;
-  transform: none;
-}
-.mp .appstore:hover {
-  background: var(--paper-2);
-  transform: none;
-  box-shadow: none;
-}
-.mp .appstore .apple { width: 18px; height: 18px; fill: var(--ink); }
-.mp .appstore .small { font-size: var(--t-micro); font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
-.mp .appstore .big {
-  font-family: var(--font-disp), var(--font-inter), sans-serif;
-  font-size: var(--t-body);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-
-/* ============================================================
-   BREAKPOINT 1: >=720px. Typography and grid density only.
-   Still one column. No clamp() anywhere on this page.
-   ============================================================ */
-@media (min-width: 720px) {
-  .mp { --t-name: 44px; --gutter: 24px; }
-  .mp-fascia { padding-bottom: var(--s-8); }
-  .mp-portrait { width: 96px; height: 96px; margin-top: -48px; }
-  .mp-svcs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  /* Reset the 2-column first-row rule, then the 3-column equivalents. */
-  .mp-svcs > div:nth-child(-n + 2) { border-top: 1px solid var(--rule); }
-  .mp-svcs > div:nth-child(-n + 3) { border-top: 0; }
-  .mp-svcs > div:last-child:nth-child(odd) { grid-column: auto; }
-  .mp-svcs > div:last-child:nth-child(3n + 1) { grid-column: 1 / -1; }
-  .mp-svcs > div:last-child:nth-child(3n + 2) { grid-column: 2 / -1; }
-  .mp-strip.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-/* ============================================================
-   BREAKPOINT 2: >=900px. The only real layout change.
-   The sidebar is the one concession to conversion in an otherwise
-   single-column design: it holds the only conversion event on
-   screen for the entire scroll of a rich page. The card styles
-   live on the base .mp-ask now; this block only pins it.
-   max-height: a fully expanded composer runs ~700px, taller than
-   a 1280x720 laptop viewport; without it sticky pins the top and
-   the send button can never be scrolled to.
-   ============================================================ */
-@media (min-width: 900px) {
-  .mp { --measure: 1000px; }
-  .mp-body {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    column-gap: var(--s-8);
-    align-items: start;
-  }
-  .mp-col { grid-column: 1; grid-row: 1; min-width: 0; max-width: 640px; }
-  .mp-ask {
-    grid-column: 2;
-    grid-row: 1;
-    position: sticky;
-    top: var(--s-5);
-    max-height: calc(100vh - var(--s-8));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  .mp-repeat { display: none; }
-  .mp-how { max-width: 62ch; }
-}
-
-/* A viewport too short to hold the whole composer cannot have both the pin
-   and one scroll surface. The max-height above keeps the send button
-   reachable, but it pays for it with a scrollbar nested inside the page's
-   only conversion event, which reads as broken and hides the button behind
-   a gesture nobody is prompted to make. On those screens, stop pinning: the
-   composer scrolls with the page and every visitor gets the whole card.
-   The pin returns the moment there is room for it. (Cutoff raised from
-   800px on 2026-08-04: the booking composer added a timing row and a
-   visible vehicle field, so the expanded card now runs ~850px.) */
-@media (min-width: 900px) and (max-height: 940px) {
-  .mp-ask {
-    position: static;
-    max-height: none;
-    overflow-y: visible;
-  }
-}
-
-/* THE SPARSE DESKTOP OVERRIDE.
-   On a sparse page the left column would hold only the HOW MYKU WORKS
-   paragraph, so a 640/360 grid would render a nearly empty column beside
-   a floating form. One boolean collapses it to the mobile layout. The
-   composer keeps its card; only the pinning goes. */
-@media (min-width: 900px) {
-  .mp--sparse .mp-body {
-    display: block;
-    max-width: 640px;
-    margin: 0 auto;
-  }
-  .mp--sparse .mp-ask {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
-}
-
-/* ============================================================
-   BREAKPOINT 3: >=1200px. The desktop pass.
-   Up to here the page is a laptop composition; on a wide monitor
-   it floated in dead margin: a 1000px measure in a 1900px window,
-   a 44px name in a 270px band that was mostly empty ink. This
-   block scales the composition instead of just centering it. The
-   sign gets sign-sized type, the shelf gets a deeper overlap, the
-   money figures grow, and the composer earns more column. Nothing
-   below 1200px changes by a single pixel.
-   ============================================================ */
-@media (min-width: 1200px) {
-  .mp { --measure: 1200px; --t-name: 56px; --gutter: 32px; }
-  .mp-topbar .mp-wrap { height: 52px; }
-  .mp-fascia .mp-eyebrow { margin-top: var(--s-6); }
-  /* The sign's supporting lines step up one type token with it. */
-  .mp-spec,
-  .mp-factline { font-size: var(--t-prose); }
-  /* Overlap runway: the portrait hangs 60px below the band edge. */
-  .mp-fascia { padding-bottom: 72px; }
-  .mp-portrait { width: 120px; height: 120px; margin-top: -60px; }
-  .mp-portrait.ph { font-size: 28px; }
-  .mp-panel { margin-top: -20px; }
-  .mp-cell { padding: 18px var(--s-5); }
-  /* The money figures alone get one size above t-head: the panel
-     exists to answer the money question, and at this width 22px
-     read as a footnote inside a 500px cell. */
-  .mp-cell b { font-size: 26px; }
-  .mp-body { grid-template-columns: minmax(0, 1fr) 400px; column-gap: var(--s-8); }
-  .mp-col { max-width: 720px; }
-}
-
-/* The sign keeps pace on genuinely wide monitors. Type only: the
-   measure stops at 1280px so line lengths stay readable. */
-@media (min-width: 1600px) {
-  .mp { --measure: 1280px; --t-name: 64px; }
-}
-
-/* ============================================================
-   THE CRAFT LAYER
-   The system above is correct but flat: it reads as a document,
-   not as a place someone runs a business from. Everything below
-   adds material and life WITHOUT touching the layout, the type
-   scale, or the trust marks. Three rules held throughout:
-
-   1. Every effect is CSS only. No JS gates content, so a crawler,
-      a reader mode, or a dead script still gets the whole page.
-   2. Motion is entrance and response only, never ambient. Nothing
-      loops, nothing drifts, nothing begs for attention while a
-      stressed customer is trying to read a price.
-   3. prefers-reduced-motion kills all of it (the block above
-      already does this globally).
-   ============================================================ */
-
-/* ---- MATERIAL: the fascia stops being a black rectangle ----
-   A warm light source top-left, a cool falloff bottom-right, and
-   a fine grain so the ink reads as a painted surface instead of
-   a fill. The accent hairline at the bottom edge is the brand
-   signing the sign: one pixel of orange, the whole width. */
-.mp-fascia {
+/* ---------- SERVICE AREA / RADAR PLATE ---------- */
+.mp-area {
   position: relative;
-  background:
-    radial-gradient(120% 140% at 12% -20%, #2A241C 0%, transparent 55%),
-    radial-gradient(90% 120% at 100% 100%, #0D0F14 0%, transparent 60%),
-    var(--ink);
-  isolation: isolate;
+  margin-top: clamp(30px, 4vw, 10px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 20px;
+  /* Opaque: the spinning .mp-bio-mark sits behind this panel, and a
+     translucent ground let hard orange arcs crawl across the radar. */
+  background: linear-gradient(158deg, #1B2028, #0A0C10);
+  box-shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  padding: clamp(20px, 3.2vw, 28px);
+  overflow: hidden;
 }
-.mp-fascia::before {
+.mp-area::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: -1;
   pointer-events: none;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='0.5'/%3E%3C/svg%3E");
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 19px 19px;
+  -webkit-mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+  mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
 }
-/* The band signs off with one orange hairline, edge to edge. */
-.mp-fascia::after {
+.mp-area > * { position: relative; z-index: 1; }
+.mp-area-head { display: flex; align-items: center; gap: 12px; margin-bottom: clamp(14px, 2.4vw, 18px); }
+.mp-area-head .k {
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mp-steel);
+  white-space: nowrap;
+}
+.mp-area-head .mp-rule { opacity: 0.14; }
+.mp-area-in { display: grid; grid-template-columns: 1fr; gap: clamp(18px, 3vw, 26px); align-items: center; }
+
+.mp-radar { width: min(248px, 100%); margin: 0 auto; position: relative; }
+.mp-radar::before {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent) 22%, var(--accent) 78%, transparent);
-  opacity: 0.85;
+  left: 50%;
+  top: 50%;
+  width: 118%;
+  height: 118%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.10), rgba(249, 115, 22, 0.03) 46%, transparent 70%);
 }
-.mp-topbar { border-bottom-color: rgba(250, 247, 242, 0.10); }
-
-/* The name gets optical weight: a whisper of text shadow so it
-   sits ON the band rather than in it. */
-.mp-name {
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
-  text-wrap: balance;
-}
-
-/* ---- DEPTH: cards lit from above ----
-   Two shadows, not one: a tight contact shadow and a wide ambient
-   one, plus a 1px top highlight. That combination is what makes a
-   surface look like it is resting on the paper instead of drawn
-   on it. */
-.mp-panel,
-.mp-ask,
-.mp-list,
-.mp-bio,
-.mp-svcs,
-.mp-rev {
-  box-shadow:
-    0 1px 2px rgba(20, 18, 15, 0.05),
-    0 12px 28px -16px rgba(20, 18, 15, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-.mp-portrait {
-  box-shadow:
-    0 2px 6px rgba(20, 18, 15, 0.14),
-    0 14px 30px -14px rgba(20, 18, 15, 0.30);
+.mp-radar svg { width: 100%; height: auto; overflow: visible; position: relative; }
+.mp-radar .fld { stroke: rgba(255, 255, 255, 0.19); fill: none; stroke-width: 1; }
+.mp-radar .ring { stroke: rgba(184, 193, 206, 0.52); fill: none; stroke-width: 1.4; stroke-linecap: round; }
+.mp-radar .ring.dash { stroke-dasharray: 3 4; stroke: rgba(184, 193, 206, 0.4); }
+.mp-radar .acc { stroke: var(--mp-o); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mp-radar .twn { fill: rgba(200, 208, 218, 0.62); }
+.mp-radar .lbl-t { font-family: var(--mp-mono); font-weight: 600; fill: #E7EAEF; letter-spacing: 1.9px; }
+.mp-radar .lbl-s { font-family: var(--mp-mono); fill: rgba(178, 186, 197, 0.85); letter-spacing: 1.5px; }
+.mp-radar .halo { fill: none; stroke: var(--mp-o); stroke-width: 1; opacity: 0.34; }
+/* The sweep does NOT rotate. A turning radar sweep over concentric range
+   rings is the standard visual grammar of live tracking, and nothing behind
+   this drawing is live: it is a static picture of towns that appear on this
+   page. It is drawn once, at rest. */
+@media (scripting: enabled) {
+  .mp-radar .dr { stroke-dasharray: 100; stroke-dashoffset: 100; }
+  .mp-area.in .mp-radar .dr { animation: mpDrawIn 1.5s cubic-bezier(0.5, 0, 0.3, 1) forwards; }
+  .mp-area.in .mp-radar .d1 { animation-delay: 0.08s; }
+  .mp-area.in .mp-radar .d2 { animation-delay: 0.20s; }
+  .mp-area.in .mp-radar .d3 { animation-delay: 0.32s; }
+  .mp-area.in .mp-radar .d4 { animation-delay: 0.46s; }
+  .mp-radar .fade { opacity: 0; transition: opacity 0.9s 0.75s ease; }
+  .mp-area.in .mp-radar .fade { opacity: 1; }
 }
 
-/* ---- RESPONSE: things move when touched, and only then ---- */
-.mp-chip {
-  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    background-color 150ms ease, border-color 150ms ease,
-    box-shadow 150ms ease, color 150ms ease;
+.mp-area-rows { display: grid; gap: 0; min-width: 0; }
+.mp-arow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
-.mp-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px -4px rgba(20, 18, 15, 0.25); }
-.mp-chip:active { transform: translateY(0) scale(0.97); }
-/* The selected chip is the one answer on the page that has been
-   given, so it earns the ink fill and a real lift. */
-.mp-chip.sel { box-shadow: 0 4px 12px -4px rgba(20, 18, 15, 0.40); }
-
-.mp-send {
-  background-image: linear-gradient(180deg, #FB8A3C 0%, var(--accent) 100%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.30) inset,
-    0 8px 20px -8px rgba(249, 115, 22, 0.55);
-  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 180ms ease, filter 150ms ease;
+.mp-arow:first-child { border-top: 1px solid rgba(255, 255, 255, 0.09); }
+.mp-arow .k {
+  font-family: var(--mp-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mp-steel);
+  flex: 0 0 auto;
 }
-.mp-send:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.30) inset,
-    0 14px 30px -10px rgba(249, 115, 22, 0.65);
+.mp-arow .v {
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #EDEFF2;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
-.mp-send:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+.mp-arow .v svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--mp-o); }
+/* The correction to the drawing must be readable, not fine print: it is the
+   sentence that stops a range ring reading as a coverage guarantee. */
+.mp-area-note {
+  margin: 14px 0 0;
+  font-family: var(--mp-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: #A8B0BA;
+}
 
-/* Inputs grow their ring rather than snapping it on. */
-.mp .mp-inp { transition: border-color 160ms ease, box-shadow 200ms ease, background-color 160ms ease; }
-
-/* Job rows answer the pointer: a warm wash and an accent edge that
-   wipes in from the left. */
-.mp-job {
+/* ============================================================
+   SERVICES
+   ============================================================ */
+.mp-services {
+  background: var(--mp-paper-2);
+  color: var(--mp-ink);
+  padding: clamp(56px, 9vw, 110px) 0;
   position: relative;
-  transition: background-color 180ms ease;
+  overflow: hidden;
 }
-.mp-job::before {
+.mp-srv-list { border-top: 1px solid var(--mp-paper-3); }
+.mp-srv {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: clamp(15px, 2.8vw, 22px) 4px;
+  border-bottom: 1px solid var(--mp-paper-3);
+  overflow: hidden;
+}
+.mp-srv::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: var(--accent);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  width: 0;
+  background: var(--mp-o);
+  opacity: 0.07;
+  transition: width 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.mp-job:hover { background: var(--paper-2); }
-.mp-job:hover::before { transform: scaleY(1); }
-.mp-job-thumb { transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1); }
-.mp-job:hover .mp-job-thumb { transform: scale(1.06); }
+.mp-srv:hover::before { width: 100%; }
+.mp-srv .n {
+  font-size: clamp(19px, 4.4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.25, 1), color 0.3s;
+  position: relative;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.mp-srv:hover .n { transform: translateX(10px); color: var(--mp-o-deep); }
+.mp-srv .dots { flex: 1; border-bottom: 1px dotted #B9B2A6; min-width: 48px; transform: translateY(-4px); opacity: 0.7; }
+.mp-srv .p {
+  font-family: var(--mp-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #635D57;
+  white-space: nowrap;
+  position: relative;
+}
+.mp-srv .p b { color: var(--mp-o-deep); font-size: 15px; letter-spacing: -0.01em; font-family: var(--mp-sans); font-weight: 900; }
+/* Price-less service: the price slot renders nothing. A price is the
+   mechanic's own choice per service, and no price means he chose not to
+   say. The page never invents a "Quoted" to fill the gap. */
+.mp-srv.np .dots { margin-right: 6px; }
 
-/* ---- ARRIVAL: the page assembles itself, once ----
-   Content is in the DOM and visible to anything that ignores CSS;
-   this only animates the last 10px of its arrival. The shelf and
-   the composer lead because they answer the two questions every
-   visitor has: who is this, and how do I reach him. */
-@keyframes mp-rise {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
+/* ============================================================
+   REVIEWS
+   ============================================================ */
+.mp-reviews {
+  background: var(--mp-paper);
+  color: var(--mp-ink);
+  padding: clamp(56px, 9vw, 110px) 0;
+  position: relative;
+  overflow: hidden;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .mp-fascia .mp-eyebrow,
-  .mp-name,
-  .mp-spec,
-  .mp-factline,
-  .mp-shelf,
-  .mp-ask,
-  .mp-col > * {
-    animation: mp-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .mp-name { animation-delay: 40ms; }
-  .mp-spec { animation-delay: 80ms; }
-  .mp-factline { animation-delay: 110ms; }
-  .mp-shelf { animation-delay: 150ms; }
-  .mp-ask { animation-delay: 190ms; }
-  .mp-col > *:nth-child(2) { animation-delay: 120ms; }
-  .mp-col > *:nth-child(3) { animation-delay: 160ms; }
-  .mp-col > *:nth-child(n + 4) { animation-delay: 200ms; }
+.mp-rev-list { display: grid; gap: clamp(14px, 2.4vw, 20px); grid-template-columns: 1fr; }
+.mp-rev {
+  position: relative;
+  border: 1px solid #E4DFD5;
+  border-radius: 20px;
+  background: linear-gradient(152deg, #FFFFFF 0%, #FBF9F5 60%, #F4F1EA 100%);
+  padding: clamp(20px, 3.4vw, 28px);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(20, 16, 10, 0.05);
 }
+.mp-rev-q {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  width: 54px;
+  height: 48px;
+  fill: var(--mp-paper-2);
+  z-index: 0;
+}
+.mp-rev p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--mp-serif);
+  font-size: clamp(18px, 2.6vw, 22px);
+  line-height: 1.45;
+  color: #241F19;
+  overflow-wrap: anywhere;
+}
+.mp-rev .att {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mp-slate);
+  font-variant-numeric: tabular-nums;
+}
+.mp-reviews .mp-more > summary { background: #FFFFFF; }
+.mp-reviews .mp-more .mp-rev-list { margin-top: clamp(14px, 2.4vw, 20px); }
 
-/* ---- SECTION EYEBROWS: the rule earns a tick of accent ---- */
-.mp-sec-rule { position: relative; }
-.mp-sec-rule::after {
+/* ============================================================
+   THE QUOTE COMPOSER
+   ============================================================ */
+.mp-quote { position: relative; padding: clamp(54px, 9vw, 104px) 0 clamp(34px, 5vw, 60px); overflow: hidden; }
+.mp-glow {
+  position: absolute;
+  left: 50%;
+  top: -10%;
+  width: 150vw;
+  height: 70vh;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(249, 115, 22, 0.20), transparent 68%);
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(10px);
+}
+.mp-quote .mp-wrap { position: relative; z-index: 5; }
+/* Both anchors clear the sticky header. #ask is the section; #quote is a
+   zero-height span that preserves the legacy deep link. */
+.mp-anchor { display: block; height: 0; overflow: hidden; scroll-margin-top: 74px; }
+.mp-quote, .mp-work { scroll-margin-top: 60px; }
+
+.mp-composer {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(29, 34, 42, 0.92), rgba(13, 15, 19, 0.96));
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  padding: clamp(20px, 4vw, 38px);
+  position: relative;
+  overflow: hidden;
+}
+.mp-composer::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 50%;
-  width: 14px;
-  height: 2px;
-  transform: translateY(-50%);
-  background: var(--accent);
-  opacity: 0.55;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--mp-o), var(--mp-o-hot), var(--mp-o), transparent);
+  background-size: 220% 100%;
+  animation: mpRail 5s linear infinite;
+}
+@keyframes mpRail { to { background-position: -220% 0; } }
+.mp-composer h2 {
+  font-size: clamp(28px, 6.2vw, 46px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  font-weight: 900;
+  margin: 6px 0 0;
+  text-transform: uppercase;
+  color: #fff;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.mp-lead { margin: 12px 0 0; color: #A9B1BC; font-size: 15.5px; line-height: 1.55; max-width: 46ch; }
+.mp-fgroup { margin-top: clamp(22px, 3.6vw, 30px); }
+.mp-flabel {
+  display: block;
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mp-steel-2);
+  margin-bottom: 11px;
+  font-weight: 600;
+}
+.mp-flabel .req { color: var(--mp-o); }
+
+.mp-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+/* Chips WRAP. The mechanic's longest service names are exactly the ones his
+   bio leads with, and dropping them from the ask (because they did not fit
+   one nowrap line) cost him the lead or dumped it into "Not sure". */
+.mp-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  background: rgba(255, 255, 255, 0.045);
+  color: #D8DCE3;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  max-width: 100%;
+  transition: transform 0.4s cubic-bezier(0.2, 1.3, 0.4, 1), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+.mp-chip:hover { border-color: rgba(255, 255, 255, 0.34); background: rgba(255, 255, 255, 0.09); }
+.mp-chip.sel {
+  background: linear-gradient(160deg, var(--mp-o-hot), var(--mp-o) 55%, var(--mp-o-deep));
+  border-color: var(--mp-o-hot);
+  color: #180A02;
+  font-weight: 800;
+  box-shadow: 0 10px 26px -10px rgba(249, 115, 22, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+.mp-chips.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mp-chips.seg .mp-chip { width: 100%; justify-content: center; text-align: center; font-size: 14.5px; padding: 11px 8px; }
+
+.mp-inp {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 13px;
+  padding: 15px 16px;
+  color: #EEF1F4;
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 54px;
+  transition: border-color 0.25s, background-color 0.25s, box-shadow 0.25s;
+}
+textarea.mp-inp { resize: vertical; min-height: 104px; }
+.mp-inp::placeholder { color: #7E8894; }
+.mp-inp:focus {
+  outline: none;
+  border-color: var(--mp-o);
+  background: rgba(249, 115, 22, 0.07);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.16);
+}
+.mp-inp:focus-visible { outline: none; }
+.mp-inp.bad,
+.mp [aria-invalid='true'].mp-inp { border-color: var(--mp-o-hot); }
+
+.mp-two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.mp-sub {
+  margin: 11px 0 0;
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #8E96A1;
+  line-height: 1.6;
+}
+.mp-submit { margin-top: clamp(22px, 3.4vw, 28px); }
+.mp-price-hint {
+  margin: 11px 0 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #FFD3AE;
+}
+/* Validation text, announced. ALWAYS in the DOM with height reserved, so the
+   layout never jumps and the live region is not created at announce time. */
+.mp-err {
+  margin: 12px 0 0;
+  min-height: 20px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: #FFB088;
+  font-weight: 600;
+}
+/* Optional-name disclosure */
+.mp-optlink {
+  margin-top: 14px;
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--mp-steel-2);
+}
+.mp-optlink:hover { color: #D8DCE3; }
+.mp-optlink .chev { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s ease; }
+.mp-optlink[aria-expanded='true'] .chev { transform: rotate(180deg); }
+/* Honeypot. The label maps to nothing in any autofill vocabulary. */
+.mp-hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* Sent state. Replaces the whole ask inside the same card. */
+.mp-sent { padding: clamp(6px, 1.6vw, 12px) 0; }
+.mp-sent h2 {
+  font-size: clamp(28px, 6.2vw, 46px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  color: #fff;
+}
+.mp-sent h2:focus { outline: none; }
+.mp-sent p { margin: 14px 0 0; color: #BAC2CC; font-size: 16px; line-height: 1.6; max-width: 46ch; }
+
+/* PREVIEW. An unclaimed page is shown to the mechanic during the pitch. It
+   must not take customer requests on his behalf, so the composer is
+   replaced. Recessed, dashed, no shadow, no rail: it must never read as a
+   disabled form the visitor could somehow enable. */
+.mp-preview {
+  border: 1px dashed rgba(255, 255, 255, 0.26);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: clamp(22px, 4vw, 38px);
+}
+.mp-preview h2 {
+  font-size: clamp(26px, 5.4vw, 40px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 900;
+  margin: 6px 0 0;
+  text-transform: uppercase;
+  color: #E7EAEF;
+}
+.mp-preview p { margin: 14px 0 0; color: #A9B1BC; font-size: 16px; line-height: 1.6; max-width: 52ch; }
+.mp-preview a { color: var(--mp-o-hot); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+
+/* ---------- how myku works ---------- */
+.mp-trust {
+  margin-top: clamp(26px, 4vw, 40px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.028);
+  padding: clamp(20px, 3.4vw, 28px);
+  display: grid;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.mp-trust::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--mp-o), transparent);
+}
+.mp-trust-h { display: flex; align-items: center; gap: 10px; }
+/* Info mark, never a shield or a check: this panel says Myku does NOT
+   vouch, and a protection badge would assert the opposite of the sentence
+   it introduces. */
+.mp-trust-h svg { width: 20px; height: 20px; color: var(--mp-o); flex: 0 0 auto; }
+.mp-trust-h h2 {
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fff;
+  font-weight: 700;
+  margin: 0;
+}
+.mp-trust p { margin: 0; color: #9BA3AE; font-size: 15px; line-height: 1.6; }
+
+/* No-JS notice above the composer. Same voice as an inline error. */
+.mp-noscript {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  border-radius: 12px;
+  background: rgba(249, 115, 22, 0.08);
+  color: #FFC9A3;
+  font-size: 14.5px;
+  line-height: 1.5;
 }
 
-html:has(.mp) { scroll-behavior: smooth; }
+/* ---------- footer ---------- */
+/* padding-block only: the `padding` shorthand here wiped the inline padding
+   .mp-wrap sets, dropping the footer flush against the screen edge on every
+   phone while the panel above it stayed inset. */
+.mp-ft { border-top: 1px solid rgba(255, 255, 255, 0.09); padding-block: 26px calc(112px + env(safe-area-inset-bottom)); }
+.mp-ft .note { font-size: 13.5px; line-height: 1.6; color: #9BA3AE; max-width: 62ch; }
+.mp-ft .note a { color: #D8DCE3; text-decoration: underline; text-underline-offset: 3px; }
+.mp-ft .links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 18px; }
+.mp-ft .links a {
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8A929C;
+}
+.mp-ft .links a:hover { color: #E7EAEF; }
+
+/* ---------- sticky mobile CTA ---------- */
+.mp-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  padding: 10px var(--mp-pad) calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(8, 9, 11, 0), rgba(8, 9, 11, 0.86) 34%, rgba(8, 9, 11, 0.97));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* Without JavaScript the bar simply stays available. */
+@media (scripting: enabled) {
+  .mp-dock { transform: translateY(130%); }
+  .mp-dock.up { transform: none; }
+}
+/* No numbers live here. The dock repeats down the entire page, and the
+   labor rate is the mechanic's own unconfirmed figure. */
+.mp-dock .note {
+  font-family: var(--mp-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8A939F;
+  line-height: 1.4;
+  flex: 0 0 auto;
+}
+.mp-dock .mp-btn { flex: 1; }
+
+/* ---------- reveal ---------- */
+@media (scripting: enabled) {
+  .mp-rv {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .mp-rv.in { opacity: 1; transform: none; }
+}
+.mp-rv-d1 { transition-delay: 0.08s; }
+.mp-rv-d2 { transition-delay: 0.16s; }
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+@media (min-width: 640px) {
+  .mp-area-in { grid-template-columns: minmax(0, 248px) minmax(0, 1fr); gap: clamp(20px, 3.4vw, 34px); }
+  .mp-radar { margin: 0; }
+}
+@media (min-width: 760px) {
+  .mp { font-size: 18px; }
+  .mp-facts-in { grid-template-columns: repeat(4, 1fr); }
+  .mp-facts-in.n1 { grid-template-columns: 1fr; }
+  .mp-facts-in.n2 { grid-template-columns: repeat(2, 1fr); }
+  .mp-facts-in.n3 { grid-template-columns: repeat(3, 1fr); }
+  .mp-facts-in.n3 .mp-fact:last-child { grid-column: auto; }
+  .mp-fact { border-bottom: 0; }
+  .mp-fact .v { font-size: clamp(28px, 4.2vw, 60px); }
+  .mp-fact:nth-child(2n) { border-right: 1px solid rgba(255, 255, 255, 0.09); }
+  .mp-fact:last-child { border-right: 0; }
+  .mp-cards { grid-template-columns: 1fr 1fr; }
+  .mp-rev-list { grid-template-columns: 1fr 1fr; }
+  .mp-two { grid-template-columns: 1fr 1fr; }
+  .mp-dock { display: none; }
+  .mp-ft { padding-bottom: calc(34px + env(safe-area-inset-bottom)); }
+  .mp-hero-in { padding-top: clamp(52px, 9vh, 104px); }
+  .mp-spec { max-width: 22ch; }
+  .mp svg.mp-hero-mark { display: block; }
+  .mp-card-body { max-width: 68%; }
+}
+@media (min-width: 1040px) {
+  .mp-bio-inner { display: grid; grid-template-columns: 1.04fr 0.96fr; gap: clamp(30px, 5vw, 68px); align-items: start; }
+  .mp-area { margin-top: 6px; }
+  .mp-area-in { grid-template-columns: 1fr; gap: clamp(18px, 2.4vw, 26px); }
+  .mp-radar { margin: 2px auto 4px; width: min(340px, 100%); }
+}
+
+/* ============================================================
+   NARROW PHONES — 380px and under
+   The three-up timing control broke "As soon as possible" onto three
+   lines; the service leader dots collapsed to specks, and a two-line
+   service name left its price stranded beside the first line.
+   ============================================================ */
+@media (max-width: 380px) {
+  .mp-chips.seg { grid-template-columns: 1fr; gap: 7px; }
+  .mp-chips.seg .mp-chip { min-height: 48px; font-size: 15px; padding: 11px 14px; }
+
+  .mp-srv { flex-wrap: wrap; align-items: center; column-gap: 12px; row-gap: 4px; }
+  .mp-srv .n { flex: 1 1 100%; }
+  .mp-srv .dots { flex: 1 1 auto; min-width: 40px; transform: translateY(-5px); }
+  .mp-srv .p { flex: 0 0 auto; }
+  /* Nothing to lead to, so no leader: the name alone with its row border. */
+  .mp-srv.np .dots { display: none; }
+  .mp-srv.np { row-gap: 0; }
+
+  .mp-card-body { max-width: 100%; }
+  .mp-card.pic .mp-card-body { max-width: 100%; }
+  .mp-plate { opacity: 0.4; }
+}
+
+/* ============================================================
+   REDUCED MOTION — kill everything, and the rAF loops stop too
+   (see StorefrontFx: the canvas draws one frame and exits).
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html:has(.mp) { scroll-behavior: auto; }
+  .mp *,
+  .mp *::before,
+  .mp *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .mp-rv,
+  .mp-card,
+  .mp-rail,
+  .mp-msk > i { opacity: 1 !important; transform: none !important; }
+  .mp-plate .ln > *,
+  .mp-plate .acc > * { stroke-dashoffset: 0 !important; }
+  .mp-plate .dash { stroke-dasharray: 3 4 !important; }
+  .mp-underink path { stroke-dashoffset: 0 !important; }
+  .mp-radar .dr { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+  .mp-radar .ring.dash { stroke-dasharray: 3 4 !important; }
+  .mp-radar .fade { opacity: 1 !important; }
+  .mp-hero-eyebrow .mp-ln { width: 100% !important; }
+  .mp-fact::before { width: 100% !important; }
+  .mp-name { background-position: 38% 0 !important; }
+  .mp-bloom { display: none; }
+  .mp-spark { display: none; }
+}
