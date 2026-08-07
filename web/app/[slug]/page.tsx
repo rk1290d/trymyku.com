@@ -541,9 +541,9 @@ export default async function ProfilePage({
   if (strip.some((c) => c.caption === 'Labor rate')) selfBits.push('the labor rate');
   if (strip.some((c) => c.caption === 'Diagnostic')) selfBits.push('the diagnostic fee');
   if (yearsInStrip) selfBits.push('the years working');
-  const factsNote = selfBits.length
-    ? `${first} gave ${listOf(selfBits)}. Myku has not confirmed ${selfBits.length > 1 ? 'them' : 'it'}.`
-    : null;
+  // Three words, not a deposition. The full sentence lives in How Myku
+  // Works; this is just quiet attribution on the numbers themselves.
+  const factsNote = selfBits.length ? `${first}’s own numbers.` : null;
 
   // Gated on the paragraphs that actually render, not on the raw column. A
   // whitespace-only bio is truthy and renders nothing, which would leave the
@@ -661,9 +661,14 @@ export default async function ProfilePage({
   const numReviews = reviews.length > 0 ? nextNum() : null;
   const numAsk = nextNum();
 
-  const claimHref = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+  const claimMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
     `Claiming my Myku page (${page.slug})`
   )}`;
+  // The claim BUTTONS scroll to the panel instead of firing the mailto
+  // directly: on a machine with no mail app a mailto click does visibly
+  // nothing, which reads as a dead button. The panel spells the address out
+  // so the action always works even when the link cannot.
+  const claimHref = '#claim';
 
   const jobCard = (j: WallJob) => (
     <article className={`mp-card${j.verified ? ' ver' : ''}${j.photo ? ' pic' : ''}`} key={j.key}>
@@ -692,18 +697,22 @@ export default async function ProfilePage({
                 <CheckMark />
                 Completed through Myku
               </span>
-              <span className="mp-conf">This job ran through Myku. Myku confirmed it happened.</span>
             </>
           ) : (
-            <>
-              <span className="mp-badge">
+            // The provenance sentence is one tap away, not stamped on every
+            // card: repeated across the wall it stopped being information and
+            // became the page apologizing for its own mechanic. The chip
+            // still names the source, the How Myku Works block still defines
+            // it, and the tap answers anyone who wants the fine print.
+            <details className="mp-provx">
+              <summary className="mp-badge">
                 <InfoMark />
                 Shared by {first}
-              </span>
+              </summary>
               <span className="mp-notconf">
                 {first} listed this job. Myku has not confirmed it.
               </span>
-            </>
+            </details>
           )}
         </div>
         <h3>{j.vehicle}</h3>
@@ -1141,17 +1150,15 @@ export default async function ProfilePage({
                         </div>
                       </div>
 
-                      {/* The correction to the drawing, in plain sight. It is
-                          the sentence that stops a range ring reading as a
-                          coverage guarantee, and it carries the provenance of
-                          the pins as well as their meaning. */}
+                      {/* The one sentence that stops a range ring reading as
+                          a coverage guarantee. Job provenance is NOT restated
+                          here: the cards and the How Myku Works block already
+                          carry it, and a third repetition made the page sound
+                          like it was apologizing for its own mechanic. */}
                       <p className="mp-area-note">
                         A drawing, not a live map.{' '}
                         {townPins.length > 0
-                          ? 'The pins are towns from the jobs listed on this page, not a promise of coverage. '
-                          : 'Not a promise of coverage. '}
-                        {hasSharedJob
-                          ? `Myku has not confirmed the jobs ${first} listed. `
+                          ? 'The pins are towns from jobs on this page. '
                           : ''}
                         Ask {first} about your address.
                       </p>
@@ -1234,14 +1241,15 @@ export default async function ProfilePage({
             {unclaimed ? (
               <div className="mp-preview">
                 <span className="mp-sec-num">{numAsk} · Preview</span>
-                <h2>This page is not live yet</h2>
+                <h2 id="claim">This page is not live yet</h2>
                 <p>
                   {first} has not claimed it, so it is not taking requests. The details here came
                   from public listings and none of them have been confirmed by {first}.
                 </p>
                 <p>
-                  Are you {first}? <a href={claimHref}>Claim this page</a> and you decide what it
-                  says before anyone sees it.
+                  Are you {first}? Write to{' '}
+                  <a href={claimMailto}>{SUPPORT_EMAIL}</a> and we hand you the keys. You decide
+                  what the page says before anyone sees it.
                 </p>
               </div>
             ) : (
@@ -1276,13 +1284,18 @@ export default async function ProfilePage({
           </div>
 
           <div className="mp-wrap mp-ft">
+            {/* No disclaimer down here. Ending the page on "does not endorse
+                or guarantee" made the last word a warning, which reads as
+                shady exactly where a visitor decides whether to trust the
+                page. The full statement lives once, in How Myku Works,
+                directly above. The footer just says whose page this is. */}
             <div className="note">
               {page.full_name}
-              {cityShort ? ` · ${cityShort}` : ''}. This page is hosted by{' '}
-              <Link href="/">Myku</Link>.{' '}
-              {unclaimed
-                ? 'Myku does not endorse or guarantee anyone’s work.'
-                : 'Myku confirms facts and does not endorse or guarantee anyone’s work.'}
+              {cityShort ? ` · ${cityShort}` : ''}.{' '}
+              {/* "His page" is an ownership claim, so a preview he has not
+                  claimed cannot say it. */}
+              {unclaimed ? 'A preview, hosted by ' : `${first}’s page, hosted by `}
+              <Link href="/">Myku</Link>.
             </div>
             {/* No App Store badge on a mechanic's storefront. A customer's
                 first job must never hit a download pitch: it costs the

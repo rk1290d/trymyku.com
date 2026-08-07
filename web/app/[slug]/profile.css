@@ -815,12 +815,19 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
   border-color: rgba(18, 98, 110, 0.36);
 }
 .mp-badge.ver svg { width: 12.5px; height: 12.5px; }
-/* Every card states its provenance in one line, so the caveat on a
-   self-reported card is a symmetry, not a flag raised against it. This
-   sentence is what the whole trust model rests on, so it is not the
-   quietest text on the card it governs. */
-.mp-notconf,
-.mp-conf {
+/* Provenance on tap, not stamped across the wall. The chip is a native
+   details/summary: it works without JS, the info mark is the affordance,
+   and the sentence appears only for whoever asks. Repeated on every card
+   it read as the page apologizing for its own mechanic; defined once in
+   How Myku Works and available here on tap, it reads as bookkeeping. */
+.mp-provx { display: contents; }
+.mp-provx summary { list-style: none; cursor: pointer; }
+.mp-provx summary::-webkit-details-marker { display: none; }
+.mp-provx[open] summary.mp-badge {
+  color: #3B424E;
+  border-color: rgba(92, 102, 117, 0.55);
+}
+.mp-notconf {
   display: block;
   width: 100%;
   order: 99;
@@ -829,9 +836,8 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
   line-height: 1.5;
   letter-spacing: 0.01em;
   margin-top: 8px;
+  color: var(--mp-slate-2);
 }
-.mp-notconf { color: var(--mp-slate-2); }
-.mp-conf { color: #1B5560; font-weight: 600; }
 
 .mp-card h3 {
   font-size: clamp(24px, 5.2vw, 33px);
