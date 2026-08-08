@@ -1,0 +1,1978 @@
+/* ============================================================
+   HOME PAGE :: trymyku.com
+   GENERATED BASE: this file starts as a namespaced copy of the
+   storefront system (profile.css) so the front page speaks EXACTLY
+   the language the mechanic pages speak - same tokens, same motion
+   discipline, same zero-JS guarantees. Home-specific rules live in
+   the HOME OVERRIDES section at the bottom. If a storefront rule
+   changes character, re-sync deliberately, never blindly.
+   ============================================================ */
+
+/* ============================================================
+   PUBLIC MECHANIC PAGE  ::  trymyku.com/<slug>
+   KINETIC INK — the approved storefront design, ported.
+
+   Every rule is scoped to .hm (the <main> of the profile route)
+   or to a body:has(.hm) / html:has(.mp) escape hatch. Tokens are
+   declared on the scope, never on :root, so the marketing site is
+   untouched.
+
+   COLOUR CONTRACT (the part that is load-bearing, not taste):
+   - --hm-o (#F97316) is MYKU. It is the CTA fill, the section
+     numbers, the hero ink stroke, the composer rail. It never
+     marks a claim Myku has not checked.
+   - --hm-teal (#12626E) is the ONE semantic colour. It appears
+     only on work Myku itself confirmed ran through the platform.
+   - Self-reported work carries NEUTRAL steel. It is differently
+     sourced, not second class, so it gets the same badge shape,
+     the same rhythm and the same provenance line as verified
+     work; it simply does not get to wear the platform's colour.
+     (The prototype had these two inverted: the mechanic's own
+     listings wore Myku orange while Myku's own confirmation wore
+     a colour used nowhere else. A skimming customer decodes
+     orange as Myku, so the semantics read backwards.)
+   ============================================================ */
+
+.hm {
+  /* ---- INK + PAPER ---- */
+  --hm-ink:      #08090B;
+  --hm-ink-1:    #0D0F13;
+  --hm-ink-2:    #14171D;
+  --hm-ink-3:    #1D222A;
+  --hm-paper:    #F5F2ED;
+  --hm-paper-2:  #EBE7DF;
+  --hm-paper-3:  #DFDAD0;
+
+  /* Neutrals. --hm-steel is the muted voice on ink (5.0:1 on
+     #08090B); --hm-slate is the muted voice on paper (5.2:1 on
+     #F5F2ED). Every small run picks the one for its ground. */
+  --hm-steel:    #7C8592;
+  --hm-steel-2:  #A8B0BB;
+  --hm-slate:    #6F6960;
+  --hm-slate-2:  #5A544A;
+
+  /* ---- MYKU ORANGE ---- */
+  --hm-o:        #F97316;
+  --hm-o-hot:    #FF9A4D;
+  --hm-o-deep:   #C2530A;   /* the only orange with 4.5:1 on paper */
+
+  /* ---- PLATFORM VERIFICATION TEAL ----
+     Used ONLY on work Myku itself confirmed. Never decorative,
+     never next to a claim Myku has not checked, never on
+     paperwork: a reviewed document is not a completed job. */
+  --hm-teal:      #12626E;
+  --hm-teal-deep: #0C4A54;
+
+  --hm-sans:  var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --hm-serif: ui-serif, Georgia, 'Iowan Old Style', 'Times New Roman', 'Noto Serif', serif;
+  --hm-mono:  ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace;
+
+  --hm-rule: rgba(8, 9, 11, 0.14);
+  --hm-ink-strong: #030405;
+  --hm-pad:  clamp(18px, 5.2vw, 64px);
+  --hm-maxw: 1180px;
+  --hm-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  position: relative;
+  z-index: 1;
+  background: var(--hm-paper);
+  color: var(--hm-ink);
+  color-scheme: dark;
+  font-family: var(--hm-sans);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ---- KILL THE DARK MARKETING ATMOSPHERE ----
+   body and .hm-paper-fallback are not descendants of .hm, so they cannot
+   read its tokens and must restate the literal.
+   KEEP #08090B BELOW IN SYNC WITH --hm-ink ABOVE. The themeColor export in
+   page.tsx is the same value: the header band runs to the very top of the
+   page, so the Android status bar merges into it. */
+html:has(.mp),
+body:has(.hm),
+.hm-paper-fallback { background: #08090B; }
+/* 1. :has() route, for browsers that support it. The marketing aurora would
+      otherwise drift behind this page's own canvas mesh. */
+body:has(.hm) .bgfx { display: none; }
+/* 2. Fallback opaque layer, so a browser without :has() never renders the
+      marketing atmosphere behind this page. */
+.hm-paper-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hm *,
+.hm *::before,
+.hm *::after { box-sizing: border-box; }
+.hm img,
+.hm svg { display: block; max-width: 100%; }
+/* Form-control font reset. Deliberately UNSCOPED and at :where() specificity
+   (0,0,0): scoping it to `.mp` raised it to (0,1,1), which beat every
+   single-class rule that follows and silently reset the submit CTA, the
+   service chips and every input back to browser defaults. This reset must
+   always lose to the component that styles the control. */
+:where(button, input, textarea, select) { font: inherit; color: inherit; }
+.hm a { color: inherit; text-decoration: none; }
+.hm ::selection { background: var(--hm-o); color: #140800; }
+.hm .tnum { font-variant-numeric: tabular-nums; }
+
+/* Focus rings pick the colour that actually clears 3:1 on their ground:
+   deep orange on paper, hot orange on ink. */
+.hm :focus-visible {
+  outline: 2px solid var(--hm-o-deep);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.hm-ink :focus-visible,
+.hm-hdr :focus-visible,
+.hm-dock :focus-visible { outline-color: var(--hm-o-hot); }
+
+/* ---- PRIMITIVES ---- */
+.hm-wrap {
+  max-width: var(--hm-maxw);
+  margin: 0 auto;
+  padding-left: var(--hm-pad);
+  padding-right: var(--hm-pad);
+}
+.hm-ink {
+  background: var(--hm-ink);
+  color: #EDEFF2;
+  position: relative;
+  isolation: isolate;
+}
+.hm-ink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background-image: var(--hm-grain);
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+}
+.hm-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--hm-grain);
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+.hm-eyebrow {
+  font-family: var(--hm-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--hm-steel);
+  margin: 0;
+}
+.hm-eyebrow .sep { color: var(--hm-o); }
+
+.hm-sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(22px, 4vw, 40px);
+}
+.hm-sec-head h2 {
+  font-size: clamp(36px, 8vw, 88px);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.hm-sec-num {
+  font-family: var(--hm-mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--hm-o);
+  font-weight: 700;
+  align-self: flex-start;
+  padding-top: 0.35em;
+}
+.hm-rule {
+  flex: 1 1 60px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.16;
+  min-width: 40px;
+}
+.hm-sec-meta {
+  font-family: var(--hm-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hm-slate);
+  align-self: flex-start;
+  padding-top: 0.5em;
+}
+.hm-ink .hm-sec-meta { color: var(--hm-steel); }
+
+/* ============================================================
+   CLAIM STRIP (unclaimed preview only)
+   Above everything. The eyebrow carries UNCONFIRMED so this can
+   stay one line without losing the disclosure.
+   ============================================================ */
+.hm-claim {
+  background: #12141A;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.28);
+  color: #C9CFD8;
+  font-family: var(--hm-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 0;
+}
+.hm-claim a {
+  color: var(--hm-o-hot);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.hm-hdr {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  /* Opaque ink base FIRST: the header sits above the hero in flow, so at
+     scroll 0 a translucent bar samples whatever is behind it. The
+     translucency layers on top only where there is something dark. */
+  background: #0A0B0E;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .hm-hdr {
+    background: linear-gradient(rgba(8, 9, 11, 0.72), rgba(8, 9, 11, 0.72)) padding-box, #0A0B0E border-box;
+    backdrop-filter: saturate(1.4) blur(14px);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  }
+}
+.hm-hdr-in {
+  max-width: var(--hm-maxw);
+  margin: 0 auto;
+  padding: 10px var(--hm-pad);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* The mark does NOT navigate. It is the one thread tying the mechanic's
+   storefront back to the platform, but the homepage recruits customers into
+   a multi-quote flow that lists his competitors, and a visitor who arrived
+   on a link HE shared must never be one tap from that. */
+.hm-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hm-tile {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex: 0 0 auto;
+  display: block;
+  overflow: hidden;
+  box-shadow: 0 6px 18px -8px rgba(249, 115, 22, 0.55);
+}
+.hm-tile img { width: 100%; height: 100%; object-fit: contain; border-radius: 9px; }
+.hm-hdr-cta { margin-left: auto; }
+/* After a successful send the page's loudest controls would lead to a
+   composer that now reads "Request sent." */
+body[data-lead-sent='1'] .hm-hdr-cta,
+body[data-lead-sent='1'] .hm-dock { display: none; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hm-hero {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 0;
+  /* Static ground. With JavaScript off (or before the canvas paints) the
+     hero must already look like the hero, not like a black rectangle. */
+  background:
+    radial-gradient(70% 46% at 78% 12%, rgba(249, 115, 22, 0.20), transparent 66%),
+    radial-gradient(74% 50% at 22% 30%, rgba(16, 52, 102, 0.55), transparent 68%),
+    radial-gradient(60% 44% at 52% 88%, rgba(96, 116, 146, 0.30), transparent 70%),
+    linear-gradient(180deg, #0B1017 0%, #08090B 62%);
+}
+.hm-mesh {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  z-index: 0;
+  opacity: 0.95;
+}
+.hm-spark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.hm-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 78% at 78% 6%, rgba(249, 115, 22, 0.13), transparent 62%),
+    linear-gradient(180deg, rgba(8, 9, 11, 0.42) 0%, rgba(8, 9, 11, 0.06) 34%, rgba(8, 9, 11, 0.62) 82%, var(--hm-ink) 100%);
+}
+.hm-streak {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.16;
+  background: repeating-linear-gradient(97deg, rgba(255, 255, 255, 0.10) 0 1px, transparent 1px 4px);
+  -webkit-mask-image: radial-gradient(90% 65% at 50% 35%, #000, transparent 78%);
+  mask-image: radial-gradient(90% 65% at 50% 35%, #000, transparent 78%);
+}
+.hm-bloom {
+  position: absolute;
+  z-index: 2;
+  width: 42vmax;
+  height: 42vmax;
+  left: 0;
+  top: 0;
+  margin: -21vmax 0 0 -21vmax;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.4), rgba(249, 115, 22, 0.08) 42%, transparent 68%);
+  transition: opacity 0.5s ease;
+}
+/* Type selector needed: `.hm svg { display: block }` above outranks a bare
+   class, so a plain `.hm-hero-mark { display:none }` never took effect and
+   the dial rendered on phones it was designed to sit out. */
+.hm svg.hm-hero-mark {
+  position: absolute;
+  right: -10%;
+  top: 6%;
+  width: min(52vw, 640px);
+  z-index: 1;
+  opacity: 0.11;
+  display: none;
+  animation: hmSpin 120s linear infinite;
+}
+@keyframes hmSpin { to { transform: rotate(360deg); } }
+
+.hm-hero-in {
+  position: relative;
+  z-index: 5;
+  padding-top: clamp(40px, 10vh, 100px);
+  padding-bottom: clamp(26px, 4vw, 46px);
+}
+.hm-hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: clamp(16px, 3vw, 26px);
+}
+.hm-hero-eyebrow .hm-ln {
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, var(--hm-o), transparent);
+  flex: 1;
+  animation: hmLnGrow 1.4s 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes hmLnGrow { to { width: 100%; } }
+
+.hm-name {
+  font-size: clamp(56px, 16.5vw, 208px);
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0;
+  color: #F2F4F7;
+  overflow-wrap: anywhere;
+}
+/* Names are free text and are NEVER truncated or ellipsized. Long ones step
+   the scale down instead, so the biggest type on the page still fits the
+   phone it is read on. */
+.hm-name.nm-mid  { font-size: clamp(44px, 12.5vw, 152px); }
+.hm-name.nm-long { font-size: clamp(34px, 9.4vw, 112px); }
+.hm-name span { display: block; }
+.hm-name .r2 { padding-left: 0.055em; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hm-name {
+    background-image: linear-gradient(96deg,
+      #5C6470 0%, #C7CCD4 9%, #FFFFFF 15%, #9AA2AD 22%,
+      #5A616C 32%, #E6E9ED 41%, #8A919B 49%,
+      #C2530A 57%, #FF9A4D 61%, #FFD9B5 64%, #F97316 67%, #7C3F12 72%,
+      #6E7580 80%, #EFF2F5 90%, #5C6470 100%);
+    background-size: 280% 100%;
+    background-position: 0% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: hmSheen 11s linear infinite;
+    filter: drop-shadow(0 14px 40px rgba(0, 0, 0, 0.55));
+  }
+}
+@keyframes hmSheen { to { background-position: -280% 0; } }
+
+.hm-underink { width: min(560px, 86%); height: 16px; margin: 14px 0 0; overflow: visible; }
+.hm-underink path {
+  fill: none;
+  stroke: var(--hm-o);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: hmDrawIn 1.6s 0.8s cubic-bezier(0.5, 0, 0.35, 1) forwards;
+  filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.55));
+}
+@keyframes hmDrawIn { to { stroke-dashoffset: 0; } }
+
+.hm-spec {
+  font-family: var(--hm-serif);
+  font-size: clamp(20px, 4.6vw, 32px);
+  line-height: 1.24;
+  margin: clamp(20px, 4vw, 30px) 0 0;
+  max-width: 19ch;
+  color: #DDE1E7;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+.hm-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: clamp(20px, 3.6vw, 28px); }
+.hm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--hm-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.045);
+  color: #D6DAE1;
+}
+.hm-pill.live {
+  border-color: rgba(249, 115, 22, 0.5);
+  color: #FFD3AE;
+  background: rgba(249, 115, 22, 0.09);
+}
+/* The availability dot does NOT pulse. A pulsing presence dot is the visual
+   grammar of live, real-time status; behind it is a flag the mechanic
+   toggled in the app at some unknown time, and a static caption cannot
+   outrun motion. */
+.hm-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hm-o);
+  flex: 0 0 auto;
+}
+
+.hm-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(26px, 4.4vw, 38px); }
+
+/* ---------- buttons ---------- */
+.hm-btn {
+  --bx: 0px;
+  --by: 0px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 26px;
+  border-radius: 14px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  text-align: center;
+  transform: translate3d(var(--bx), var(--by), 0);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease, filter 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.hm-btn > .lbl {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1);
+}
+.hm-btn-o {
+  background: linear-gradient(160deg, var(--hm-o-hot), var(--hm-o) 42%, var(--hm-o-deep));
+  /* Near-black on orange is 6.9:1. White would be 2.8:1. */
+  color: #180A02;
+  box-shadow: 0 10px 30px -10px rgba(249, 115, 22, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+}
+.hm-btn-o::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 34%, rgba(255, 255, 255, 0.65) 50%, transparent 66%);
+  transform: translateX(-70%);
+  transition: opacity 0.3s;
+}
+.hm-btn-o:hover::before { opacity: 1; animation: hmBtnSheen 0.9s ease forwards; }
+@keyframes hmBtnSheen { to { transform: translateX(70%); } }
+.hm-btn-o:hover { box-shadow: 0 16px 44px -12px rgba(249, 115, 22, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+.hm-btn-o[disabled] { opacity: 0.62; cursor: default; }
+.hm-btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: #E9ECF1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.hm-btn-ghost:hover { background: rgba(255, 255, 255, 0.11); border-color: rgba(255, 255, 255, 0.38); }
+.hm-btn:active { filter: brightness(0.94); }
+.hm-btn.pressed { transition: transform 0.5s cubic-bezier(0.2, 1.55, 0.4, 1); }
+.hm-btn-sm { min-height: 40px; padding: 0 16px; font-size: 14px; border-radius: 11px; }
+.hm-btn-xl { min-height: 62px; font-size: 18px; border-radius: 16px; width: 100%; }
+.hm-arrow { transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
+.hm-btn:hover .hm-arrow { transform: translateX(4px); }
+
+/* ---------- fact strip ---------- */
+.hm-facts {
+  position: relative;
+  z-index: 5;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: clamp(30px, 5vw, 52px);
+}
+/* The strip carries 1 to 4 cells and the grid heals itself at every count,
+   so the band is never half-ruled with an empty right half. The 1px gaps ARE
+   the hairlines. */
+.hm-facts-in { display: grid; grid-template-columns: repeat(2, 1fr); }
+.hm-facts-in.n1 { grid-template-columns: 1fr; }
+/* Three cells below 760px: two up, the third spanning, so a caption like
+   YEARS WORKING never has to survive a 100px column. */
+.hm-facts-in.n3 .hm-fact:last-child { grid-column: 1 / -1; }
+.hm-fact {
+  padding: clamp(18px, 3.4vw, 28px) clamp(6px, 2vw, 10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+.hm-fact:nth-child(2n) { border-right: 0; }
+.hm-fact:nth-child(n + 3) { border-bottom: 0; }
+.hm-fact:last-child { border-right: 0; }
+.hm-fact .v {
+  font-family: var(--hm-serif);
+  font-size: clamp(30px, 8vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #fff;
+  display: block;
+  font-variant-numeric: tabular-nums;
+  /* Values WRAP, never ellipsize. Truncating "$1,250/hr" to "$1,2..." in the
+     one panel built to answer the money question is a truthfulness hazard,
+     not an overflow fix. */
+  overflow-wrap: anywhere;
+}
+/* Masked slide-up. The true number is always the only number rendered. */
+.hm-msk {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  line-height: 1.18;
+  padding: 0.12em 0.05em 0.14em;
+  margin: -0.12em -0.05em -0.14em;
+}
+.hm-msk > i { display: block; font-style: normal; line-height: 1.18; }
+/* SCRIPT-GATED. Every rule that hides content JavaScript is then responsible
+   for revealing sits behind (scripting: enabled). With JavaScript off, or in
+   a browser that does not support the query, nothing is ever hidden and the
+   page renders complete. */
+@media (scripting: enabled) {
+  .hm-msk > i { transform: translateY(112%); transition: transform 0.95s cubic-bezier(0.16, 0.9, 0.2, 1); }
+  .hm-fact.in .hm-msk > i { transform: none; }
+  .hm-fact:nth-child(2) .hm-msk > i { transition-delay: 0.09s; }
+  .hm-fact:nth-child(3) .hm-msk > i { transition-delay: 0.18s; }
+  .hm-fact:nth-child(4) .hm-msk > i { transition-delay: 0.27s; }
+}
+.hm-fact .u {
+  font-size: 0.42em;
+  letter-spacing: 0.02em;
+  color: var(--hm-o);
+  font-family: var(--hm-sans);
+  font-weight: 800;
+  vertical-align: 0.42em;
+  margin-left: 0.08em;
+}
+.hm-fact .k {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hm-steel);
+}
+.hm-fact::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background: var(--hm-o);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hm-fact.in::before { width: 100%; }
+.hm-fact:nth-child(2).in::before { transition-delay: 0.08s; }
+.hm-fact:nth-child(3).in::before { transition-delay: 0.16s; }
+.hm-fact:nth-child(4).in::before { transition-delay: 0.24s; }
+/* No cells at all: one positive sentence about how the business prices,
+   never a blank and never an "unavailable". */
+.hm-fact.fb {
+  grid-column: 1 / -1;
+  border-right: 0;
+  font-family: var(--hm-serif);
+  font-size: clamp(19px, 3.6vw, 26px);
+  line-height: 1.35;
+  color: #E4E8EE;
+  max-width: 30ch;
+}
+/* The provenance line for the numbers above it. The page is scrupulous
+   about the mechanic's work history and must not be silent about his
+   numbers, which sit in the most authoritative slot on the page. */
+.hm-facts-note {
+  margin: 0;
+  padding: 0 clamp(6px, 2vw, 10px) clamp(18px, 3vw, 24px);
+  font-family: var(--hm-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: var(--hm-steel-2);
+  max-width: 62ch;
+}
+
+/* ============================================================
+   WORK WALL
+   ============================================================ */
+.hm-work {
+  background: var(--hm-paper);
+  color: var(--hm-ink);
+  position: relative;
+  padding: clamp(56px, 9vw, 110px) 0 clamp(46px, 7vw, 90px);
+}
+.hm-work::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    linear-gradient(var(--hm-paper-3) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hm-paper-3) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, #000, transparent 75%);
+  mask-image: radial-gradient(70% 60% at 50% 0%, #000, transparent 75%);
+}
+.hm-work .hm-wrap { position: relative; }
+.hm-cards { display: grid; gap: clamp(14px, 2.4vw, 20px); grid-template-columns: 1fr; }
+
+.hm-card {
+  /* One accent token per card. Self-reported work is neutral steel;
+     Myku-confirmed work is teal. The two never half-mix. */
+  --acc: #5C6675;
+  --acc-strong: rgba(92, 102, 117, 0.5);
+  --acc-soft: rgba(92, 102, 117, 0.18);
+  --acc-wash: rgba(92, 102, 117, 0.09);
+  position: relative;
+  background: linear-gradient(152deg, #FFFFFF 0%, #FBF9F5 52%, #F2EFE8 100%);
+  border: 1px solid #E4DFD5;
+  border-radius: 20px;
+  padding: clamp(20px, 3.6vw, 30px);
+  overflow: hidden;
+  min-height: clamp(230px, 42vw, 282px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(20, 16, 10, 0.05), 0 18px 40px -24px rgba(20, 16, 10, 0.4);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease,
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (scripting: enabled) {
+  .hm-card { opacity: 0; transform: translateY(26px); }
+  .hm-card.in { opacity: 1; transform: none; }
+}
+/* drafting grid inside the ticket */
+.hm-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(#CFC8BA 1px, transparent 1px),
+    linear-gradient(90deg, #CFC8BA 1px, transparent 1px);
+  background-size: 19px 19px;
+  opacity: 0.4;
+  -webkit-mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+  mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+}
+.hm-rail {
+  position: absolute;
+  left: 0;
+  top: clamp(20px, 3.6vw, 30px);
+  bottom: clamp(20px, 3.6vw, 30px);
+  width: 3px;
+  background: linear-gradient(180deg, var(--acc), var(--acc-soft));
+  border-radius: 0 3px 3px 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.9s 0.15s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.hm-card.in .hm-rail { transform: none; }
+.hm-card:nth-child(2) { transition-delay: 0.07s; }
+.hm-card:nth-child(3) { transition-delay: 0.14s; }
+.hm-card:nth-child(4) { transition-delay: 0.21s; }
+.hm-card:hover {
+  border-color: var(--acc-strong);
+  box-shadow: 0 1px 2px rgba(20, 16, 10, 0.05), 0 26px 60px -26px rgba(20, 16, 10, 0.45);
+}
+.hm-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+  background: radial-gradient(280px 200px at var(--mx, 50%) var(--my, 0%), var(--acc-wash), transparent 70%);
+}
+.hm-card:hover::before { opacity: 1; }
+
+/* ---------- VERIFIED TICKET ----------
+   A job Myku itself confirmed. This is the only place on the page a check
+   mark is truthful, so it is the only place one appears. The card gains
+   weight (heavier ring, deeper shadow, wider rail) rather than the
+   self-reported cards losing any: a mechanic's own listings must never read
+   as warnings on his own storefront. */
+.hm-card.ver {
+  --acc: var(--hm-teal);
+  --acc-strong: rgba(18, 98, 110, 0.55);
+  --acc-soft: rgba(18, 98, 110, 0.18);
+  --acc-wash: rgba(18, 98, 110, 0.10);
+  background: linear-gradient(152deg, #FFFFFF 0%, #F8FBFB 50%, #EAF2F2 100%);
+  border-color: #C7DADC;
+  box-shadow:
+    0 1px 2px rgba(10, 42, 48, 0.06),
+    0 22px 50px -24px rgba(8, 52, 60, 0.5),
+    inset 0 0 0 1px rgba(18, 98, 110, 0.12);
+}
+.hm-card.ver:hover {
+  box-shadow:
+    0 1px 2px rgba(10, 42, 48, 0.06),
+    0 30px 66px -26px rgba(8, 52, 60, 0.55),
+    inset 0 0 0 1px rgba(18, 98, 110, 0.2);
+}
+.hm-card.ver .hm-rail { width: 5px; border-radius: 0 4px 4px 0; }
+.hm-card.ver::after { opacity: 0.3; }
+
+.hm-card-body { position: relative; z-index: 2; max-width: 66%; flex: 1 1 auto; min-width: 0; }
+/* A card with the mechanic's own photograph gives that photo the plate
+   slot, so the picture he took of his own job is never lost to a drawing
+   Myku made up about it. */
+.hm-card.pic .hm-card-body { max-width: 58%; }
+.hm-card-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+
+/* Both marks: same shape, same rhythm, same size, so neither reads as an
+   exception. Only the Myku-confirmed one carries a platform colour. */
+.hm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font-family: var(--hm-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #4A5260;
+  background: rgba(92, 102, 117, 0.09);
+  border: 1px solid rgba(92, 102, 117, 0.34);
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+.hm-badge svg { width: 11px; height: 11px; flex: 0 0 auto; }
+.hm-badge.ver {
+  color: var(--hm-teal-deep);
+  background: rgba(18, 98, 110, 0.11);
+  border-color: rgba(18, 98, 110, 0.36);
+}
+.hm-badge.ver svg { width: 12.5px; height: 12.5px; }
+/* Provenance on tap, not stamped across the wall. The chip is a native
+   details/summary: it works without JS, the info mark is the affordance,
+   and the sentence appears only for whoever asks. Repeated on every card
+   it read as the page apologizing for its own mechanic; defined once in
+   How Myku Works and available here on tap, it reads as bookkeeping. */
+.hm-provx { display: contents; }
+.hm-provx summary { list-style: none; cursor: pointer; }
+.hm-provx summary::-webkit-details-marker { display: none; }
+.hm-provx[open] summary.hm-badge {
+  color: #3B424E;
+  border-color: rgba(92, 102, 117, 0.55);
+}
+.hm-notconf {
+  display: block;
+  width: 100%;
+  order: 99;
+  font-family: var(--hm-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  margin-top: 8px;
+  color: var(--hm-slate-2);
+}
+
+.hm-card h3 {
+  font-size: clamp(24px, 5.2vw, 33px);
+  line-height: 1.02;
+  letter-spacing: -0.038em;
+  font-weight: 900;
+  margin: 14px 0 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.hm-card .job { margin: 9px 0 0; color: #524D45; font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
+.hm-card-foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px dashed #D5CFC2;
+}
+/* The work wall is a resume, not a price list. What he DID is the headline;
+   what it cost is quiet supporting evidence. Forward-looking pricing lives
+   on the services list. */
+.hm-price {
+  font-family: var(--hm-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+  color: #3F3A33;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* "Job total" is a Myku-authored caption and is reserved for the platform's
+   own transaction record. A self-reported price is free text the mechanic
+   typed ("80-120", "parts only", "call me"), so it prints verbatim with no
+   caption stamped on top of it. */
+.hm-price .lbl {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7A7266;
+  font-weight: 700;
+}
+.hm-when {
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hm-slate);
+  text-align: right;
+  line-height: 1.7;
+  flex: 0 0 auto;
+}
+/* Publishing a price is optional, so a card can legitimately have none. The
+   footer then becomes one deliberate left-aligned block on the card's own
+   left margin, rather than a two-column row with an empty first column and
+   a date stranded at the right. It reads as a footer with one thing in it,
+   which is what it is. */
+.hm-card-foot.noprice { justify-content: flex-start; align-items: center; }
+.hm-card-foot.noprice .hm-when { text-align: left; font-size: 11.5px; color: var(--hm-slate-2); line-height: 1.5; }
+
+/* blueprint plate */
+.hm-plate {
+  position: absolute;
+  right: -7%;
+  top: -3%;
+  width: min(56%, 250px);
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.45s ease;
+}
+.hm-plate .ln { fill: none; stroke: #26313E; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.46; }
+.hm-plate .acc { fill: none; stroke: var(--acc); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.hm-plate .dash { stroke-dasharray: 3 4; opacity: 0.3; }
+@media (scripting: enabled) {
+  .hm-plate .ln > *:not(.dash),
+  .hm-plate .acc > * { stroke-dasharray: 560; stroke-dashoffset: 560; }
+  .hm-card.in .hm-plate .ln > *:not(.dash),
+  .hm-card.in .hm-plate .acc > * { animation: hmDrawIn 1.15s cubic-bezier(0.5, 0, 0.3, 1) forwards; }
+}
+.hm-card.in .hm-plate .ln > *:nth-child(1) { animation-delay: 0.10s; }
+.hm-card.in .hm-plate .ln > *:nth-child(2) { animation-delay: 0.16s; }
+.hm-card.in .hm-plate .ln > *:nth-child(3) { animation-delay: 0.22s; }
+.hm-card.in .hm-plate .ln > *:nth-child(4) { animation-delay: 0.28s; }
+.hm-card.in .hm-plate .ln > *:nth-child(5) { animation-delay: 0.34s; }
+.hm-card.in .hm-plate .ln > *:nth-child(6) { animation-delay: 0.40s; }
+.hm-card.in .hm-plate .ln > *:nth-child(7) { animation-delay: 0.46s; }
+.hm-card.in .hm-plate .ln > *:nth-child(8) { animation-delay: 0.52s; }
+.hm-card.in .hm-plate .ln > *:nth-child(9) { animation-delay: 0.58s; }
+.hm-card.in .hm-plate .acc > * { animation-delay: 0.62s; }
+.hm-card:hover .hm-plate { opacity: 1; }
+/* On one-up phone cards the plate sits directly behind the provenance
+   caveat, which is the one line on the card that must stay easy to read. */
+@media (max-width: 759px) {
+  .hm-plate { opacity: 0.5; }
+}
+
+/* the mechanic's own photo, in the plate slot */
+.hm-pic {
+  position: absolute;
+  right: clamp(14px, 2.6vw, 22px);
+  top: clamp(14px, 2.6vw, 22px);
+  z-index: 1;
+  width: min(38%, 152px);
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(20, 16, 10, 0.14);
+  box-shadow: 0 10px 24px -14px rgba(20, 16, 10, 0.6);
+}
+
+/* overflow disclosure, zero JavaScript */
+.hm-more { margin-top: clamp(14px, 2.4vw, 20px); }
+.hm-more > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid var(--hm-paper-3);
+  background: #FFFFFF;
+  font-family: var(--hm-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--hm-slate-2);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.hm-more > summary::-webkit-details-marker { display: none; }
+.hm-more > summary:hover { border-color: #BDB6A8; background: var(--hm-paper); }
+/* CLIPPED, not display:none. display:none deletes the element that
+   currently holds focus and drops a keyboard or switch user to <body> and
+   the top of the document. */
+.hm-more[open] > summary {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+  min-height: 0;
+}
+.hm-more .hm-cards { margin-top: clamp(14px, 2.4vw, 20px); }
+
+/* ============================================================
+   ABOUT — ink band
+   ============================================================ */
+.hm-bio { padding: clamp(60px, 10vw, 120px) 0 clamp(52px, 8vw, 100px); position: relative; overflow: hidden; }
+.hm-bio-mark {
+  position: absolute;
+  right: -16%;
+  top: -10%;
+  width: min(70vw, 620px);
+  z-index: 0;
+  opacity: 0.16;
+  animation: hmSpin 90s linear infinite;
+}
+.hm-bio .hm-wrap { position: relative; z-index: 5; }
+.hm-bio-p {
+  margin: 0 0 clamp(16px, 2.6vw, 22px);
+  color: #BAC2CC;
+  font-size: clamp(16px, 2.3vw, 19px);
+  line-height: 1.7;
+  max-width: 46ch;
+  overflow-wrap: anywhere;
+}
+.hm-bio-p:first-child::first-letter {
+  font-family: var(--hm-serif);
+  font-size: 2.6em;
+  float: left;
+  line-height: 0.86;
+  padding: 0.06em 0.12em 0 0;
+  color: var(--hm-o);
+}
+.hm-bio-p:last-child { margin-bottom: 0; }
+
+/* Paperwork checks. A DIFFERENT mark from job provenance, on purpose: a
+   reviewed document is not a completed job, and the teal check must never
+   migrate onto it. The qualification sits adjacent to the claim, same size,
+   same breath. That adjacency IS the feature: never render one without the
+   other, and never render either on an unclaimed page. */
+.hm-cred {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: clamp(26px, 4vw, 36px);
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 15px;
+  color: #D2D8E0;
+  line-height: 1.5;
+}
+.hm-cred svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 3px; color: var(--hm-steel-2); }
+.hm-qual { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: #99A1AC; max-width: 46ch; }
+
+/* ---------- SERVICE AREA / RADAR PLATE ---------- */
+.hm-area {
+  position: relative;
+  margin-top: clamp(30px, 4vw, 10px);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 20px;
+  /* Opaque: the spinning .hm-bio-mark sits behind this panel, and a
+     translucent ground let hard orange arcs crawl across the radar. */
+  background: linear-gradient(158deg, #1B2028, #0A0C10);
+  box-shadow: 0 24px 60px -34px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  padding: clamp(20px, 3.2vw, 28px);
+  overflow: hidden;
+}
+.hm-area::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 19px 19px;
+  -webkit-mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+  mask-image: radial-gradient(78% 76% at 92% 6%, #000, transparent 72%);
+}
+.hm-area > * { position: relative; z-index: 1; }
+.hm-area-head { display: flex; align-items: center; gap: 12px; margin-bottom: clamp(14px, 2.4vw, 18px); }
+.hm-area-head .k {
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hm-steel);
+  white-space: nowrap;
+}
+.hm-area-head .hm-rule { opacity: 0.14; }
+.hm-area-in { display: grid; grid-template-columns: 1fr; gap: clamp(18px, 3vw, 26px); align-items: center; }
+
+.hm-radar { width: min(248px, 100%); margin: 0 auto; position: relative; }
+.hm-radar::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 118%;
+  height: 118%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.10), rgba(249, 115, 22, 0.03) 46%, transparent 70%);
+}
+.hm-radar svg { width: 100%; height: auto; overflow: visible; position: relative; }
+.hm-radar .fld { stroke: rgba(255, 255, 255, 0.19); fill: none; stroke-width: 1; }
+.hm-radar .ring { stroke: rgba(184, 193, 206, 0.52); fill: none; stroke-width: 1.4; stroke-linecap: round; }
+.hm-radar .ring.dash { stroke-dasharray: 3 4; stroke: rgba(184, 193, 206, 0.4); }
+.hm-radar .acc { stroke: var(--hm-o); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.hm-radar .twn { fill: rgba(200, 208, 218, 0.62); }
+.hm-radar .lbl-t { font-family: var(--hm-mono); font-weight: 600; fill: #E7EAEF; letter-spacing: 1.9px; }
+.hm-radar .lbl-s { font-family: var(--hm-mono); fill: rgba(178, 186, 197, 0.85); letter-spacing: 1.5px; }
+.hm-radar .halo { fill: none; stroke: var(--hm-o); stroke-width: 1; opacity: 0.34; }
+/* The sweep does NOT rotate. A turning radar sweep over concentric range
+   rings is the standard visual grammar of live tracking, and nothing behind
+   this drawing is live: it is a static picture of towns that appear on this
+   page. It is drawn once, at rest. */
+@media (scripting: enabled) {
+  .hm-radar .dr { stroke-dasharray: 100; stroke-dashoffset: 100; }
+  .hm-area.in .hm-radar .dr { animation: hmDrawIn 1.5s cubic-bezier(0.5, 0, 0.3, 1) forwards; }
+  .hm-area.in .hm-radar .d1 { animation-delay: 0.08s; }
+  .hm-area.in .hm-radar .d2 { animation-delay: 0.20s; }
+  .hm-area.in .hm-radar .d3 { animation-delay: 0.32s; }
+  .hm-area.in .hm-radar .d4 { animation-delay: 0.46s; }
+  .hm-radar .fade { opacity: 0; transition: opacity 0.9s 0.75s ease; }
+  .hm-area.in .hm-radar .fade { opacity: 1; }
+}
+
+.hm-area-rows { display: grid; gap: 0; min-width: 0; }
+.hm-arow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+.hm-arow:first-child { border-top: 1px solid rgba(255, 255, 255, 0.09); }
+.hm-arow .k {
+  font-family: var(--hm-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hm-steel);
+  flex: 0 0 auto;
+}
+.hm-arow .v {
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #EDEFF2;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.hm-arow .v svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--hm-o); }
+/* The correction to the drawing must be readable, not fine print: it is the
+   sentence that stops a range ring reading as a coverage guarantee. */
+.hm-area-note {
+  margin: 14px 0 0;
+  font-family: var(--hm-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: #A8B0BA;
+}
+
+/* ============================================================
+   SERVICES
+   ============================================================ */
+.hm-services {
+  background: var(--hm-paper-2);
+  color: var(--hm-ink);
+  padding: clamp(56px, 9vw, 110px) 0;
+  position: relative;
+  overflow: hidden;
+}
+.hm-srv-list { border-top: 1px solid var(--hm-paper-3); }
+.hm-srv {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: clamp(15px, 2.8vw, 22px) 4px;
+  border-bottom: 1px solid var(--hm-paper-3);
+  overflow: hidden;
+}
+.hm-srv::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--hm-o);
+  opacity: 0.07;
+  transition: width 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hm-srv:hover::before { width: 100%; }
+.hm-srv .n {
+  font-size: clamp(19px, 4.4vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.25, 1), color 0.3s;
+  position: relative;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.hm-srv:hover .n { transform: translateX(10px); color: #A34407; }
+.hm-srv .dots { flex: 1; border-bottom: 1px dotted #B9B2A6; min-width: 48px; transform: translateY(-4px); opacity: 0.7; }
+.hm-srv .p {
+  font-family: var(--hm-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #635D57;
+  white-space: nowrap;
+  position: relative;
+}
+.hm-srv .p b { color: var(--hm-o-deep); font-size: 15px; letter-spacing: -0.01em; font-family: var(--hm-sans); font-weight: 900; }
+/* Price-less service: the price slot renders nothing. A price is the
+   mechanic's own choice per service, and no price means he chose not to
+   say. The page never invents a "Quoted" to fill the gap. */
+.hm-srv.np .dots { margin-right: 6px; }
+
+/* ============================================================
+   REVIEWS
+   ============================================================ */
+.hm-reviews {
+  background: var(--hm-paper);
+  color: var(--hm-ink);
+  padding: clamp(56px, 9vw, 110px) 0;
+  position: relative;
+  overflow: hidden;
+}
+.hm-rev-list { display: grid; gap: clamp(14px, 2.4vw, 20px); grid-template-columns: 1fr; }
+.hm-rev {
+  position: relative;
+  border: 1px solid #E4DFD5;
+  border-radius: 20px;
+  background: linear-gradient(152deg, #FFFFFF 0%, #FBF9F5 60%, #F4F1EA 100%);
+  padding: clamp(20px, 3.4vw, 28px);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(20, 16, 10, 0.05);
+}
+.hm-rev-q {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  width: 54px;
+  height: 48px;
+  fill: var(--hm-paper-2);
+  z-index: 0;
+}
+.hm-rev p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--hm-serif);
+  font-size: clamp(18px, 2.6vw, 22px);
+  line-height: 1.45;
+  color: #241F19;
+  overflow-wrap: anywhere;
+}
+.hm-rev .att {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hm-slate);
+  font-variant-numeric: tabular-nums;
+}
+.hm-reviews .hm-more > summary { background: #FFFFFF; }
+.hm-reviews .hm-more .hm-rev-list { margin-top: clamp(14px, 2.4vw, 20px); }
+
+/* ============================================================
+   THE QUOTE COMPOSER
+   ============================================================ */
+.hm-quote { position: relative; padding: clamp(54px, 9vw, 104px) 0 clamp(34px, 5vw, 60px); overflow: hidden; }
+.hm-glow {
+  position: absolute;
+  left: 50%;
+  top: -10%;
+  width: 150vw;
+  height: 70vh;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(249, 115, 22, 0.20), transparent 68%);
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(10px);
+}
+.hm-quote .hm-wrap { position: relative; z-index: 5; }
+/* Both anchors clear the sticky header. #ask is the section; #quote is a
+   zero-height span that preserves the legacy deep link. */
+.hm-anchor { display: block; height: 0; overflow: hidden; scroll-margin-top: 74px; }
+.hm-quote, .hm-work { scroll-margin-top: 60px; }
+
+.hm-composer {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(29, 34, 42, 0.92), rgba(13, 15, 19, 0.96));
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  padding: clamp(20px, 4vw, 38px);
+  position: relative;
+  overflow: hidden;
+}
+.hm-composer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--hm-o), var(--hm-o-hot), var(--hm-o), transparent);
+  background-size: 220% 100%;
+  animation: hmRail 5s linear infinite;
+}
+@keyframes hmRail { to { background-position: -220% 0; } }
+.hm-composer h2 {
+  font-size: clamp(28px, 6.2vw, 46px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  font-weight: 900;
+  margin: 6px 0 0;
+  text-transform: uppercase;
+  color: #fff;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.hm-lead { margin: 12px 0 0; color: #A9B1BC; font-size: 15.5px; line-height: 1.55; max-width: 46ch; }
+.hm-fgroup { margin-top: clamp(22px, 3.6vw, 30px); }
+.hm-flabel {
+  display: block;
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hm-steel-2);
+  margin-bottom: 11px;
+  font-weight: 600;
+}
+.hm-flabel .req { color: var(--hm-o); }
+
+.hm-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+/* Chips WRAP. The mechanic's longest service names are exactly the ones his
+   bio leads with, and dropping them from the ask (because they did not fit
+   one nowrap line) cost him the lead or dumped it into "Not sure". */
+.hm-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  background: rgba(255, 255, 255, 0.045);
+  color: #D8DCE3;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  max-width: 100%;
+  transition: transform 0.4s cubic-bezier(0.2, 1.3, 0.4, 1), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+.hm-chip:hover { border-color: rgba(255, 255, 255, 0.34); background: rgba(255, 255, 255, 0.09); }
+.hm-chip.sel {
+  background: linear-gradient(160deg, var(--hm-o-hot), var(--hm-o) 55%, var(--hm-o-deep));
+  border-color: var(--hm-o-hot);
+  color: #180A02;
+  font-weight: 800;
+  box-shadow: 0 10px 26px -10px rgba(249, 115, 22, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+.hm-chips.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.hm-chips.seg .hm-chip { width: 100%; justify-content: center; text-align: center; font-size: 14.5px; padding: 11px 8px; }
+
+.hm-inp {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 13px;
+  padding: 15px 16px;
+  color: #EEF1F4;
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 54px;
+  transition: border-color 0.25s, background-color 0.25s, box-shadow 0.25s;
+}
+textarea.hm-inp { resize: vertical; min-height: 104px; }
+.hm-inp::placeholder { color: #7E8894; }
+.hm-inp:focus {
+  outline: none;
+  border-color: var(--hm-o);
+  background: rgba(249, 115, 22, 0.07);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.16);
+}
+.hm-inp:focus-visible { outline: none; }
+.hm-inp.bad,
+.hm [aria-invalid='true'].hm-inp { border-color: var(--hm-o-hot); }
+
+.hm-two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.hm-sub {
+  margin: 11px 0 0;
+  font-family: var(--hm-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #8E96A1;
+  line-height: 1.6;
+}
+.hm-submit { margin-top: clamp(22px, 3.4vw, 28px); }
+.hm-price-hint {
+  margin: 11px 0 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #FFD3AE;
+}
+/* Validation text, announced. ALWAYS in the DOM with height reserved, so the
+   layout never jumps and the live region is not created at announce time. */
+.hm-err {
+  margin: 12px 0 0;
+  min-height: 20px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: #FFB088;
+  font-weight: 600;
+}
+/* Optional-name disclosure */
+.hm-optlink {
+  margin-top: 14px;
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--hm-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--hm-steel-2);
+}
+.hm-optlink:hover { color: #D8DCE3; }
+.hm-optlink .chev { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s ease; }
+.hm-optlink[aria-expanded='true'] .chev { transform: rotate(180deg); }
+/* Honeypot. The label maps to nothing in any autofill vocabulary. */
+.hm-hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* Sent state. Replaces the whole ask inside the same card. */
+.hm-sent { padding: clamp(6px, 1.6vw, 12px) 0; }
+.hm-sent h2 {
+  font-size: clamp(28px, 6.2vw, 46px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  color: #fff;
+}
+.hm-sent h2:focus { outline: none; }
+.hm-sent p { margin: 14px 0 0; color: #BAC2CC; font-size: 16px; line-height: 1.6; max-width: 46ch; }
+
+/* PREVIEW. An unclaimed page is shown to the mechanic during the pitch. It
+   must not take customer requests on his behalf, so the composer is
+   replaced. Recessed, dashed, no shadow, no rail: it must never read as a
+   disabled form the visitor could somehow enable. */
+.hm-preview {
+  border: 1px dashed rgba(255, 255, 255, 0.26);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: clamp(22px, 4vw, 38px);
+}
+.hm-preview h2 {
+  font-size: clamp(26px, 5.4vw, 40px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 900;
+  margin: 6px 0 0;
+  text-transform: uppercase;
+  color: #E7EAEF;
+}
+.hm-preview p { margin: 14px 0 0; color: #A9B1BC; font-size: 16px; line-height: 1.6; max-width: 52ch; }
+.hm-preview a { color: var(--hm-o-hot); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+
+/* ---------- how myku works ---------- */
+.hm-trust {
+  margin-top: clamp(26px, 4vw, 40px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.028);
+  padding: clamp(20px, 3.4vw, 28px);
+  display: grid;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.hm-trust::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--hm-o), transparent);
+}
+.hm-trust-h { display: flex; align-items: center; gap: 10px; }
+/* Info mark, never a shield or a check: this panel says Myku does NOT
+   vouch, and a protection badge would assert the opposite of the sentence
+   it introduces. */
+.hm-trust-h svg { width: 20px; height: 20px; color: var(--hm-o); flex: 0 0 auto; }
+.hm-trust-h h2 {
+  font-family: var(--hm-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fff;
+  font-weight: 700;
+  margin: 0;
+}
+.hm-trust p { margin: 0; color: #9BA3AE; font-size: 15px; line-height: 1.6; }
+
+/* No-JS notice above the composer. Same voice as an inline error. */
+.hm-noscript {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  border-radius: 12px;
+  background: rgba(249, 115, 22, 0.08);
+  color: #FFC9A3;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+/* ---------- footer ---------- */
+/* padding-block only: the `padding` shorthand here wiped the inline padding
+   .hm-wrap sets, dropping the footer flush against the screen edge on every
+   phone while the panel above it stayed inset. */
+.hm-ft { border-top: 1px solid rgba(255, 255, 255, 0.09); padding-block: 26px calc(112px + env(safe-area-inset-bottom)); }
+.hm-ft .note { font-size: 13.5px; line-height: 1.6; color: #9BA3AE; max-width: 62ch; }
+.hm-ft .note a { color: #D8DCE3; text-decoration: underline; text-underline-offset: 3px; }
+.hm-ft .links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 18px; }
+.hm-ft .links a {
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8A929C;
+}
+.hm-ft .links a:hover { color: #E7EAEF; }
+
+/* ---------- sticky mobile CTA ---------- */
+.hm-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  padding: 10px var(--hm-pad) calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(8, 9, 11, 0), rgba(8, 9, 11, 0.86) 34%, rgba(8, 9, 11, 0.97));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+/* Without JavaScript the bar simply stays available. */
+@media (scripting: enabled) {
+  .hm-dock { transform: translateY(130%); }
+  .hm-dock.up { transform: none; }
+}
+/* No numbers live here. The dock repeats down the entire page, and the
+   labor rate is the mechanic's own unconfirmed figure. */
+.hm-dock .note {
+  font-family: var(--hm-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8A939F;
+  line-height: 1.4;
+  flex: 0 0 auto;
+}
+.hm-dock .hm-btn { flex: 1; }
+
+/* ---------- reveal ---------- */
+@media (scripting: enabled) {
+  .hm-rv {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .hm-rv.in { opacity: 1; transform: none; }
+}
+.hm-rv-d1 { transition-delay: 0.08s; }
+.hm-rv-d2 { transition-delay: 0.16s; }
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+@media (min-width: 640px) {
+  .hm-area-in { grid-template-columns: minmax(0, 248px) minmax(0, 1fr); gap: clamp(20px, 3.4vw, 34px); }
+  .hm-radar { margin: 0; }
+}
+@media (min-width: 760px) {
+  .hm { font-size: 18px; }
+  .hm-facts-in { grid-template-columns: repeat(4, 1fr); }
+  .hm-facts-in.n1 { grid-template-columns: 1fr; }
+  .hm-facts-in.n2 { grid-template-columns: repeat(2, 1fr); }
+  .hm-facts-in.n3 { grid-template-columns: repeat(3, 1fr); }
+  .hm-facts-in.n3 .hm-fact:last-child { grid-column: auto; }
+  .hm-fact { border-bottom: 0; }
+  .hm-fact .v { font-size: clamp(28px, 4.2vw, 60px); }
+  .hm-fact:nth-child(2n) { border-right: 1px solid rgba(255, 255, 255, 0.09); }
+  .hm-fact:last-child { border-right: 0; }
+  .hm-cards { grid-template-columns: 1fr 1fr; }
+  .hm-rev-list { grid-template-columns: 1fr 1fr; }
+  .hm-two { grid-template-columns: 1fr 1fr; }
+  .hm-dock { display: none; }
+  .hm-ft { padding-bottom: calc(34px + env(safe-area-inset-bottom)); }
+  .hm-hero-in { padding-top: clamp(52px, 9vh, 104px); }
+  .hm-spec { max-width: 22ch; }
+  .hm svg.hm-hero-mark { display: block; }
+  .hm-card-body { max-width: 68%; }
+}
+@media (min-width: 1040px) {
+  .hm-bio-inner { display: grid; grid-template-columns: 1.04fr 0.96fr; gap: clamp(30px, 5vw, 68px); align-items: start; }
+  .hm-area { margin-top: 6px; }
+  .hm-area-in { grid-template-columns: 1fr; gap: clamp(18px, 2.4vw, 26px); }
+  .hm-radar { margin: 2px auto 4px; width: min(340px, 100%); }
+}
+
+/* ============================================================
+   NARROW PHONES — 380px and under
+   The three-up timing control broke "As soon as possible" onto three
+   lines; the service leader dots collapsed to specks, and a two-line
+   service name left its price stranded beside the first line.
+   ============================================================ */
+@media (max-width: 380px) {
+  .hm-chips.seg { grid-template-columns: 1fr; gap: 7px; }
+  .hm-chips.seg .hm-chip { min-height: 48px; font-size: 15px; padding: 11px 14px; }
+
+  .hm-srv { flex-wrap: wrap; align-items: center; column-gap: 12px; row-gap: 4px; }
+  .hm-srv .n { flex: 1 1 100%; }
+  .hm-srv .dots { flex: 1 1 auto; min-width: 40px; transform: translateY(-5px); }
+  .hm-srv .p { flex: 0 0 auto; }
+  /* Nothing to lead to, so no leader: the name alone with its row border. */
+  .hm-srv.np .dots { display: none; }
+  .hm-srv.np { row-gap: 0; }
+
+  .hm-card-body { max-width: 100%; }
+  .hm-card.pic .hm-card-body { max-width: 100%; }
+  .hm-plate { opacity: 0.4; }
+}
+
+/* ============================================================
+   REDUCED MOTION — kill everything, and the rAF loops stop too
+   (see StorefrontFx: the canvas draws one frame and exits).
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html:has(.mp) { scroll-behavior: auto; }
+  .hm *,
+  .hm *::before,
+  .hm *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .hm-rv,
+  .hm-card,
+  .hm-rail,
+  .hm-msk > i { opacity: 1 !important; transform: none !important; }
+  .hm-plate .ln > *,
+  .hm-plate .acc > * { stroke-dashoffset: 0 !important; }
+  .hm-plate .dash { stroke-dasharray: 3 4 !important; }
+  .hm-underink path { stroke-dashoffset: 0 !important; }
+  .hm-radar .dr { stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
+  .hm-radar .ring.dash { stroke-dasharray: 3 4 !important; }
+  .hm-radar .fade { opacity: 1 !important; }
+  .hm-hero-eyebrow .hm-ln { width: 100% !important; }
+  .hm-fact::before { width: 100% !important; }
+  .hm-name { background-position: 38% 0 !important; }
+  .hm-bloom { display: none; }
+  .hm-spark { display: none; }
+}
+
+/* ============================================================
+   HOME OVERRIDES
+   Everything below adapts the storefront vocabulary to the front
+   page: a two-column hero with the app mockup, the service
+   marquee, the three blueprint steps, the two doors, and the
+   closing mission + CTA band. Nothing here leaks outside .hm.
+   ============================================================ */
+
+/* ---- topbar: the real mark, the word, one CTA ---- */
+.hm-hdr .brandword {
+  font-size: 15.5px; font-weight: 800; letter-spacing: -0.02em; color: #EDEFF2;
+}
+.hm-hdr .logo-img { width: 30px; height: 30px; border-radius: 9px; display: block; }
+
+/* ---- hero becomes a two-column composition at desktop ---- */
+.hm-hero-grid { display: grid; grid-template-columns: 1fr; gap: clamp(34px, 5vw, 56px); align-items: center; }
+@media (min-width: 980px) {
+  .hm-hero-grid { grid-template-columns: 1.04fr 0.96fr; }
+}
+.hm-hero .hm-name { max-width: 13ch; }
+/* The pitch line under the drawn stroke: serif italic, the name of the
+   product hot. */
+.hm-pitch {
+  margin-top: clamp(18px, 3vw, 26px);
+  font-family: var(--hm-serif);
+  font-style: italic;
+  font-size: clamp(24px, 3.6vw, 40px);
+  line-height: 1.25;
+  color: #EDEFF2;
+  letter-spacing: 0.002em;
+}
+.hm-pitch b { color: var(--hm-o-hot); font-style: italic; font-weight: 700; }
+.hm-lead {
+  margin-top: clamp(14px, 2.2vw, 20px);
+  max-width: 46ch;
+  color: #B7C0CC;
+  font-size: clamp(15.5px, 2vw, 18px);
+  line-height: 1.65;
+}
+.hm-hero-foot {
+  margin-top: 16px; display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--hm-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--hm-steel);
+}
+.hm-hero-foot .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--hm-o); flex: none; }
+
+/* The phone leans into the mesh: framed as an object, not a screenshot. */
+.hm-phone-col { display: flex; justify-content: center; position: relative; z-index: 2; }
+@media (max-width: 979px) { .hm-phone-col { display: none; } }
+
+/* ---- service marquee: drafting-table tape on the ink band ---- */
+.hm-mq {
+  position: relative; z-index: 2;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 15px 0;
+  overflow: hidden;
+  background: rgba(8, 9, 11, 0.55);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.hm-mq-track { display: flex; gap: 44px; width: max-content; animation: hmMq 46s linear infinite; }
+.hm-mq span {
+  font-family: var(--hm-mono); font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.22em; text-transform: uppercase; color: #6E7883;
+  white-space: nowrap; display: inline-flex; align-items: center; gap: 44px;
+}
+.hm-mq span::after { content: ""; width: 5px; height: 5px; background: var(--hm-o); opacity: 0.65; transform: rotate(45deg); }
+.hm-mq .soon { color: var(--hm-o); opacity: 0.8; }
+@keyframes hmMq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .hm-mq-track { animation: none; } }
+
+/* ---- the three steps: blueprint plates on drafting cards ---- */
+.hm-steps { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: clamp(26px, 4vw, 40px); }
+@media (min-width: 860px) { .hm-steps { grid-template-columns: repeat(3, 1fr); } }
+.hm-step-plate { width: min(150px, 46%); margin: 6px auto 2px; display: block; }
+.hm-step-plate .ln path,
+.hm-step-plate .ln circle { fill: none; stroke: #8A94A2; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hm-step-plate .acc path,
+.hm-step-plate .acc circle { fill: none; stroke: var(--hm-o); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.hm-step h3 { font-size: 19px; font-weight: 800; letter-spacing: -0.015em; margin: 10px 0 6px; color: var(--hm-ink-strong); }
+.hm-step p { color: var(--hm-slate); font-size: 14.5px; line-height: 1.6; margin: 0; }
+.hm-step .num {
+  font-family: var(--hm-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.2em; color: var(--hm-o-deep);
+}
+
+/* ---- the two doors, on ink ---- */
+.hm-doors { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: clamp(26px, 4vw, 40px); }
+@media (min-width: 900px) { .hm-doors { grid-template-columns: 1fr 1fr; } }
+.hm-door {
+  position: relative; border-radius: 20px; padding: clamp(22px, 3.4vw, 34px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(165deg, #14181F, #0A0C10);
+  overflow: hidden;
+}
+.hm-door::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 19px 19px;
+  -webkit-mask-image: radial-gradient(80% 70% at 50% 0%, #000, transparent);
+  mask-image: radial-gradient(80% 70% at 50% 0%, #000, transparent);
+}
+.hm-door.mech { border-color: rgba(249, 115, 22, 0.4); }
+.hm-door.mech::before {
+  content: ""; position: absolute; inset: -30% -20% auto -20%; height: 70%;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(249, 115, 22, 0.2), transparent 70%);
+  pointer-events: none;
+}
+.hm-door .k {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--hm-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--hm-steel);
+}
+.hm-door.mech .k { color: var(--hm-o); }
+.hm-door .k svg { width: 15px; height: 15px; }
+.hm-door h3 {
+  margin: 12px 0 10px; font-size: clamp(21px, 2.6vw, 27px); font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1.16; color: #EDEFF2;
+}
+.hm-door p { margin: 0 0 20px; color: #B7C0CC; font-size: 15px; line-height: 1.65; max-width: 46ch; }
+.hm-door .hm-btn { position: relative; z-index: 2; }
+
+/* ---- trust panel, on paper ---- */
+.hm-trust-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: clamp(22px, 3.4vw, 30px) 0; }
+.hm-tchip {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--hm-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: #4A5260;
+  background: rgba(92, 102, 117, 0.09); border: 1px solid rgba(92, 102, 117, 0.34);
+  padding: 8px 13px; border-radius: 999px;
+}
+.hm-tchip svg { width: 13px; height: 13px; }
+.hm-tchip svg path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.hm-trust-line {
+  font-family: var(--hm-serif); font-style: italic;
+  font-size: clamp(26px, 4.4vw, 46px); line-height: 1.2; letter-spacing: 0.002em;
+  color: var(--hm-ink-strong); max-width: 24ch;
+}
+.hm-trust-line b { color: var(--hm-o-deep); font-weight: 700; }
+.hm-trust-note { margin-top: 16px; color: var(--hm-slate); font-size: 15px; line-height: 1.65; max-width: 60ch; }
+
+/* ---- mission + CTA, the closing ink band ---- */
+.hm-mission p {
+  font-family: var(--hm-serif); font-size: clamp(19px, 2.6vw, 26px);
+  line-height: 1.55; color: #C9D1DB; max-width: 62ch; margin: 0 0 18px;
+}
+.hm-mission p b { color: #EDEFF2; font-weight: 600; }
+.hm-mission p .hl { color: var(--hm-o-hot); font-style: italic; }
+.hm-cta-row { display: flex; flex-wrap: wrap; gap: 13px; align-items: center; margin-top: clamp(26px, 4vw, 36px); }
+.hm-cta-note { margin-top: 14px; font-family: var(--hm-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hm-steel); }
+
+/* The final band ends the page: give it room and a top hairline. */
+.hm-final { padding-bottom: clamp(60px, 8vw, 96px); }
+.hm-final .hm-wrap > .rule { height: 1px; background: rgba(255, 255, 255, 0.08); margin-bottom: clamp(34px, 5vw, 54px); }
+
+/* ---- hero headline: sized for a two-column band, never broken mid-word ---- */
+.hm-hero .hm-name {
+  font-size: clamp(34px, 5.2vw, 74px);
+  max-width: none;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  line-height: 1.02;
+}
+.hm-hdr .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+
+/* ---- wordmark dot + shared sub-page pieces ---- */
+.hm-hdr .brandword .branddot { color: var(--hm-o); }
+
+/* Serif lede prose on the drafting paper (the "reputation lives in DMs" block). */
+.hm-lede h2 {
+  font-family: var(--hm-serif); font-style: italic; font-weight: 600;
+  font-size: clamp(24px, 3.6vw, 40px); line-height: 1.25; letter-spacing: 0.002em;
+  color: var(--hm-ink-strong); max-width: 26ch; margin: 0 0 18px;
+}
+.hm-lede p { color: var(--hm-slate); font-size: clamp(16px, 2.1vw, 19px); line-height: 1.7; max-width: 62ch; margin: 0; }
+.hm-lede p .hl {
+  /* #A34407 on the cream ground is 5.7:1; the old --hm-o-deep was 4.15:1. */ color: var(--hm-o-deep); font-weight: 600; }
+
+/* Four-up door grid for the sub-pages' step/feature walls. */
+@media (min-width: 900px) { .hm-doors.four { grid-template-columns: 1fr 1fr; } }
+.hm-door .doornum {
+  font-family: var(--hm-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.2em; color: var(--hm-o);
+}
+.hm-door .doornum + h3 { margin-top: 10px; }
+
+/* FAQ: native disclosures in the drafting language, on paper. */
+.hm-faq { display: grid; gap: 12px; margin-top: clamp(24px, 3.6vw, 36px); max-width: 760px; }
+.hm-faq details {
+  border: 1px solid var(--hm-rule); border-radius: 14px; background: #FFFFFF;
+  box-shadow: 0 10px 30px -22px rgba(20, 22, 26, 0.5);
+}
+.hm-faq summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: space-between; gap: 16px; padding: 16px 20px;
+  font-weight: 700; font-size: 15.5px; letter-spacing: -0.01em; color: var(--hm-ink-strong);
+}
+.hm-faq summary::-webkit-details-marker { display: none; }
+.hm-faq summary .chev {
+  flex: none; width: 26px; height: 26px; border-radius: 8px;
+  display: grid; place-items: center; border: 1px solid var(--hm-rule);
+  color: var(--hm-slate); transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.hm-faq summary .chev svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+.hm-faq details[open] summary .chev { transform: rotate(45deg); color: var(--hm-o-deep); border-color: rgba(249, 115, 22, 0.5); }
+.hm-faq .a { padding: 0 20px 18px; color: var(--hm-slate); font-size: 14.5px; line-height: 1.65; max-width: 64ch; }
+@media (prefers-reduced-motion: reduce) { .hm-faq summary .chev { transition: none; } }
+
+/* Concierge form, reskinned WITHOUT touching the component: the old class
+   names get the storefront-composer look whenever they render inside .hm.
+   Dark panel on the closing ink band, orange submit, honest errors. */
+.hm-formpanel {
+  max-width: 560px; margin-top: clamp(24px, 3.6vw, 36px);
+  border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 20px;
+  background: linear-gradient(165deg, #14181F, #0A0C10);
+  padding: clamp(20px, 3.2vw, 30px);
+}
+.hm .form { display: flex; flex-direction: column; gap: 12px; text-align: left; }
+/* Scoped to the FORM ONLY: a bare .hm .lbl also matched the .lbl span inside
+   every button and repainted CTAs as grey mono uppercase. */
+.hm .form .lbl {
+  font-family: var(--hm-mono); font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--hm-steel); margin-bottom: -4px;
+}
+.hm .form .lbl .opt { color: #5A6472; text-transform: none; letter-spacing: 0.04em; }
+.hm .inp {
+  font-family: inherit; font-size: 16px; color: #EDEFF2;
+  background: rgba(0, 0, 0, 0.42); border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px; padding: 13px 15px; width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.hm .inp::placeholder { color: #5A6472; }
+.hm .inp:focus { outline: none; border-color: var(--hm-o); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.22); }
+.hm .form .btn {
+  font-family: inherit; font-weight: 800; font-size: 16px; color: #150700;
+  background: linear-gradient(180deg, #FFA149, var(--hm-o) 60%, #E8620C);
+  border: 0; border-radius: 14px; padding: 15px 22px; cursor: pointer; width: 100%;
+  box-shadow: 0 14px 38px -12px rgba(249, 115, 22, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+.hm .form .btn:disabled { opacity: 0.62; cursor: default; }
+.hm .err { color: #FFB088; font-size: 13.5px; font-weight: 600; min-height: 16px; }
+.hm .hp { position: absolute !important; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.hm .confirm { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0; text-align: center; }
+.hm .confirm.show { display: flex; }
+.hm .confirm .ck {
+  width: 56px; height: 56px; border-radius: 999px; display: grid; place-items: center;
+  background: rgba(249, 115, 22, 0.14); border: 1px solid rgba(249, 115, 22, 0.4);
+}
+.hm .confirm .ck svg { width: 26px; height: 26px; stroke: var(--hm-o); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.hm .confirm h3 { color: #EDEFF2; font-size: 20px; font-weight: 800; margin: 0; }
+.hm .confirm p { color: #B7C0CC; font-size: 14.5px; max-width: 40ch; margin: 0; }
+
+/* Four steps: 2x2 at width, never a 3+1 orphan. */
+.hm-steps.four { grid-template-columns: 1fr; }
+@media (min-width: 860px) { .hm-steps.four { grid-template-columns: 1fr 1fr; } }
+
+/* Buttons OWN their text color. The `.hm a { color: inherit }` reset has
+   (0,1,1) specificity and silently beat the (0,1,0) button skins, so an
+   anchor-button's label took its color from whatever container it sat in:
+   white in the header, correct-looking only by luck elsewhere. */
+.hm a.hm-btn { color: #EDEFF2; }
+.hm a.hm-btn-o { color: #180A02; }
+
+/* Findings from the final review, appended as counter-rules. */
+/* The App Store badge is a black pill; inside .hm the anchor reset made its
+   product line inherit page ink and vanish black-on-black in the footer. */
+.hm .appstore, .hm .appstore .big { color: #fff; }
+/* Eyebrows: brand orange is 2.5:1 on the cream grounds. Dark-orange there,
+   full orange only on the ink bands where it clears 7:1. */
+.hm-sec-num { color: #A34407; }
+.hm-ink .hm-sec-num { color: var(--hm-o); }

@@ -15,7 +15,7 @@ import { useEffect, useRef } from 'react';
 // Under prefers-reduced-motion the mesh paints ONE frame and the function
 // returns. No rAF loop is ever scheduled, no pointer handler is attached: the
 // loops actually stop rather than merely losing their transitions.
-export default function StorefrontFx() {
+export default function StorefrontFx({ prefix = 'mp' }: { prefix?: string } = {}) {
   const meshRef = useRef<HTMLCanvasElement | null>(null);
   const sparkRef = useRef<HTMLCanvasElement | null>(null);
   const bloomRef = useRef<HTMLDivElement | null>(null);
@@ -24,7 +24,7 @@ export default function StorefrontFx() {
     const mesh = meshRef.current;
     const spark = sparkRef.current;
     const bloom = bloomRef.current;
-    const hero = mesh?.closest<HTMLElement>('.mp-hero') ?? null;
+    const hero = mesh?.closest<HTMLElement>(`.${prefix}-hero`) ?? null;
     if (!hero) return;
 
     const mm = window.matchMedia;
@@ -231,7 +231,7 @@ export default function StorefrontFx() {
 
     /* ---------------- 3. REVEAL ---------------- */
     const targets = Array.from(
-      document.querySelectorAll<HTMLElement>('.mp-rv, .mp-card, .mp-fact, .mp-area')
+      document.querySelectorAll<HTMLElement>(`.${prefix}-rv, .${prefix}-card, .${prefix}-fact, .${prefix}-area`)
     );
     if ('IntersectionObserver' in window && !RM) {
       const ro = new IntersectionObserver(
@@ -287,7 +287,7 @@ export default function StorefrontFx() {
     }
 
     /* ---------------- 4. MAGNETIC CTAs ---------------- */
-    const mags = Array.from(document.querySelectorAll<HTMLElement>('.mp-mag'));
+    const mags = Array.from(document.querySelectorAll<HTMLElement>(`.${prefix}-mag`));
     if (FINE && !RM && mags.length) {
       const state = mags.map(() => ({ x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0 }));
       let magRAF: number | null = null;
@@ -336,7 +336,7 @@ export default function StorefrontFx() {
     /* ---------------- 5. PRESS SPRING (touch included) ---------------- */
     if (!RM) {
       const pressables = Array.from(
-        document.querySelectorAll<HTMLElement>('.mp-btn, .mp-chip')
+        document.querySelectorAll<HTMLElement>(`.${prefix}-btn, .${prefix}-chip`)
       );
       const down = (e: Event) => {
         const t = e.currentTarget as HTMLElement;
@@ -366,7 +366,7 @@ export default function StorefrontFx() {
 
     /* ---------------- 6. CARD POINTER LIGHT ---------------- */
     if (FINE && !RM) {
-      const cards = Array.from(document.querySelectorAll<HTMLElement>('.mp-card'));
+      const cards = Array.from(document.querySelectorAll<HTMLElement>(`.${prefix}-card`));
       const handlers: [HTMLElement, (e: PointerEvent) => void][] = cards.map((card) => {
         const h = (e: PointerEvent) => {
           const r = card.getBoundingClientRect();
@@ -383,7 +383,7 @@ export default function StorefrontFx() {
        The dock hides whenever the hero or the composer is on screen, so the
        page never shows two competing asks at once. On a short page that means
        it effectively never appears, which is the point. */
-    const dock = document.getElementById('mp-dock');
+    const dock = document.getElementById(`${prefix}-dock`);
     const askEl = document.getElementById('ask');
     if (dock && askEl && 'IntersectionObserver' in window) {
       const seen = { hero: true, ask: false };
@@ -405,15 +405,15 @@ export default function StorefrontFx() {
     }
 
     return () => cleanups.forEach((fn) => fn());
-  }, []);
+  }, [prefix]);
 
   return (
     <>
-      <canvas className="mp-mesh" ref={meshRef} aria-hidden="true" />
-      <canvas className="mp-spark" ref={sparkRef} aria-hidden="true" />
-      <div className="mp-veil" aria-hidden="true" />
-      <div className="mp-streak" aria-hidden="true" />
-      <div className="mp-bloom" ref={bloomRef} aria-hidden="true" />
+      <canvas className={`${prefix}-mesh`} ref={meshRef} aria-hidden="true" />
+      <canvas className={`${prefix}-spark`} ref={sparkRef} aria-hidden="true" />
+      <div className={`${prefix}-veil`} aria-hidden="true" />
+      <div className={`${prefix}-streak`} aria-hidden="true" />
+      <div className={`${prefix}-bloom`} ref={bloomRef} aria-hidden="true" />
     </>
   );
 }

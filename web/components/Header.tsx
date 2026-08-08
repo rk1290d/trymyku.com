@@ -9,11 +9,16 @@ export default function Header({
   return (
     <header className="site" id="hdr">
       <div className="container nav">
-        {/* The top bar carries the mark alone; the wordmark lives in the
-            footer. The logo IS the brand up here. */}
+        {/* Logo + wordmark, matching HmHeader: the shared Footer went
+            logo-only, so if the header also carried the mark alone, the
+            legacy routes (privacy, terms, support, 404) would never spell
+            the brand's name anywhere on the page. */}
         <Link href="/" className="brand" aria-label="Myku home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Myku" width={40} height={40} />
+          <img src="/logo.png" alt="" width={40} height={40} />
+          <span className="wm">
+            Myku<span className="dot">.</span>
+          </span>
         </Link>
         <span className="nav-right">
           {cta ? (

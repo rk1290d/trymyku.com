@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
-import Header from '@/components/Header';
+import HmHeader from '@/components/HmHeader';
 import Footer from '@/components/Footer';
 import AppStoreBadge from '@/components/AppStoreBadge';
+import StorefrontFx from '@/components/StorefrontFx';
+import '../home.css';
 
 export const metadata: Metadata = {
   title: 'For Car Owners | Your mechanic, without the runaround',
   description:
-    'Post the problem, or just describe the symptom. Verified independent mechanics near you respond with a price, and you pick who you trust. Free on iOS.',
+    'Post the problem, or just describe the symptom. Compare prices from independent mechanics who want the job, and pick who you trust. Free on iOS.',
   alternates: { canonical: '/customers' },
 };
 
@@ -19,133 +21,181 @@ const Vf = () => (
 
 const Check = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path className="ck" d="M20 6L9 17l-5-5" />
+    <path d="M20 6L9 17l-5-5" />
   </svg>
 );
 
 export default function CustomersPage() {
   return (
-    <>
-      <Header cta={{ href: '/mechanics', label: "I'm a Mechanic" }} />
+    <div className="hm">
+      <HmHeader cta={{ href: '/mechanics', label: "I'm a Mechanic" }} />
       <main>
-        <section className="hero">
-          <div className="aurora a1" aria-hidden="true" />
-          <div className="aurora a2" aria-hidden="true" />
-          <div className="container hero-grid">
-            <div className="hero-copy">
-              <div className="pill reveal">
-                <span className="pulse" /> Live on iOS
-              </div>
-              <h1 className="h1 reveal d1">
-                Your mechanic,
-                <br />
-                <span className="grad">without the runaround.</span>
-              </h1>
-              <p className="lead reveal d1">
-                Post the problem, or just describe the symptom. Verified mechanics near
-                you respond with a price, and you pick who you trust.
-              </p>
-              <div className="hero-btns reveal d2">
-                <AppStoreBadge />
-              </div>
-              <div className="hero-foot reveal d3">
-                <span className="dot" /> Live across Chicago and the suburbs.
-              </div>
-            </div>
+        {/* ---------- HERO ---------- */}
+        <section className="hm-ink hm-hero">
+          <StorefrontFx prefix="hm" />
+          <svg className="hm-hero-mark" viewBox="0 0 400 400" aria-hidden="true">
+            <g fill="none" stroke="#F97316" strokeWidth="1.2">
+              <circle cx="200" cy="200" r="198" />
+              <circle cx="200" cy="200" r="162" />
+              <circle cx="200" cy="200" r="112" />
+              <circle cx="200" cy="200" r="64" />
+              <circle cx="200" cy="200" r="22" />
+              <g strokeWidth="2.4">
+                <path d="M200 2v26M200 372v26M2 200h26M372 200h26" />
+              </g>
+            </g>
+          </svg>
 
-            <div className="hero-visual reveal d2">
-              <div className="qstack" aria-hidden="true">
-                <div className="qpost">
-                  <div className="yt">Your post</div>
-                  <div className="car">2016 Jeep Cherokee</div>
-                  <div className="issue">
-                    Won&apos;t start, clicking sound when I turn the key. Need a diagnosis.
-                  </div>
+          <div className="hm-wrap hm-hero-in">
+            <div className="hm-hero-grid">
+              <div>
+                <div className="hm-hero-eyebrow">
+                  <p className="hm-eyebrow">
+                    <span>Live on iOS</span>
+                  </p>
+                  <span className="hm-ln" aria-hidden="true" />
                 </div>
-                <div className="qlbl">
-                  <span className="d" /> Mechanics are responding
+
+                <h1 className="hm-name nm-long">
+                  <span>Your mechanic,</span>
+                </h1>
+
+                <svg className="hm-underink" viewBox="0 0 560 16" preserveAspectRatio="none" aria-hidden="true">
+                  <path pathLength="100" d="M4 11 C 90 4, 168 14, 252 8 S 420 3, 556 9" />
+                </svg>
+
+                <p className="hm-pitch">
+                  without the <b>runaround.</b>
+                </p>
+
+                <p className="hm-lead">
+                  Post the problem, or just describe the symptom. Compare prices from
+                  mechanics who want the job, and pick who you trust.
+                </p>
+
+                <div className="hm-hero-cta">
+                  <AppStoreBadge />
                 </div>
-                <div className="quote q1">
-                  <div className="av">M</div>
-                  <div className="mid">
-                    <div className="nm">Marcus R.</div>
-                    <div className="rt">
-                      <span className="st">★★★★★</span> <span className="tnum">4.9 · 2.3 mi</span>
+
+                <p className="hm-hero-foot">
+                  <span className="dot" aria-hidden="true" />
+                  Live across Chicago and the suburbs.
+                </p>
+              </div>
+
+              <div className="hm-phone-col" aria-hidden="true">
+                <div className="qstack">
+                  <div className="qpost">
+                    <div className="yt">Your post</div>
+                    <div className="car">2016 Jeep Cherokee</div>
+                    <div className="issue">
+                      Won&apos;t start, clicking sound when I turn the key. Need a diagnosis.
                     </div>
-                    <Vf />
                   </div>
-                  <div className="pr">
-                    <div className="amt tnum">$45</div>
-                    <div className="when">Today, 4 PM</div>
+                  <div className="qlbl">
+                    <span className="d" /> Mechanics are responding
                   </div>
-                </div>
-                <div className="quote q2">
-                  <div className="av">D</div>
-                  <div className="mid">
-                    <div className="nm">Dave T.</div>
-                    <div className="rt">
-                      <span className="st">★★★★★</span> <span className="tnum">4.8 · 5.1 mi</span>
+                  <div className="quote q1">
+                    <div className="av">M</div>
+                    <div className="mid">
+                      <div className="nm">Andre V.</div>
+                      <div className="rt">
+                        <span className="st">★★★★★</span> <span className="tnum">4.9 · 2.3 mi</span>
+                      </div>
+                      <Vf />
                     </div>
-                    <Vf />
-                  </div>
-                  <div className="pr">
-                    <div className="amt tnum">$40</div>
-                    <div className="when">Tomorrow, 9 AM</div>
-                  </div>
-                </div>
-                <div className="quote q3">
-                  <div className="av">A</div>
-                  <div className="mid">
-                    <div className="nm">Alex L.</div>
-                    <div className="rt">
-                      <span className="st">★★★★★</span> <span className="tnum">5.0 · 3.7 mi</span>
+                    <div className="pr">
+                      <div className="amt tnum">$45</div>
+                      <div className="when">Today, 4 PM</div>
                     </div>
-                    <Vf />
                   </div>
-                  <span className="pick">Choose</span>
+                  <div className="quote q2">
+                    <div className="av">D</div>
+                    <div className="mid">
+                      <div className="nm">Dave T.</div>
+                      <div className="rt">
+                        <span className="st">★★★★★</span> <span className="tnum">4.8 · 5.1 mi</span>
+                      </div>
+                      <Vf />
+                    </div>
+                    <div className="pr">
+                      <div className="amt tnum">$40</div>
+                      <div className="when">Tomorrow, 9 AM</div>
+                    </div>
+                  </div>
+                  <div className="quote q3">
+                    <div className="av">A</div>
+                    <div className="mid">
+                      <div className="nm">Alex L.</div>
+                      <div className="rt">
+                        <span className="st">★★★★★</span> <span className="tnum">5.0 · 3.7 mi</span>
+                      </div>
+                      <Vf />
+                    </div>
+                    <span className="pick">Choose</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="sec">
-          <div className="container center">
-            <span className="tag reveal">How it works</span>
-            <h2 className="title reveal">Three steps, zero guesswork.</h2>
-            <p className="sub reveal">You do not need to know what is wrong. Just where to start.</p>
-            <div className="steps" id="steps">
-              <div className="step reveal d1">
-                <div className="s-node">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    <path d="M8.5 9h7M8.5 12.5h4" />
-                  </svg>
-                </div>
-                <div className="s-num">01</div>
+        {/* ---------- 01: the three steps, on paper ---------- */}
+        <section className="hm-work">
+          <div className="hm-wrap">
+            <div className="hm-sec-head hm-rv">
+              <span className="hm-sec-num">01 · How it works</span>
+              <h2>Three steps, zero guesswork.</h2>
+              <span className="hm-rule" aria-hidden="true" />
+            </div>
+            <p className="hm-trust-note hm-rv" style={{ marginTop: 10 }}>
+              You do not need to know what is wrong. Just where to start.
+            </p>
+
+            <div className="hm-steps">
+              <div className="hm-card hm-step">
+                <svg className="hm-step-plate" viewBox="0 0 200 130" aria-hidden="true">
+                  <g className="ln">
+                    <path d="M40 30h96a12 12 0 0 1 12 12v34a12 12 0 0 1-12 12H74l-22 18v-18h-12a12 12 0 0 1-12-12V42a12 12 0 0 1 12-12z" />
+                    <path d="M52 50h72M52 64h44" />
+                  </g>
+                  <g className="acc">
+                    <path d="M158 76c10 2 18 8 22 16" />
+                    <circle cx="184" cy="98" r="3.4" />
+                  </g>
+                </svg>
+                <div className="num">01</div>
                 <h3>Post the problem</h3>
                 <p>Know what you need? Post it. Not sure? Describe the symptom and ask for a diagnosis.</p>
               </div>
-              <div className="step reveal d2">
-                <div className="s-node">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 7h9M4 12h16M4 17h6" />
-                    <circle cx="17" cy="7" r="2.1" />
-                    <circle cx="14" cy="17" r="2.1" />
-                  </svg>
-                </div>
-                <div className="s-num">02</div>
+
+              <div className="hm-card hm-step">
+                <svg className="hm-step-plate" viewBox="0 0 200 130" aria-hidden="true">
+                  <g className="ln">
+                    <path d="M36 36h84M36 65h128M36 94h64" />
+                    <circle cx="150" cy="36" r="9" />
+                    <circle cx="124" cy="94" r="9" />
+                  </g>
+                  <g className="acc">
+                    <circle cx="176" cy="65" r="9" />
+                    <path d="M172.5 65l2.6 2.6 4.4-4.8" />
+                  </g>
+                </svg>
+                <div className="num">02</div>
                 <h3>Compare quotes</h3>
-                <p>Mechanics near you reply with a price and availability. See their ratings and reviews.</p>
+                <p>Mechanics who want the job reply with a price and availability. See their ratings and reviews.</p>
               </div>
-              <div className="step reveal d3">
-                <div className="s-node">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z" />
-                    <path d="M9 12l2 2 4-4" />
-                  </svg>
-                </div>
-                <div className="s-num">03</div>
+
+              <div className="hm-card hm-step">
+                <svg className="hm-step-plate" viewBox="0 0 200 130" aria-hidden="true">
+                  <g className="ln">
+                    <path d="M100 18l44 18v26c0 28-19 47-44 56-25-9-44-28-44-56V36z" />
+                  </g>
+                  <g className="acc">
+                    <path d="M84 64l12 12 22-24" />
+                  </g>
+                </svg>
+                <div className="num">03</div>
                 <h3>Pick who you trust</h3>
                 <p>They come to you, or you drop off at their shop. Your car, your call.</p>
               </div>
@@ -153,57 +203,47 @@ export default function CustomersPage() {
           </div>
         </section>
 
-        <section className="sec tone">
-          <div className="container center">
-            <span className="tag reveal">Why customers use it</span>
-            <h2 className="title reveal">Repair, on your terms.</h2>
-            <div className="feats">
-              <div className="feat spot reveal">
-                <div className="ic">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 1v22" />
-                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                </div>
+        {/* ---------- 02: why customers use it, on ink ---------- */}
+        <section className="hm-ink hm-bio">
+          <div className="hm-wrap">
+            <div className="hm-sec-head hm-rv" style={{ color: '#fff' }}>
+              <span className="hm-sec-num">02 · Why customers use it</span>
+              <h2>Repair, on your terms.</h2>
+              <span className="hm-rule" aria-hidden="true" />
+            </div>
+
+            <div className="hm-doors four">
+              <div className="hm-door hm-rv">
+                <span className="k">Upfront</span>
                 <h3>See the price upfront.</h3>
                 <p>
                   Independent mechanics often charge far less than the dealership, and
                   you see the quote before anyone touches your car.
                 </p>
               </div>
-              <div className="feat spot reveal d1">
-                <div className="ic">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                </div>
+              <div className="hm-door hm-rv">
+                <span className="k">At your door</span>
                 <h3>Mechanics come to you.</h3>
                 <p>
                   Mobile mechanics drive to your location. No tow truck, no rental car,
                   no waiting room.
                 </p>
               </div>
-              <div className="feat spot reveal d2">
-                <div className="ic">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                </div>
+              <div className="hm-door hm-rv">
+                <span className="k">Facts on file</span>
                 <h3>Verified, not vouched.</h3>
+                {/* Per-mechanic facts, never a blanket guarantee: the product
+                    shows exactly which checks each mechanic has cleared, and
+                    some pages show none. The copy must not promise more than
+                    the storefront can show. */}
                 <p>
-                  Every mechanic is ID-verified, with license and insurance on file. The
-                  reviews come from real customers, not us.
+                  ID checks, insurance on file, badges on jobs done through Myku. What was
+                  confirmed sits on each mechanic&rsquo;s page, and the reviews come from real
+                  customers, not us.
                 </p>
               </div>
-              <div className="feat spot reveal d3">
-                <div className="ic">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                </div>
+              <div className="hm-door hm-rv">
+                <span className="k">Your call</span>
                 <h3>You stay in control.</h3>
                 <p>You choose the mechanic, the price, and the timing. Every time.</p>
               </div>
@@ -211,40 +251,53 @@ export default function CustomersPage() {
           </div>
         </section>
 
-        <section className="sec">
-          <div className="container">
-            <div className="trust-panel reveal">
-              <div className="trust-tag">How trust works here</div>
-              <div className="trust-chips">
-                <span className="tchip"><Check /> License confirmed</span>
-                <span className="tchip"><Check /> Insurance on file</span>
-                <span className="tchip"><Check /> ID verified</span>
-              </div>
-              <div className="trust-line">
-                We confirm facts. We do not endorse. <span className="a">You decide.</span>
-              </div>
-              <p className="trust-note">
-                Verification means we checked the paperwork, not that we vouch for the
-                work. You see the facts and the reviews, then decide for yourself.
-              </p>
+        {/* ---------- 03: trust, on paper ---------- */}
+        <section className="hm-work">
+          <div className="hm-wrap">
+            <div className="hm-sec-head hm-rv">
+              <span className="hm-sec-num">03 · How trust works here</span>
+              <h2>The paperwork, checked.</h2>
+              <span className="hm-rule" aria-hidden="true" />
             </div>
+
+            <div className="hm-trust-chips hm-rv">
+              <span className="hm-tchip">
+                <Check /> ID verified
+              </span>
+              <span className="hm-tchip">
+                <Check /> Insurance on file
+              </span>
+              <span className="hm-tchip">
+                <Check /> ID verified
+              </span>
+            </div>
+
+            <p className="hm-trust-line hm-rv">
+              We confirm facts. We do not endorse. <b>You decide.</b>
+            </p>
+            <p className="hm-trust-note hm-rv">
+              Verification means we checked the paperwork, not that we vouch for the
+              work. You see the facts and the reviews, then decide for yourself.
+            </p>
           </div>
         </section>
 
-        <section className="sec tone formsec">
-          <div className="container center">
-            <span className="tag reveal">Get the app</span>
-            <h2 className="title reveal">The next time something rattles, start here.</h2>
-            <p className="sub reveal d1">
-              Free on iPhone. Post your first problem in under two minutes.
-            </p>
-            <div className="cta-btns reveal d1" style={{ marginTop: 26 }}>
+        {/* ---------- 04: get the app, closing ink band ---------- */}
+        <section className="hm-ink hm-quote hm-final">
+          <div className="hm-wrap">
+            <div className="hm-sec-head hm-rv" style={{ color: '#fff' }}>
+              <span className="hm-sec-num">04 · Get the app</span>
+              <h2>The next time something rattles, start here.</h2>
+              <span className="hm-rule" aria-hidden="true" />
+            </div>
+            <p className="hm-lead hm-rv">Free on iPhone. Post your first problem in under two minutes.</p>
+            <div className="hm-cta-row hm-rv">
               <AppStoreBadge />
             </div>
           </div>
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

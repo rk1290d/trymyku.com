@@ -6,12 +6,11 @@ export default function Footer() {
   return (
     <footer className="site">
       <div className="container">
-        <Link href="/" className="foot-brand">
+        {/* Logo only down here: the mark is self-sufficient, and the wordmark
+            fought whatever ground the footer happened to sit on. */}
+        <Link href="/" className="foot-brand" aria-label="Myku home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Myku logo" width={34} height={34} />
-          <span className="wm">
-            Myku<span className="dot">.</span>
-          </span>
         </Link>
         <div className="foot-badge">
           <AppStoreBadge />

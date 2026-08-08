@@ -1691,3 +1691,8 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   .mp-bloom { display: none; }
   .mp-spark { display: none; }
 }
+
+/* Same anchor-vs-skin specificity fix as home.css: .mp a (0,1,1) beat
+   .mp-btn-o (0,1,0), leaving anchor-button label color to the container. */
+.mp a.mp-btn { color: #EDEFF2; }
+.mp a.mp-btn-o { color: #180A02; }
