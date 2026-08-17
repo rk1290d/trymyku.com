@@ -320,8 +320,19 @@ function listOf(parts: string[]): string {
 
 /* ------------------------------------------------------------------
    PAGE
+
+   `mode` is 'live' for the public route and 'preview' for the mechanic's
+   own token-keyed draft. Every preview difference is gated on
+   mode === 'preview' (or mode === 'live' where something is withheld), so
+   the live render is byte-for-byte what it was before the prop existed.
    ------------------------------------------------------------------ */
-export default function Storefront({ data }: { data: PageData }) {
+export default function Storefront({
+  data,
+  mode = 'live',
+}: {
+  data: PageData;
+  mode?: 'live' | 'preview';
+}) {
   const { page, services: rawServices, shared, verified, reviews: rawReviews } = data;
 
   // Non-empty content only. A blank service string renders an empty ruled
@@ -702,7 +713,9 @@ export default function Storefront({ data }: { data: PageData }) {
 
   return (
     <>
-      {jsonLd ? (
+      {/* Live only. A preview is not a public business listing, so it
+          carries no structured data even when the draft is published. */}
+      {mode === 'live' && jsonLd ? (
         <script
           type="application/ld+json"
           // Escape < so a hostile display name can never close the tag.
@@ -713,6 +726,17 @@ export default function Storefront({ data }: { data: PageData }) {
       ) : null}
       <div className="mp-paper-fallback" aria-hidden="true" />
       <main className="mp">
+        {/* Preview only. Says what this link is, who can see it and that it
+            takes no requests, before anything else on the page. */}
+        {mode === 'preview' ? (
+          <div className="mp-preview-ribbon" role="status">
+            <div className="mp-wrap">
+              Preview. Only someone with this link can see it, and it stops working in 30
+              minutes. It is not taking requests.
+            </div>
+          </div>
+        ) : null}
+
         {/* One slim line ABOVE everything. The full explanation lives in HOW
             MYKU WORKS and the eyebrow carries UNCONFIRMED, so three lines of
             preamble above the mechanic's own name buys nothing. */}
@@ -1186,6 +1210,18 @@ export default function Storefront({ data }: { data: PageData }) {
                   what the page says before anyone sees it.
                 </p>
               </div>
+            ) : mode === 'preview' ? (
+              // The mechanic's own preview of a published-shaped page. Same
+              // number, same heading, so he sees the shape of what visitors
+              // get, but no live form: a preview takes no requests.
+              <div className="mp-composer mp-composer-inert" aria-disabled="true">
+                {numAsk ? <span className="mp-sec-num">{numAsk} · Your quote</span> : null}
+                <h2>Get a price from {first}</h2>
+                <p className="mp-lead">
+                  Requests turn on when you publish. Visitors will pick the job and leave a
+                  number here, and it lands in your Myku inbox.
+                </p>
+              </div>
             ) : (
               <div className="mp-composer">
                 {/* The heading and sub-line live INSIDE QuoteForm so the sent
@@ -1250,7 +1286,7 @@ export default function Storefront({ data }: { data: PageData }) {
             rendered on a preview page, which takes no requests. It carries no
             numbers: the labor rate is the mechanic's own figure and must not
             repeat down the whole page in Myku's voice. */}
-        {!unclaimed ? (
+        {!unclaimed && mode === 'live' ? (
           <div className="mp-dock" id="mp-dock">
             <span className="note">
               Free to send

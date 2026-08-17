@@ -1696,3 +1696,21 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
    .mp-btn-o (0,1,0), leaving anchor-button label color to the container. */
 .mp a.mp-btn { color: #EDEFF2; }
 .mp a.mp-btn-o { color: #180A02; }
+
+/* ============================================================
+   PRIVATE PREVIEW (token route only; never on the live page)
+   Ribbon above everything, mirroring the claim strip's hairline.
+   The composer stand-in is the same box, just visibly at rest.
+   ============================================================ */
+.mp-preview-ribbon {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--mp-ink-2);
+  color: var(--mp-paper);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.28);
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 10px 0;
+}
+.mp-composer-inert { opacity: .85; }

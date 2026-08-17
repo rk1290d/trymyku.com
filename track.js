@@ -4,6 +4,8 @@
    data back. No personal data, no cross-site cookies. Fails silently. */
 (function () {
   try {
+    // A mechanic's own private previews are not page views.
+    if ((location.pathname || '').indexOf('/preview/') === 0) return;
     var ENDPOINT = 'https://fioiaoxaozqfwdqukoho.supabase.co/rest/v1/page_views';
     var KEY = 'sb_publishable_Wp39xMC488ds7jL9MY4HfA_GksslO4S';
     var VK = 'myku_vid';

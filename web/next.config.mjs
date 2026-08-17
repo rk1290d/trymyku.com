@@ -20,6 +20,20 @@ const nextConfig = {
     // served at the same /stats URL it had on GitHub Pages.
     return [{ source: '/stats', destination: '/stats.html' }];
   },
+  async headers() {
+    // Private previews: never indexed, never cached, and the token in the
+    // URL never leaks through a Referer to any link on the page.
+    return [
+      {
+        source: '/preview/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
