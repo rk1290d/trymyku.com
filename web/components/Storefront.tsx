@@ -520,6 +520,21 @@ export default function Storefront({ data }: { data: PageData }) {
       ? 'Myku shows you what it has. Myku does not endorse or guarantee anyone’s work. You decide.'
       : 'Myku confirms facts and shows them to you. Myku does not endorse or guarantee anyone’s work. You decide.',
   ];
+  // The self-reported chip names its SOURCE, and the source differs by state.
+  // On a published page the mechanic himself listed the job: "Shared by
+  // {first}". On an unclaimed page he has never touched it; the rows were
+  // seeded from public listings by Myku, and saying "{first} listed this" or
+  // "Shared by {first}" attributes to him an act he did not perform, on a page
+  // he does not know exists. The How Myku Works block below already says the
+  // details "came from public listings"; the chip and its definition must say
+  // the same thing, or the page contradicts itself one screen apart.
+  const sharedChip = unclaimed ? 'From public listings' : `Shared by ${first}`;
+  const sharedNote = unclaimed
+    ? 'From a public listing. Myku has not confirmed it.'
+    : `${first} listed this job. Myku has not confirmed it.`;
+  const sharedDef = unclaimed
+    ? 'Jobs marked From public listings were found in public listings.'
+    : `Jobs marked Shared by ${first} were listed by ${first}.`;
   // Gated on which marks ACTUALLY render, not on the wall existing. Defining
   // "Completed through Myku" on a page where every card is self-reported
   // implies a confirmed job is present somewhere, which is the exact blur
@@ -527,16 +542,14 @@ export default function Storefront({ data }: { data: PageData }) {
   const sharedCount = wall.length - verifiedCount;
   if (verifiedCount > 0 && sharedCount > 0)
     howParas.push(
-      `Jobs marked Completed through Myku were done through the Myku platform. Jobs marked Shared by ${first} were listed by ${first}.`
+      `Jobs marked Completed through Myku were done through the Myku platform. ${sharedDef}`
     );
   else if (verifiedCount > 0)
     howParas.push(
       'Jobs marked Completed through Myku were done through the Myku platform.'
     );
   else if (sharedCount > 0)
-    howParas.push(
-      `Jobs marked Shared by ${first} were listed by ${first}. Myku has not confirmed them.`
-    );
+    howParas.push(`${sharedDef} Myku has not confirmed them.`);
   if (credentials.length > 0)
     howParas.push(
       'ID verified, insurance on file and certifications on file mean Myku reviewed documents. They do not mean Myku recommends the work.'
@@ -630,11 +643,9 @@ export default function Storefront({ data }: { data: PageData }) {
             <details className="mp-provx">
               <summary className="mp-badge">
                 <InfoMark />
-                Shared by {first}
+                {sharedChip}
               </summary>
-              <span className="mp-notconf">
-                {first} listed this job. Myku has not confirmed it.
-              </span>
+              <span className="mp-notconf">{sharedNote}</span>
             </details>
           )}
         </div>
