@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Storefront from '@/components/Storefront';
-import { getMechanicPage } from '@/lib/supabase';
+import { getMechanicPage, resolveRetiredSlug } from '@/lib/supabase';
 import { loadPublicPage } from '@/lib/pageData';
 import { firstName } from '@/lib/format';
 import './profile.css';
@@ -26,7 +26,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const page = await getMechanicPage(slug);
-  if (!page) return { title: 'Page not found' };
+  if (!page) {
+    // Metadata cannot redirect; the page function below does. This only
+    // keeps the tab from reading "Page not found" during the hop.
+    const current = await resolveRetiredSlug(slug);
+    if (current && current !== slug) return { title: 'Redirecting' };
+    return { title: 'Page not found' };
+  }
 
   const city = page.service_city?.split(',')[0]?.trim();
   const spec = page.specialization || 'Independent mechanic';
@@ -70,6 +76,13 @@ export async function generateMetadata({
 export default async function ProfilePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const data = await loadPublicPage(slug);
-  if (!data) notFound();
+  if (!data) {
+    // A retired slug follows the page to its current address. redirect(),
+    // not permanentRedirect(): a 308 is cached by browsers, and a rename
+    // A -> B -> A would then loop on the cached hop.
+    const current = await resolveRetiredSlug(slug);
+    if (current && current !== slug) redirect('/' + current);
+    notFound();
+  }
   return <Storefront data={data} />;
 }

@@ -4,6 +4,7 @@ import QuoteForm from '@/components/QuoteForm';
 import StorefrontFx from '@/components/StorefrontFx';
 import { timeAgo, money, firstName, workTypeLabel } from '@/lib/format';
 import { SUPPORT_EMAIL, SITE_URL } from '@/lib/site';
+import { socialLinks } from '@/lib/socials';
 import type { PageData } from '@/lib/pageData';
 
 /* ------------------------------------------------------------------
@@ -285,6 +286,9 @@ interface WallJob {
   town: string | null;
   verified: boolean;
   photo: string | null;
+  // The mechanic's own words about his own job. Shared cards only: a
+  // verified card carries Myku's record of the job, not his caption of it.
+  caption: string | null;
   ts: number;
 }
 
@@ -317,6 +321,7 @@ function listOf(parts: string[]): string {
   if (parts.length <= 1) return parts[0] ?? '';
   return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
 }
+
 
 /* ------------------------------------------------------------------
    PAGE
@@ -366,6 +371,7 @@ export default function Storefront({
       town: j.town?.trim() || null,
       verified: true,
       photo: null,
+      caption: null,
       ts: new Date(j.completed_at).getTime() || 0,
     })),
     ...shared.map((j) => ({
@@ -379,6 +385,7 @@ export default function Storefront({
       town: j.town?.trim() || null,
       verified: false,
       photo: j.photo_url,
+      caption: j.caption?.trim() || null,
       ts: j.done_on ? new Date(j.done_on).getTime() || 0 : 0,
     })),
   ].sort((a, b) => b.ts - a.ts);
@@ -422,14 +429,33 @@ export default function Storefront({
   // empty. There is no "unavailable" state anywhere on this page.
   const specLine = page.specialization || 'Independent mechanic';
 
+  // The headline is the BUSINESS name when he gave one, else the person.
+  // Attribution never moves with it: `first` above stays the person's own
+  // first name, so "Shared by", "About", "How ... works" and the note under
+  // the facts keep naming the human, not the shingle.
+  const bizName = page.business_name?.trim() || null;
+  const headline = bizName ?? page.full_name;
+
   // The name sets in two lines, the way the design draws it. Long names step
   // the type scale down; they are never truncated or ellipsized.
-  const nameParts = page.full_name.trim().split(/\s+/).filter(Boolean);
-  const nameLine1 = nameParts[0] || page.full_name;
+  const nameParts = headline.trim().split(/\s+/).filter(Boolean);
+  const nameLine1 = nameParts[0] || headline;
   const nameLine2 = nameParts.slice(1).join(' ');
-  const longestToken = Math.max(...(nameParts.length ? nameParts : [page.full_name]).map((t) => t.length));
+  const longestToken = Math.max(...(nameParts.length ? nameParts : [headline]).map((t) => t.length));
   const nameClass =
     longestToken > 12 ? 'mp-name nm-long' : longestToken > 9 ? 'mp-name nm-mid' : 'mp-name';
+
+  // Content slots. Each is trimmed to null here so a whitespace-only value
+  // never conjures a row, and every slot below renders only when its value
+  // survived. A page with none of them set renders exactly as before the
+  // columns existed.
+  const showPortrait = Boolean(page.photo_url) && page.show_photo === true;
+  const hours = page.hours_note?.trim() || null;
+  // Typed by the mechanic for the rows only. NOT fed to the radar: the pins
+  // stay job-derived, so the drawing never asserts coverage he merely listed.
+  const towns = (page.service_towns ?? []).map((t) => (t ?? '').trim()).filter(Boolean);
+  const requestNote = page.request_note?.trim() || null;
+  const links = socialLinks(page.socials);
 
   // FACT STRIP, fixed priority order, maximum 4 cells. The panel always
   // renders: the money question is never silent. `self` marks the cells the
@@ -512,14 +538,21 @@ export default function Storefront({
     if (townSet.length === 4) break;
   }
   // The panel is worth drawing only when it has something to say.
-  const hasArea = Boolean(city) || Boolean(work) || showAvailable || townSet.length > 0;
+  const hasArea =
+    Boolean(city) ||
+    Boolean(work) ||
+    showAvailable ||
+    townSet.length > 0 ||
+    Boolean(page.hours_note?.trim()) ||
+    towns.length > 0;
 
   const hasAbout =
     bioParas.length > 0 ||
     hasArea ||
     years > 0 ||
     certs.length > 0 ||
-    credentials.length > 0;
+    credentials.length > 0 ||
+    links.length > 0;
 
   // The disclosure never defines a mark that does not appear on this page.
   const howParas: string[] = [
@@ -611,6 +644,12 @@ export default function Storefront({
   const claimMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
     `Claiming my Myku page (${page.slug})`
   )}`;
+  // On EVERY page, claimed or not. A visitor who thinks the page is wrong
+  // about someone needs a door, and it is the one link here that is not
+  // gated on the mechanic's data.
+  const reportMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+    `Reporting a Myku page (${page.slug})`
+  )}`;
   // The claim BUTTONS scroll to the panel instead of firing the mailto
   // directly: on a machine with no mail app a mailto click does visibly
   // nothing, which reads as a dead button. The panel spells the address out
@@ -662,6 +701,8 @@ export default function Storefront({
         </div>
         <h3>{j.vehicle}</h3>
         {j.service ? <p className="job">{j.service}</p> : null}
+        {/* Shared cards only: verified cards are built with caption null. */}
+        {j.caption ? <p className="mp-cap">{j.caption}</p> : null}
       </div>
       {/* A card with no published price is not a card with a hole in it: the
           footer becomes one deliberate left-aligned block. */}
@@ -810,10 +851,30 @@ export default function Storefront({
               <span className="mp-ln" aria-hidden="true" />
             </div>
 
+            {/* alt="" on purpose: the name is set directly beneath, and a
+                screen reader must not hear it twice. */}
+            {showPortrait && page.photo_url ? (
+              <div className="mp-portrait">
+                <Image
+                  className="mp-portrait-img"
+                  src={page.photo_url}
+                  alt=""
+                  width={96}
+                  height={96}
+                  unoptimized={!isSupabaseImage(page.photo_url)}
+                  priority
+                />
+              </div>
+            ) : null}
+
             <h1 className={nameClass}>
               <span>{nameLine1}</span>
               {nameLine2 ? <span className="r2">{nameLine2}</span> : null}
             </h1>
+
+            {/* Only when the headline is the business: the person then gets
+                his own line so the page still says who you are talking to. */}
+            {bizName ? <p className="mp-person">{page.full_name}</p> : null}
 
             <svg className="mp-underink" viewBox="0 0 560 16" preserveAspectRatio="none" aria-hidden="true">
               <path pathLength="100" d="M4 11 C 90 4, 168 14, 252 8 S 420 3, 556 9" />
@@ -968,6 +1029,25 @@ export default function Storefront({
                       </p>
                     </div>
                   ) : null}
+
+                  {/* Every href here passed the per-platform host allowlist
+                      in socialLinks(); the label is Myku's word for where the
+                      link goes, so the host must actually be that place. */}
+                  {links.length > 0 ? (
+                    <div className="mp-rv mp-rv-d1 mp-find">
+                      <span className="k">Find {first} online</span>
+                      <span className="v">
+                        {links.map((l, i) => (
+                          <span key={l.key}>
+                            {i > 0 ? <span className="sep"> · </span> : null}
+                            <a href={l.url} rel="noopener nofollow ugc" target="_blank">
+                              {l.label}
+                            </a>
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div>
@@ -1075,6 +1155,21 @@ export default function Storefront({
                               <span className="v">
                                 <VanGlyph /> {work}
                               </span>
+                            </div>
+                          ) : null}
+                          {/* Both labelled as HIS listing, like the
+                              certifications row: typed hours and typed towns
+                              are his claims, not Myku's confirmation. */}
+                          {hours ? (
+                            <div className="mp-arow">
+                              <span className="k">Hours {first} lists</span>
+                              <span className="v">{hours}</span>
+                            </div>
+                          ) : null}
+                          {towns.length > 0 ? (
+                            <div className="mp-arow">
+                              <span className="k">Towns {first} covers</span>
+                              <span className="v">{listOf(towns)}</span>
                             </div>
                           ) : null}
                           {/* Strictly available === true, so null and false
@@ -1224,6 +1319,14 @@ export default function Storefront({
               </div>
             ) : (
               <div className="mp-composer">
+                {/* His own words above the form. Live branch only: a page
+                    that takes no requests has no business printing a note
+                    about how to send one. */}
+                {requestNote && !unclaimed ? (
+                  <p className="mp-note">
+                    <span className="k">A note from {first}</span> {requestNote}
+                  </p>
+                ) : null}
                 {/* The heading and sub-line live INSIDE QuoteForm so the sent
                     state swaps the whole ask at once. Left here they would sit
                     above "Request sent." telling the visitor to fill in a form
@@ -1277,6 +1380,7 @@ export default function Storefront({
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
               <Link href="/support">Support</Link>
+              <a href={reportMailto}>Report this page</a>
             </div>
           </div>
         </section>

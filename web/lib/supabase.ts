@@ -32,6 +32,15 @@ export interface MechanicPage {
   available: boolean | null;
   socials: Record<string, string> | null;
   created_at: string;
+  // Content slots. Every one of these is optional on the page: the
+  // storefront renders a slot only when its value is present, so a row with
+  // all of them null renders exactly as it did before the columns existed.
+  business_name: string | null;
+  hours_note: string | null;
+  request_note: string | null;
+  service_towns: string[];
+  show_photo: boolean;
+  page_lang: 'en' | 'es';
 }
 
 export interface SharedJob {
@@ -43,6 +52,7 @@ export interface SharedJob {
   done_on: string | null;
   town: string | null;
   photo_url: string | null;
+  caption: string | null;
 }
 
 export interface VerifiedJob {
@@ -89,11 +99,14 @@ export async function getMechanicPage(slug: string): Promise<MechanicPage | null
 export interface ServiceRow {
   service: string;
   price_from: number | null;
+  sort_order: number;
 }
 
+// The mechanic's own order first, then name, so two rows he never reordered
+// still come back in a stable order.
 export async function getServices(mechanicId: string): Promise<ServiceRow[]> {
   const rows = await rest<ServiceRow[]>(
-    `web_mechanic_services?mechanic_id=eq.${mechanicId}&select=service,price_from`
+    `web_mechanic_services?mechanic_id=eq.${mechanicId}&select=service,price_from,sort_order&order=sort_order.asc,service.asc`
   );
   return rows ?? [];
 }
@@ -130,4 +143,35 @@ export async function getPublishedSlugs(): Promise<
     300
   );
   return rows ?? [];
+}
+
+// Same shape a slug is minted in. Anything else never leaves this process:
+// no request is made for input that cannot possibly be a slug.
+const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,58}[a-z0-9]$/;
+
+// A RETIRED slug resolves to the page's current slug, but only while that
+// page is publicly visible; otherwise null. The RPC is the boundary: it
+// never reveals a slug for a page the public view would not serve.
+export async function resolveRetiredSlug(slug: string): Promise<string | null> {
+  if (!SLUG_RE.test(slug)) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/web_resolve_slug`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_slug: slug }),
+      // A redirect must follow the latest rename. Never revalidate-cached.
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const out = (await res.json()) as unknown;
+    // The caller builds a redirect from this, so it must itself be a slug:
+    // never a path, never a protocol-relative "//host".
+    return typeof out === 'string' && SLUG_RE.test(out) ? out : null;
+  } catch {
+    return null;
+  }
 }

@@ -8,9 +8,25 @@ import {
   getReviews,
 } from '@/lib/supabase';
 import type { MechanicPage, ServiceRow, SharedJob, VerifiedJob, Review } from '@/lib/supabase';
+import { sanitizeSocials } from '@/lib/socials';
 
 // Everything a storefront needs, fetched once. The arrays are RAW: the
 // trim/dedupe/filter passes live in the renderer, not here.
+//
+// The ONE exception is page.socials. It is sanitised HERE, before the data
+// reaches any component, so that a stored value the renderer would reject
+// (a key pointing at a host that is not that platform) never exists past the
+// loader. Left raw, it is dropped from the rendered links but still shipped
+// to the browser inside the RSC payload as props. Sanitised, it is gone.
+//
+// IN PLACE, on the parsed object. A spread into a new object was tried first
+// and the raw copy still reached the browser: React's flight serialiser ended
+// up carrying both the parsed fetch body and the object built from it. Mutate
+// the parsed body and there is only ever one page object, and it is clean.
+function cleanSocialsInPlace(page: MechanicPage): MechanicPage {
+  page.socials = sanitizeSocials(page.socials);
+  return page;
+}
 export interface PageData {
   page: MechanicPage;
   services: ServiceRow[];
@@ -30,7 +46,7 @@ export async function loadPublicPage(slug: string): Promise<PageData | null> {
     getReviews(page.id),
   ]);
 
-  return { page, services: rawServices, shared, verified, reviews: rawReviews };
+  return { page: cleanSocialsInPlace(page), services: rawServices, shared, verified, reviews: rawReviews };
 }
 
 /* ------------------------------------------------------------------
@@ -74,7 +90,7 @@ export async function loadPreviewPage(token: string): Promise<PageData | null> {
     const b = (await res.json()) as PreviewBundle | null;
     if (!b) return null;
     return {
-      page: b.page,
+      page: cleanSocialsInPlace(b.page),
       services: b.services,
       shared: b.shared_jobs,
       verified: b.verified_jobs,

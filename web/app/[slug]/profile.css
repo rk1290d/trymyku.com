@@ -1714,3 +1714,48 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   padding: 10px 0;
 }
 .mp-composer-inert { opacity: .85; }
+
+/* ============================================================
+   CONTENT SLOTS (each renders only when its data is present)
+   Portrait above the name, business-name headline with the person
+   beneath, hours/towns rows, socials, the request note, and the
+   caption on a shared card. None of these exist on a page with no
+   slot data, so none of these rules touch such a page.
+   ============================================================ */
+.mp-portrait { margin: 0 0 14px; }
+.mp-portrait-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.mp-person { margin: 6px 0 0; font-size: 15px; letter-spacing: .01em; opacity: .82; color: #DDE1E7; }
+.mp-find {
+  margin-top: 22px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #D2D8E0;
+}
+.mp-find .k {
+  display: block;
+  font-family: var(--mp-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mp-steel);
+  margin-bottom: 6px;
+}
+.mp-find .sep { color: var(--mp-steel); }
+.mp-find a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.mp-note { margin: 0 0 18px; font-size: 14px; line-height: 1.5; opacity: .9; color: #D2D8E0; }
+.mp-note .k {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .7;
+  margin-bottom: 4px;
+}
+.mp-cap { margin: 4px 0 0; font-size: 12.5px; line-height: 1.4; opacity: .78; color: #524D45; }
