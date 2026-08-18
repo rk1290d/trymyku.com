@@ -37,7 +37,13 @@ export async function generateMetadata({
   const city = page.service_city?.split(',')[0]?.trim();
   const spec = page.specialization || 'Independent mechanic';
   const first = firstName(page.full_name);
-  const title = `${page.full_name} | ${city ? `Mechanic in ${city}` : 'Independent mechanic'}`;
+  // The business name leads here too when he has set one (decision 4), so the
+  // tab, the Google result and the link preview all agree with the H1 his page
+  // renders. Without this a mechanic trading under a shop name was absent from
+  // every surface a stranger sees BEFORE tapping, which is the only surface
+  // that decides whether they tap at all.
+  const headline = page.business_name?.trim() || page.full_name;
+  const title = `${headline} | ${city ? `Mechanic in ${city}` : 'Independent mechanic'}`;
   // States what the page is and what to do on it. Myku does not vouch,
   // including inside a search snippet or a Messenger preview. The unclaimed
   // variant mirrors the composer's own promise: the mechanic has not agreed

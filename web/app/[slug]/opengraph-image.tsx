@@ -137,6 +137,11 @@ export default async function Image({
   const city = page.service_city?.split(',')[0]?.trim();
   const years = page.years_experience ?? 0;
 
+  // Same rule the page body uses, so the card cannot contradict the page.
+  const bizName = page.business_name?.trim() || null;
+  const bizLeads = Boolean(bizName);
+  const headline = bizName ?? page.full_name;
+
   // Self-reported facts. These are on the page for claimed and unclaimed
   // pages alike, so they travel with the card either way.
   const meta = [
@@ -220,18 +225,47 @@ export default async function Image({
               minWidth: 0,
             }}
           >
+            {/* The headline follows the PAGE's rule (decision 4): the business
+                name leads when he has set one, with his own name beneath it.
+                The card used to print full_name unconditionally, so a mechanic
+                trading as "Reed Auto Repair" set the name, watched his page
+                body obey, then pasted the link into a group chat and saw a card
+                headed with his personal name instead.
+
+                Attribution never moves to the business: the person's name stays
+                on the card whenever the business name displaces it, because a
+                company cannot share a job and Myku confirms nothing about a
+                trading name.
+
+                The size ramp is wider than the old two-step because these are
+                different lengths of thing: a full name is short, while
+                business_name is CHECKed at up to 60 characters, which at the
+                old 62px would have run straight off the card. */}
             <div
               style={{
                 display: 'flex',
                 color: INK,
-                fontSize: page.full_name.length > 18 ? 62 : 76,
+                fontSize: headline.length > 40 ? 38 : headline.length > 28 ? 48 : headline.length > 18 ? 62 : 76,
                 fontWeight: 800,
                 letterSpacing: -3,
                 lineHeight: 1.05,
               }}
             >
-              {page.full_name}
+              {headline}
             </div>
+            {bizLeads ? (
+              <div
+                style={{
+                  display: 'flex',
+                  color: INK_2,
+                  fontSize: 30,
+                  fontWeight: 500,
+                  marginTop: 10,
+                }}
+              >
+                {page.full_name}
+              </div>
+            ) : null}
             <div
               style={{
                 display: 'flex',
