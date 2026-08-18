@@ -2,7 +2,10 @@
 /**
  * copy-sweep — the trust line, enforced at build time.
  *
- *   node scripts/copy-sweep.mjs        (runs before `next build`, see package.json)
+ *   node scripts/copy-sweep.mjs        (CLI; also `npm run copy-sweep`)
+ *
+ * It ALSO runs from next.config.mjs during `next build` (PHASE_PRODUCTION_BUILD),
+ * so it gates the Vercel deploy whatever build command Vercel invokes.
  *
  * VISION.md: Myku confirms facts and shows them; it never vouches. These
  * phrases turn a checked fact into an endorsement and are refused in every
@@ -59,23 +62,37 @@ function stripComments(src) {
   return src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`])\/\/.*$/gm, '$1');
 }
 
-const hits = [];
-for (const d of DIRS) {
-  let files = [];
-  try { files = walk(join(ROOT, d)); } catch { continue; }
-  for (const f of files) {
-    const src = stripComments(readFileSync(f, 'utf8'));
-    const lines = src.split('\n');
-    lines.forEach((line, i) => {
-      const re = VOUCHING.find((r) => isClaim(line, r));
-      if (re) hits.push(`${relative(ROOT, f)}:${i + 1}  ${re}  ${line.trim().slice(0, 100)}`);
-    });
+export function runCopySweep() {
+  const hits = [];
+  for (const d of DIRS) {
+    let files = [];
+    try { files = walk(join(ROOT, d)); } catch { continue; }
+    for (const f of files) {
+      const src = stripComments(readFileSync(f, 'utf8'));
+      const lines = src.split('\n');
+      lines.forEach((line, i) => {
+        const re = VOUCHING.find((r) => isClaim(line, r));
+        if (re) hits.push(`${relative(ROOT, f)}:${i + 1}  ${re}  ${line.trim().slice(0, 100)}`);
+      });
+    }
   }
+  return hits;
 }
 
-if (hits.length) {
-  console.error('\ncopy-sweep: vouching phrase in site copy (Myku confirms facts, it never endorses):');
-  for (const h of hits) console.error('  ' + h);
-  process.exit(1);
+export function reportCopySweep(hits) {
+  if (hits.length) {
+    console.error('\ncopy-sweep: vouching phrase in site copy (Myku confirms facts, it never endorses):');
+    for (const h of hits) console.error('  ' + h);
+    return false;
+  }
+  console.log('copy-sweep: clean.');
+  return true;
 }
-console.log('copy-sweep: clean.');
+
+// CLI entry (node scripts/copy-sweep.mjs); the build imports the functions.
+const invokedDirectly =
+  typeof process.argv[1] === 'string' &&
+  /copy-sweep\.mjs$/.test(process.argv[1].replace(/\\/g, '/'));
+if (invokedDirectly) {
+  process.exit(reportCopySweep(runCopySweep()) ? 0 : 1);
+}

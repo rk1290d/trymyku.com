@@ -1,3 +1,6 @@
+import { PHASE_PRODUCTION_BUILD } from 'next/constants.js';
+import { runCopySweep, reportCopySweep } from './scripts/copy-sweep.mjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
@@ -36,4 +39,12 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// The trust-line copy sweep runs inside the production build itself, so it
+// gates the deploy no matter which build command Vercel invokes (a package
+// script alone is bypassed by a bare `next build`).
+export default function config(phase) {
+  if (phase === PHASE_PRODUCTION_BUILD && !reportCopySweep(runCopySweep())) {
+    process.exit(1);
+  }
+  return nextConfig;
+}
