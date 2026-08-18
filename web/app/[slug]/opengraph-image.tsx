@@ -124,7 +124,12 @@ export default async function Image({
   }
 
   const unclaimed = page.web_status !== 'published';
-  const photo = page.photo_url ? await safePhoto(page.photo_url) : null;
+  // The portrait honours his "show my photo on the page" switch here too:
+  // the link preview IS the page to everyone who never taps it, so a photo
+  // he hid from the page must not keep riding on every share of the link.
+  // Missing (older rows) reads as shown, the same default the page uses.
+  const photo =
+    page.photo_url && page.show_photo !== false ? await safePhoto(page.photo_url) : null;
 
   const ratingNum =
     typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
