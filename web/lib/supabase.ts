@@ -38,7 +38,11 @@ export interface MechanicPage {
   business_name: string | null;
   hours_note: string | null;
   request_note: string | null;
+  /** Kept on the type until the column is dropped server-side. No longer read. */
   service_towns: string[];
+  /** Miles he travels from his city. null = not set, and the storefront then
+   *  draws no ring and no town pins rather than inventing them. */
+  service_radius_mi: number | null;
   show_photo: boolean;
   page_lang: 'en' | 'es';
 }

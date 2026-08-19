@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { resolveCity, townsWithin } from '@/lib/geo';
 import Link from 'next/link';
 import QuoteForm from '@/components/QuoteForm';
 import StorefrontFx from '@/components/StorefrontFx';
@@ -741,15 +742,45 @@ export default function Storefront({
     );
   };
 
-  // Radar label slots. Fixed positions, so the drawing can never collide
-  // with itself no matter what the town names are.
-  const SLOTS = [
-    { x: 50, y: 66, lx: 54, ly: 56 },
-    { x: 164, y: 72, lx: 156, ly: 62 },
-    { x: 54, y: 156, lx: 58, ly: 178 },
-    { x: 162, y: 152, lx: 152, ly: 174 },
-  ];
-  const townPins = townSet.map((t, i) => ({ ...SLOTS[i], label: t.toUpperCase() }));
+  // ── THE SERVICE-AREA DRAWING, MADE TRUE ────────────────────────────────────
+  // It used to place town names in four HARDCODED corners inside rings of a
+  // FIXED pixel radius, so it drew the same picture for a mechanic who travels
+  // 3 miles and one who travels 60, anywhere in the country. The look is kept
+  // exactly as it was, on purpose; only the numbers behind it changed.
+  //
+  // Centre: the official centroid of the city he already publishes, resolved
+  // from the service_city STRING. His stored coordinate is never published and
+  // never reaches this process (see web/lib/geo.ts for why that distinction is
+  // load-bearing).
+  //
+  // Radius: what he picked in the app. Without a radius, or without a city we
+  // can resolve, we draw NO ring and NO pins rather than inventing them.
+  const areaCentre = resolveCity(page.service_city);
+  const radiusMi =
+    typeof page.service_radius_mi === 'number' && page.service_radius_mi > 0
+      ? page.service_radius_mi
+      : null;
+  const areaTowns = areaCentre && radiusMi ? townsWithin(areaCentre, radiusMi, 5) : [];
+
+  // The outer ring IS the radius. Everything else is measured against it, so a
+  // pin's distance from the centre is its real distance, to scale.
+  const R_OUTER = 88;
+  const townPins = areaTowns.map((t) => {
+    const r = radiusMi ? Math.min(R_OUTER, (t.miles / radiusMi) * R_OUTER) : 0;
+    const a = (t.bearing - 90) * (Math.PI / 180); // 0deg = north, SVG y grows down
+    const x = 110 + r * Math.cos(a);
+    const y = 110 + r * Math.sin(a);
+    // Keep the label clear of the pin and inside the plate.
+    const outward = r > 46 ? -1 : 1;
+    return {
+      x,
+      y,
+      lx: Math.max(34, Math.min(186, x)),
+      ly: Math.max(20, Math.min(200, y + outward * 12)),
+      label: t.name.toUpperCase(),
+      miles: t.miles,
+    };
+  });
   const labelW = (s: string) => Math.min(92, s.length * 5.4 + 14);
 
   return (
@@ -1208,11 +1239,26 @@ export default function Storefront({
                           here: the cards and the How Myku Works block already
                           carry it, and a third repetition made the page sound
                           like it was apologizing for its own mechanic. */}
+                      {/* ATTRIBUTION IS LOAD-BEARING, not decoration. The ring
+                          now renders coverage he CLAIMS, where the old pins
+                          were derived from jobs on the page. That stays inside
+                          the trust rules only because this sentence says the
+                          distance is his, exactly like his hours and his
+                          certifications. If "the distance {first} lists" is ever
+                          dropped, the ring silently becomes a Myku assertion
+                          about where he works. */}
                       <p className="mp-area-note">
-                        A drawing, not a live map.{' '}
-                        {townPins.length > 0
-                          ? 'The pins are towns from jobs on this page. '
-                          : ''}
+                        {radiusMi && areaCentre ? (
+                          <>
+                            Drawn to scale around {areaCentre.name}, at the distance{' '}
+                            {first} lists.{' '}
+                            {townPins.length > 0
+                              ? 'The towns are real places inside it, not a promise he covers each one. '
+                              : ''}
+                          </>
+                        ) : (
+                          'A drawing, not a live map. '
+                        )}
                         Ask {first} about your address.
                       </p>
                     </div>
