@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { resolveCity, townsWithin } from '@/lib/geo';
+import { formatHours, parseHours } from '@/lib/hours';
 import Link from 'next/link';
 import QuoteForm from '@/components/QuoteForm';
 import StorefrontFx from '@/components/StorefrontFx';
@@ -451,7 +452,21 @@ export default function Storefront({
   // survived. A page with none of them set renders exactly as before the
   // columns existed.
   const showPortrait = Boolean(page.photo_url) && page.show_photo === true;
-  const hours = page.hours_note?.trim() || null;
+  // Structured hours win over the legacy typed line, so a mechanic who used
+  // the picker gets a generated sentence and anyone who typed one before the
+  // picker existed keeps theirs. Minutes are stored, not English, so slice 8
+  // can render this same value in Spanish.
+  const hours =
+    formatHours(parseHours(page.hours_json), {
+      day: { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' },
+      appointment: 'By appointment',
+      closed: 'Closed',
+      range: (a, b) => `${a} to ${b}`,
+      span: (a, b) => `${a} to ${b}`,
+      use24: false,
+    }) ||
+    page.hours_note?.trim() ||
+    null;
   // Typed by the mechanic for the rows only. NOT fed to the radar: the pins
   // stay job-derived, so the drawing never asserts coverage he merely listed.
   const towns = (page.service_towns ?? []).map((t) => (t ?? '').trim()).filter(Boolean);
@@ -544,7 +559,7 @@ export default function Storefront({
     Boolean(work) ||
     showAvailable ||
     townSet.length > 0 ||
-    Boolean(page.hours_note?.trim()) ||
+    Boolean(hours) ||
     towns.length > 0;
 
   const hasAbout =

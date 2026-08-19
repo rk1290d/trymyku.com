@@ -43,6 +43,9 @@ export interface MechanicPage {
   /** Miles he travels from his city. null = not set, and the storefront then
    *  draws no ring and no town pins rather than inventing them. */
   service_radius_mi: number | null;
+  /** Structured weekly hours (minutes from midnight). Preferred over
+   *  hours_note, which stays for anyone who typed a line before the picker. */
+  hours_json: unknown | null;
   show_photo: boolean;
   page_lang: 'en' | 'es';
 }
