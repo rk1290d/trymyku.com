@@ -9,6 +9,11 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Deliberately loose. This exists to catch a typo in an OPTIONAL field, not to
+// adjudicate RFC 5322 — a real address wrongly refused here costs a lead, and
+// the address is a fallback channel rather than something we authenticate.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // Legacy anon JWT (public by design): the notify-lead edge function sits
 // behind verify_jwt, which the modern publishable key can't satisfy.
 const SUPABASE_ANON_JWT =
@@ -65,6 +70,12 @@ export async function POST(req: NextRequest) {
       ? body.customer_name.trim().slice(0, 80)
       : null;
   const phone = typeof body.customer_phone === 'string' ? body.customer_phone.trim() : '';
+  // Optional. Stored lowercased so a future per-address dedupe has one shape to
+  // compare, the same reason the phone is normalised below.
+  const email =
+    typeof body.customer_email === 'string' && body.customer_email.trim()
+      ? body.customer_email.trim().toLowerCase().slice(0, 160)
+      : null;
   const vehicle =
     typeof body.vehicle === 'string' && body.vehicle.trim()
       ? body.vehicle.trim().slice(0, 80)
@@ -101,6 +112,14 @@ export async function POST(req: NextRequest) {
     digits.length < 7 ||
     digits.length > 15 ||
     phone.length > 32 ||
+    // The name is REQUIRED as of 2026-08-22. The browser already enforces this,
+    // but the browser is not the authority: this endpoint is public and takes
+    // nothing on trust.
+    name === null ||
+    name.length < 2 ||
+    // Optional, so null passes. A present one must look like an address, and
+    // must fit the column's 5..160 CHECK or the insert would 502 instead of 400.
+    (email !== null && (!EMAIL_RE.test(email) || email.length < 5)) ||
     (description.length < 5 && service === null)
   ) {
     return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
@@ -174,6 +193,7 @@ export async function POST(req: NextRequest) {
       slug: realSlug,
       customer_name: name,
       customer_phone: normalizedPhone,
+      customer_email: email,
       vehicle,
       description,
       service: safeService,

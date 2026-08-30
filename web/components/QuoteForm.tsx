@@ -62,6 +62,7 @@ export default function QuoteForm({
   const [timing, setTiming] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [vehicle, setVehicle] = useState('');
   const [desc, setDesc] = useState('');
   const [hp, setHp] = useState('');
@@ -73,6 +74,7 @@ export default function QuoteForm({
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const phoneRef = useRef<HTMLInputElement | null>(null);
   const nameRef = useRef<HTMLInputElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
   const sentRef = useRef<HTMLHeadingElement | null>(null);
 
   const focusTextarea = useCallback((ensureVisible = false) => {
@@ -207,6 +209,23 @@ export default function QuoteForm({
       phoneRef.current?.focus();
       return;
     }
+    if (name.trim().length < 2) {
+      setBad('name');
+      setErr(`Add your name so ${mechanicFirstName} knows who is calling.`);
+      nameRef.current?.focus();
+      return;
+    }
+    // Optional, so an empty box passes. Only a filled one has to look like an
+    // address, and the check stays deliberately loose: the point is to catch a
+    // typo, not to adjudicate what a valid address is.
+    const emailTrimmed = email.trim();
+    if (emailTrimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      setBad('email');
+      setErr('That email does not look right. Leave it blank if you prefer.');
+      setShowOpt(true);
+      emailRef.current?.focus();
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch('/api/lead', {
@@ -216,8 +235,9 @@ export default function QuoteForm({
         body: JSON.stringify({
           mechanic_id: mechanicId,
           slug,
-          customer_name: name.trim() || null,
+          customer_name: name.trim(),
           customer_phone: phone.trim(),
+          customer_email: emailTrimmed || null,
           vehicle: vehicle.trim() || null,
           description: desc.trim(),
           // Structured fields. NOT_SURE deliberately maps to null: "not sure"
@@ -366,8 +386,11 @@ export default function QuoteForm({
           </div>
         </div>
 
-        {/* Vehicle and phone. The vehicle is optional; an empty box must never
-            block the send. The phone is the only required field. */}
+        {/* Vehicle, phone and name. The vehicle is optional; an empty box must
+            never block the send. Phone and name are both required: the phone
+            because Call and Text are the mechanic's only two actions on a lead,
+            and the name because he is about to ring a stranger and should be
+            able to open with theirs. Email is optional, below. */}
         <div className="mp-fgroup mp-two">
           <div>
             <label className="mp-flabel" htmlFor="qf-vehicle">
@@ -406,6 +429,25 @@ export default function QuoteForm({
           </div>
         </div>
 
+        <div className="mp-fgroup">
+          <label className="mp-flabel" htmlFor="qf-name">
+            Your name <span className="req">*</span>
+          </label>
+          <input
+            ref={nameRef}
+            className={`mp-inp${bad === 'name' ? ' bad' : ''}`}
+            id="qf-name"
+            aria-invalid={bad === 'name'}
+            aria-describedby="qf-err"
+            type="text"
+            autoComplete="name"
+            placeholder="Your name"
+            maxLength={80}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+
         <button
           className="mp-optlink"
           type="button"
@@ -416,33 +458,36 @@ export default function QuoteForm({
             setShowOpt(next);
             if (next)
               requestAnimationFrame(() => {
-                const el = nameRef.current;
+                const el = emailRef.current;
                 if (!el) return;
                 el.focus({ preventScroll: true });
                 el.scrollIntoView({ block: 'center', behavior: 'auto' });
               });
           }}
         >
-          + Add your name
+          + Add your email
           <svg className="chev" viewBox="0 0 24 24" aria-hidden="true">
             <path d="m6 9 6 6 6-6" />
           </svg>
         </button>
         <div id="qf-opt" hidden={!showOpt}>
           <div className="mp-fgroup">
-            <label className="mp-flabel" htmlFor="qf-name">
-              Your name
+            <label className="mp-flabel" htmlFor="qf-email">
+              Your email
             </label>
             <input
-              ref={nameRef}
-              className="mp-inp"
-              id="qf-name"
-              type="text"
-              autoComplete="name"
-              placeholder="Your name"
-              maxLength={80}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              ref={emailRef}
+              className={`mp-inp${bad === 'email' ? ' bad' : ''}`}
+              id="qf-email"
+              aria-invalid={bad === 'email'}
+              aria-describedby="qf-err"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              maxLength={160}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>
