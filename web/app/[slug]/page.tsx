@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Storefront from '@/components/Storefront';
-import { getMechanicPage, resolveRetiredSlug } from '@/lib/supabase';
+import { getMechanicPage, resolveRetiredSlug, normalizeSlug } from '@/lib/supabase';
 import { loadPublicPage } from '@/lib/pageData';
 import { firstName } from '@/lib/format';
 import './profile.css';
@@ -30,7 +30,7 @@ export async function generateMetadata({
     // Metadata cannot redirect; the page function below does. This only
     // keeps the tab from reading "Page not found" during the hop.
     const current = await resolveRetiredSlug(slug);
-    if (current && current !== slug) return { title: 'Redirecting' };
+    if (current && current !== normalizeSlug(slug)) return { title: 'Redirecting' };
     return { title: 'Page not found' };
   }
 
@@ -87,8 +87,14 @@ export default async function ProfilePage({ params }: { params: Promise<Params> 
     // not permanentRedirect(): a 308 is cached by browsers, and a rename
     // A -> B -> A would then loop on the cached hop.
     const current = await resolveRetiredSlug(slug);
-    if (current && current !== slug) redirect('/' + current);
+    if (current && current !== normalizeSlug(slug)) redirect('/' + current);
     notFound();
   }
+  // The lookup folds case, so /Fort-Nite now finds the page instead of 404ing.
+  // Send it on to the one canonical address anyway, so the URL bar, the
+  // analytics row and anything the visitor shares onward all carry the same
+  // lowercase form the mechanic sees in the app. Same redirect() as above and
+  // for the same reason: never a cacheable 308.
+  if (slug !== data.page.slug) redirect('/' + data.page.slug);
   return <Storefront data={data} />;
 }

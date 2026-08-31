@@ -22,6 +22,45 @@ export const alt = 'Mechanic profile page';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
+// HOW LONG THE CARD IS ALLOWED TO BE WRONG.
+//
+// This card used to be frozen. next/og's ImageResponse constructor sets
+// `cache-control: public, immutable, no-transform, max-age=31536000` on
+// every response it builds (next/dist/server/og/image-response.js), and
+// nothing downstream touched it, so the first CDN node, browser or crawler
+// to fetch a mechanic's card pinned that PNG for a year. The og:image URL
+// cannot rescue it either: the query token Next appends is a hash of THIS
+// FILE, not of his data. It is byte-identical for every mechanic and never
+// moves when his photo, business name or city does.
+//
+// TWO exports, and they do DIFFERENT jobs. Verified by building the site and
+// reading the served headers, not assumed:
+//
+//   `revalidate` below declares this segment's freshness window, which is
+//   what a route handler is supposed to carry. On its own it changes
+//   NOTHING about the header: a local production build with only this export
+//   added still served `immutable, max-age=31536000`, because the header is
+//   written inside the ImageResponse constructor.
+//
+//   CARD_CACHE_CONTROL is the fix. The constructor lets `options.headers`
+//   override what it set, and that is the only thing that does.
+//
+// Sixty seconds is the same window the page's own data already runs on
+// (lib/supabase.ts rest(), next: { revalidate: 60 }), so the card and the
+// page it advertises can never disagree by more than the page already
+// disagrees with itself. A profile changes rarely, but it changes in bursts:
+// in the minutes after he publishes, while he is fixing his photo and his
+// business name, which is exactly when a frozen card does the damage. The
+// cost of the short window is one render per minute per slug, and only when
+// somebody actually asks for the card.
+export const revalidate = 60;
+
+// public, so shared caches may hold it; max-age=0, so a browser or a scraper
+// never treats its own copy as fresh; s-maxage=60 for the CDN; and a short
+// stale-while-revalidate so a crawler on a cold edge gets an instant card
+// rather than waiting on a re-render. No `immutable`, and no year.
+const CARD_CACHE_CONTROL = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300';
+
 // Read once per lambda instance, not once per card: a first-ever share of
 // a slug already pays cold start plus the photo fetch, and WhatsApp's
 // crawler timeout is short.
@@ -119,7 +158,10 @@ export default async function Image({
           myku
         </div>
       ),
-      { ...size, fonts: fontList }
+      // The placeholder card gets the short window too. A slug with no page
+      // today may have one tomorrow, and a year-long pin would keep serving
+      // this blank plate to everyone who shares his link after he publishes.
+      { ...size, fonts: fontList, headers: { 'cache-control': CARD_CACHE_CONTROL } }
     );
   }
 
@@ -336,6 +378,6 @@ export default async function Image({
         </div>
       </div>
     ),
-    { ...size, fonts: fontList }
+    { ...size, fonts: fontList, headers: { 'cache-control': CARD_CACHE_CONTROL } }
   );
 }

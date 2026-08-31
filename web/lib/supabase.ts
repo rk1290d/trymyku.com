@@ -96,9 +96,25 @@ async function rest<T>(path: string, revalidate = 60): Promise<T | null> {
   }
 }
 
+// A slug is MINTED lowercase and stored lowercase: the database CHECK
+// constraint mechanic_profiles_slug_format is
+// `^[a-z0-9][a-z0-9-]{1,58}[a-z0-9]$`, so no stored slug can contain an
+// uppercase letter. Folding case here therefore can never resolve to the
+// wrong mechanic's page: there is no second row it could collide with.
+//
+// It rescues the one link the product does not control. Everything Myku
+// emits is already lowercase, but a link retyped off a business card, an
+// invoice line or a van decal arrives in title case, and until now that
+// went straight to the 404 page that reads "This link doesn't go anywhere."
+// The database already folded case on its side (web_resolve_slug compares
+// `h.old_slug = lower(p_slug)`); this layer was the only one that did not.
+export function normalizeSlug(slug: string): string {
+  return slug.trim().toLowerCase();
+}
+
 export async function getMechanicPage(slug: string): Promise<MechanicPage | null> {
   const rows = await rest<MechanicPage[]>(
-    `web_mechanic_pages?slug=eq.${encodeURIComponent(slug)}&limit=1`
+    `web_mechanic_pages?slug=eq.${encodeURIComponent(normalizeSlug(slug))}&limit=1`
   );
   return rows?.[0] ?? null;
 }
@@ -160,7 +176,12 @@ const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,58}[a-z0-9]$/;
 // page is publicly visible; otherwise null. The RPC is the boundary: it
 // never reveals a slug for a page the public view would not serve.
 export async function resolveRetiredSlug(slug: string): Promise<string | null> {
-  if (!SLUG_RE.test(slug)) return null;
+  // Fold case BEFORE the guard. The guard is deliberately the minted shape,
+  // which is lowercase, so testing the raw param made a capitalised retired
+  // link fail here and never reach the RPC at all, even though the RPC
+  // itself already lowercases what it is given.
+  const normalized = normalizeSlug(slug);
+  if (!SLUG_RE.test(normalized)) return null;
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/web_resolve_slug`, {
       method: 'POST',
@@ -169,7 +190,7 @@ export async function resolveRetiredSlug(slug: string): Promise<string | null> {
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ p_slug: slug }),
+      body: JSON.stringify({ p_slug: normalized }),
       // A redirect must follow the latest rename. Never revalidate-cached.
       cache: 'no-store',
     });
