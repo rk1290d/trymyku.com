@@ -29,7 +29,10 @@ export interface MechanicPage {
   certifications: string[] | null;
   hourly_rate: number | null;
   diagnostic_fee: number | null;
-  available: boolean | null;
+  // NO `available`. The mechanic's "Available now" switch is an in-app
+  // doorbell about inbound work; it is not a fact about his business and it
+  // is not page content. The website is his resume and has nothing to do
+  // with it, so the field is neither typed here nor requested below.
   socials: Record<string, string> | null;
   created_at: string;
   // Content slots. Every one of these is optional on the page: the
@@ -112,9 +115,53 @@ export function normalizeSlug(slug: string): string {
   return slug.trim().toLowerCase();
 }
 
+// EXPLICIT, not `*`, for exactly one reason: the view still carries an
+// `available` column and this site must never receive it. Availability is
+// the app's inbound doorbell, not page content, so it does not cross onto
+// the website's infrastructure at all - not into the render, not into the
+// link-preview card, not into a fetch nobody reads.
+//
+// The cost of being explicit is that a NEW column added to
+// web_mechanic_pages will not appear here until it is added to this list.
+// That is the trade: a forgotten column renders nothing, where `*` silently
+// pulls the one column that must not travel. Keep this list in the same
+// order as the MechanicPage interface above.
+const PAGE_COLUMNS = [
+  'id',
+  'slug',
+  'web_status',
+  'full_name',
+  'photo_url',
+  'bio',
+  'specialization',
+  'years_experience',
+  'service_city',
+  'work_type',
+  'rating',
+  'review_count',
+  'jobs_done',
+  'id_verified',
+  'has_insurance',
+  'has_certifications',
+  'certifications',
+  'hourly_rate',
+  'diagnostic_fee',
+  'socials',
+  'created_at',
+  'business_name',
+  'hours_note',
+  'request_note',
+  'service_towns',
+  'service_radius_mi',
+  'hours_json',
+  'show_photo',
+  'page_lang',
+].join(',');
+
 export async function getMechanicPage(slug: string): Promise<MechanicPage | null> {
   const rows = await rest<MechanicPage[]>(
-    `web_mechanic_pages?slug=eq.${encodeURIComponent(normalizeSlug(slug))}&limit=1`
+    `web_mechanic_pages?slug=eq.${encodeURIComponent(normalizeSlug(slug))}` +
+      `&select=${PAGE_COLUMNS}&limit=1`
   );
   return rows?.[0] ?? null;
 }

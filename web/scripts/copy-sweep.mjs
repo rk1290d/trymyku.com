@@ -54,6 +54,69 @@ function walk(dir, out = []) {
   return out;
 }
 
+function walkCss(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    const st = statSync(p);
+    if (st.isDirectory()) walkCss(p, out);
+    else if (/\.css$/.test(name)) out.push(p);
+  }
+  return out;
+}
+
+/* ====================================================================
+   AVAILABILITY  ::  the mechanic's "Available now" switch does not exist
+   on this website, and this is the thing that keeps it that way.
+
+   Rohaan, 2026-08-19, binding: "the only purpose of the available now
+   button is that he is available to take bookings or get request or get
+   messages... But the website, which is supposed to be a resume in case
+   he wants to offer his work to somebody, that has nothing to do with
+   the other."
+
+   So the switch is an operational doorbell inside the app, and this site
+   is his resume. Whether he is taking work today is not a fact about his
+   business and it is not page content. It came off this site once; the
+   only reason it will not drift back is a build that refuses it.
+
+   THREE rules, because it can come back in three different ways:
+
+     1. as COPY, if someone types a presence claim into the page;
+     2. as a FIELD, if someone re-types `available` on MechanicPage, or
+        re-adds it to the PAGE_COLUMNS select, or reads it to decide
+        whether a section renders;
+     3. as CSS, if the presence pill and its status dot are put back,
+        which is how it looked before: an orange pill with a dot in it.
+
+   Rule 2 permits exactly one thing, and permits it deliberately: DELETING
+   the key. lib/pageData.ts strips `available` out of the preview bundle,
+   which the site does not choose the shape of, and that line must keep
+   working. Deleting the flag is always safe; reading, typing or selecting
+   it is what is refused.
+   ==================================================================== */
+// If one of these ever blocks a genuinely innocent line ("the app is available
+// now on the App Store"), REPHRASE THE LINE. Do not loosen the rule. The whole
+// value of this gate is that it is not negotiable at the moment somebody is in
+// a hurry, which is the moment the pill came back last time. Nothing on the
+// site says any of these today, checked at the time this was written.
+const PRESENCE_COPY = [
+  /taking new work/i,
+  /accepting new work/i,
+  /available now/i,
+  /currently available/i,
+];
+
+// The one permitted mention: throwing the key away.
+const AVAILABLE_DELETE = /delete\s*\(.*\)\.available\s*[;,]?/;
+const AVAILABLE_WORD = /\bavailable\b/;
+
+// The visual vocabulary of live presence. Both sheets had a copy of it.
+const PRESENCE_CSS = [/\.(?:mp|hm)-pill\.live\b/, /\.(?:mp|hm)-dot\b/];
+
+function stripCssComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
 // Strip // line comments and /* block */ comments. Crude but sufficient: the
 // site's source has no string literal that legitimately contains "//" ahead
 // of one of these phrases, and a false negative here would still be caught
@@ -71,20 +134,61 @@ export function runCopySweep() {
       const src = stripComments(readFileSync(f, 'utf8'));
       const lines = src.split('\n');
       lines.forEach((line, i) => {
+        const where = `${relative(ROOT, f)}:${i + 1}`;
+        const snip = line.trim().slice(0, 100);
+
         const re = VOUCHING.find((r) => isClaim(line, r));
-        if (re) hits.push(`${relative(ROOT, f)}:${i + 1}  ${re}  ${line.trim().slice(0, 100)}`);
+        if (re) hits.push({ rule: 'vouching', text: `${where}  ${re}  ${snip}` });
+
+        const pres = PRESENCE_COPY.find((r) => r.test(line));
+        if (pres) hits.push({ rule: 'availability', text: `${where}  ${pres}  ${snip}` });
+
+        if (AVAILABLE_WORD.test(line) && !AVAILABLE_DELETE.test(line)) {
+          hits.push({ rule: 'availability', text: `${where}  \`available\` field  ${snip}` });
+        }
       });
     }
   }
+
+  // The presence pill and its dot, in any stylesheet the site ships.
+  let cssFiles = [];
+  try { cssFiles = walkCss(join(ROOT, 'app')); } catch { cssFiles = []; }
+  for (const f of cssFiles) {
+    const lines = stripCssComments(readFileSync(f, 'utf8')).split('\n');
+    lines.forEach((line, i) => {
+      const re = PRESENCE_CSS.find((r) => r.test(line));
+      if (re) {
+        hits.push({
+          rule: 'availability',
+          text: `${relative(ROOT, f)}:${i + 1}  presence pill / status dot  ${line.trim().slice(0, 100)}`,
+        });
+      }
+    });
+  }
+
   return hits;
 }
 
 export function reportCopySweep(hits) {
-  if (hits.length) {
+  const vouching = hits.filter((h) => h.rule === 'vouching');
+  const availability = hits.filter((h) => h.rule === 'availability');
+
+  if (vouching.length) {
     console.error('\ncopy-sweep: vouching phrase in site copy (Myku confirms facts, it never endorses):');
-    for (const h of hits) console.error('  ' + h);
-    return false;
+    for (const h of vouching) console.error('  ' + h.text);
   }
+  if (availability.length) {
+    console.error(
+      '\ncopy-sweep: availability is back on the website. It must not be.\n' +
+        '  The "Available now" switch is an in-app doorbell about inbound work.\n' +
+        '  This site is the mechanic\'s resume and has nothing to do with it: no\n' +
+        '  presence copy, no `available` field, no status pill or dot. The only\n' +
+        '  permitted mention is deleting the key out of the preview bundle.'
+    );
+    for (const h of availability) console.error('  ' + h.text);
+  }
+  if (vouching.length || availability.length) return false;
+
   console.log('copy-sweep: clean.');
   return true;
 }

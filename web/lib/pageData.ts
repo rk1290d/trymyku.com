@@ -23,8 +23,17 @@ import { sanitizeSocials } from '@/lib/socials';
 // and the raw copy still reached the browser: React's flight serialiser ended
 // up carrying both the parsed fetch body and the object built from it. Mutate
 // the parsed body and there is only ever one page object, and it is clean.
-function cleanSocialsInPlace(page: MechanicPage): MechanicPage {
+//
+// The SECOND thing it does is drop `available`. The mechanic's "Available
+// now" switch is an in-app doorbell about inbound work, not page content,
+// and the website is his resume: it must not hold that flag in any form.
+// The public fetch already omits the column (lib/supabase.ts PAGE_COLUMNS),
+// but the preview RPC returns a whole bundle we do not choose the shape of,
+// so the key is deleted here on the way in. Same in-place reason as above:
+// deleting on a copy would leave the parsed body carrying it.
+function cleanPageInPlace(page: MechanicPage): MechanicPage {
   page.socials = sanitizeSocials(page.socials);
+  delete (page as unknown as Record<string, unknown>).available;
   return page;
 }
 export interface PageData {
@@ -46,7 +55,7 @@ export async function loadPublicPage(slug: string): Promise<PageData | null> {
     getReviews(page.id),
   ]);
 
-  return { page: cleanSocialsInPlace(page), services: rawServices, shared, verified, reviews: rawReviews };
+  return { page: cleanPageInPlace(page), services: rawServices, shared, verified, reviews: rawReviews };
 }
 
 /* ------------------------------------------------------------------
@@ -90,7 +99,7 @@ export async function loadPreviewPage(token: string): Promise<PageData | null> {
     const b = (await res.json()) as PreviewBundle | null;
     if (!b) return null;
     return {
-      page: cleanSocialsInPlace(b.page),
+      page: cleanPageInPlace(b.page),
       services: b.services,
       shared: b.shared_jobs,
       verified: b.verified_jobs,

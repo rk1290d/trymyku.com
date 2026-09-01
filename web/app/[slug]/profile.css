@@ -458,22 +458,11 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
   background: rgba(255, 255, 255, 0.045);
   color: #D6DAE1;
 }
-.mp-pill.live {
-  border-color: rgba(249, 115, 22, 0.5);
-  color: #FFD3AE;
-  background: rgba(249, 115, 22, 0.09);
-}
-/* The availability dot does NOT pulse. A pulsing presence dot is the visual
-   grammar of live, real-time status; behind it is a flag the mechanic
-   toggled in the app at some unknown time, and a static caption cannot
-   outrun motion. */
-.mp-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--mp-o);
-  flex: 0 0 auto;
-}
+/* There is no presence pill and no status dot on this page. Availability is
+   an in-app switch about inbound work; this page is a resume, and the live
+   visual vocabulary that used to render it (.mp-pill.live and .mp-dot) is
+   deleted rather than left unused. .mp-pill above stays: it carries the work
+   type, which is a real fact about how he works. */
 
 .mp-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(26px, 4.4vw, 38px); }
 

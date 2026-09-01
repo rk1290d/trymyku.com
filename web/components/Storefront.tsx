@@ -402,10 +402,14 @@ export default function Storefront({
   const cityShort = city?.split(',')[0]?.trim() || null;
   // Fail CLOSED: any unexpected status is treated as unclaimed.
   const unclaimed = page.web_status !== 'published';
-  // An unclaimed page is not taking requests, so it must not also announce
-  // that the mechanic is taking new work. Availability is suppressed with
-  // the composer, not left behind it.
-  const showAvailable = page.available === true && !unclaimed;
+  // AVAILABILITY IS NOT PAGE CONTENT, AND MUST NOT COME BACK HERE.
+  // "Available now" is an operational doorbell inside the app: it governs
+  // whether the mechanic shows up in the app's browse list and on its map,
+  // and whether a new booking, quote request or first message can reach him.
+  // This page is his resume. Whether he is taking work today has nothing to
+  // do with it, so nothing on this page reads, derives or renders that flag:
+  // no hero pill, no status row, and no hidden participation in whether a
+  // section renders. It is not a column on MechanicPage either.
   const verifiedCount = wall.filter((j) => j.verified).length;
   const hasSharedJob = wall.some((j) => !j.verified);
 
@@ -553,11 +557,13 @@ export default function Storefront({
     townSet.push(t);
     if (townSet.length === 4) break;
   }
-  // The panel is worth drawing only when it has something to say.
+  // The panel is worth drawing only when it has something to say, and only
+  // real area content counts. This test used to treat availability as one of
+  // those reasons, so a mechanic with no city, no work type, no hours and no
+  // towns still got a Service area block on the strength of a doorbell flag.
   const hasArea =
     Boolean(city) ||
     Boolean(work) ||
-    showAvailable ||
     townSet.length > 0 ||
     Boolean(hours) ||
     towns.length > 0;
@@ -928,15 +934,12 @@ export default function Storefront({
 
             <p className="mp-spec">{specLine}</p>
 
-            {work || showAvailable ? (
+            {/* One pill, and it is how he works. The row is gated on that
+                pill alone, so with no work type there is no empty band
+                between the specialization line and the CTAs. */}
+            {work ? (
               <div className="mp-meta">
-                {work ? <span className="mp-pill">{work}</span> : null}
-                {showAvailable ? (
-                  <span className="mp-pill live">
-                    <span className="mp-dot" aria-hidden="true" />
-                    Taking new work
-                  </span>
-                ) : null}
+                <span className="mp-pill">{work}</span>
               </div>
             ) : null}
 
@@ -1216,16 +1219,6 @@ export default function Storefront({
                             <div className="mp-arow">
                               <span className="k">Towns {first} covers</span>
                               <span className="v">{listOf(towns)}</span>
-                            </div>
-                          ) : null}
-                          {/* Strictly available === true, so null and false
-                              never fall through to "Taking new work". */}
-                          {showAvailable ? (
-                            <div className="mp-arow">
-                              <span className="k">Status</span>
-                              <span className="v">
-                                <span className="mp-dot" aria-hidden="true" /> Taking new work
-                              </span>
                             </div>
                           ) : null}
                           {years > 0 && !yearsInStrip ? (

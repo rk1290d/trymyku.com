@@ -470,22 +470,12 @@ body[data-lead-sent='1'] .hm-dock { display: none; }
   background: rgba(255, 255, 255, 0.045);
   color: #D6DAE1;
 }
-.hm-pill.live {
-  border-color: rgba(249, 115, 22, 0.5);
-  color: #FFD3AE;
-  background: rgba(249, 115, 22, 0.09);
-}
-/* The availability dot does NOT pulse. A pulsing presence dot is the visual
-   grammar of live, real-time status; behind it is a flag the mechanic
-   toggled in the app at some unknown time, and a static caption cannot
-   outrun motion. */
-.hm-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--hm-o);
-  flex: 0 0 auto;
-}
+/* No presence pill, no status dot here either. These were a byte-for-byte
+   copy of the profile sheet's availability rules and nothing on the
+   marketing home page ever rendered them, which made them a ready-built
+   availability badge waiting to be used. Deleted for the same reason it is
+   gone from the profile sheet: availability is an in-app switch and does not
+   belong anywhere on this site. */
 
 .hm-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(26px, 4.4vw, 38px); }
 
