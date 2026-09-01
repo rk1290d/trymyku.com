@@ -1016,6 +1016,21 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
   color: var(--mp-o);
 }
 .mp-bio-p:last-child { margin-bottom: 0; }
+/* Where the words came from, on an unclaimed page only. Set in the mono
+   sourcing voice the job chips and the fact strip use, so the page has ONE
+   way of saying "Myku copied this from a listing" rather than three. Quieter
+   than the prose above it: it qualifies the bio, it does not compete. */
+.mp-bio-src {
+  margin: clamp(14px, 2vw, 18px) 0 0;
+  font-family: var(--mp-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  /* Same grey as .mp-qual, its sibling in this column: both are the small
+     print under a claim, and they must not read as two different voices. */
+  color: #99a1ac;
+  max-width: 46ch;
+}
 
 /* Paperwork checks. A DIFFERENT mark from job provenance, on purpose: a
    reviewed document is not a completed job, and the teal check must never
@@ -1094,6 +1109,10 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
 .mp-radar .ring.dash { stroke-dasharray: 3 4; stroke: rgba(184, 193, 206, 0.4); }
 .mp-radar .acc { stroke: var(--mp-o); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .mp-radar .twn { fill: rgba(200, 208, 218, 0.62); }
+/* Callout leader. Quieter than the range rings on purpose: it is annotation,
+   not geometry, and it must never read as a route or a boundary. It appears
+   only when a town's name had to move off its dot to stay legible. */
+.mp-radar .ldr { stroke: rgba(184, 193, 206, 0.3); stroke-width: 0.7; fill: none; stroke-linecap: round; }
 .mp-radar .lbl-t { font-family: var(--mp-mono); font-weight: 600; fill: #E7EAEF; letter-spacing: 1.9px; }
 .mp-radar .lbl-s { font-family: var(--mp-mono); fill: rgba(178, 186, 197, 0.85); letter-spacing: 1.5px; }
 .mp-radar .halo { fill: none; stroke: var(--mp-o); stroke-width: 1; opacity: 0.34; }
@@ -1210,10 +1229,28 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
   position: relative;
 }
 .mp-srv .p b { color: var(--mp-o-deep); font-size: 15px; letter-spacing: -0.01em; font-family: var(--mp-sans); font-weight: 900; }
-/* Price-less service: the price slot renders nothing. A price is the
-   mechanic's own choice per service, and no price means he chose not to
-   say. The page never invents a "Quoted" to fill the gap. */
+/* Price-less service: the price slot renders nothing. The page never invents
+   a "Quoted" to fill the gap. */
 .mp-srv.np .dots { margin-right: 6px; }
+/* Where the prices came from, on an unclaimed page only. Same mono sourcing
+   voice as .mp-notconf on the work wall and .mp-bio-src in the About band, in
+   the paper-background grey those two use, so the page has ONE way of saying
+   "Myku copied this from a listing" rather than four. Quieter than the rows
+   above it: it qualifies the list, it does not compete with it.
+
+   62ch, not the 46ch the bio uses: this sits under a FULL-WIDTH list rather
+   than in a narrow column, and it is the same sentence .mp-facts-note carries,
+   which sets on one line. Wrapped here and unwrapped there, one page would
+   print the identical sentence two different shapes. */
+.mp-srv-src {
+  margin: clamp(14px, 2vw, 18px) 0 0;
+  font-family: var(--mp-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--mp-slate-2);
+  max-width: 62ch;
+}
 
 /* ============================================================
    REVIEWS
@@ -1409,6 +1446,15 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   font-size: 14.5px;
   line-height: 1.5;
   color: #FFD3AE;
+}
+/* Says the chips above came from Myku, not from him. Muted rather than warm:
+   it is a correction to what the chips imply, not a highlight, and it must
+   not outrank his own words anywhere else in the form. */
+.mp-chip-note {
+  margin: 11px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #9AA3AE;
 }
 /* Validation text, announced. ALWAYS in the DOM with height reserved, so the
    layout never jumps and the live region is not created at announce time. */

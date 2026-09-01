@@ -43,7 +43,19 @@ export async function generateMetadata({
   // every surface a stranger sees BEFORE tapping, which is the only surface
   // that decides whether they tap at all.
   const headline = page.business_name?.trim() || page.full_name;
-  const title = `${headline} | ${city ? `Mechanic in ${city}` : 'Independent mechanic'}`;
+  const base = `${headline} | ${city ? `Mechanic in ${city}` : 'Independent mechanic'}`;
+  // AN UNCLAIMED PAGE SAYS SO IN ITS TITLE TOO, not only in its description.
+  // The description below already carries the caveat, and every unfurl that
+  // renders a description shows it. iMessage does not render one: it shows the
+  // link-preview IMAGE, this title, and the domain. The image now carries the
+  // state as well, in an eyebrow sized to survive that scale (see
+  // opengraph-image.tsx, where the 300px downsample was actually measured),
+  // but the title is real text at real size on every surface, so it is the
+  // one that cannot be scaled away. It LEADS rather than trails because
+  // titles truncate from the end. Fail CLOSED on the status, the same way the
+  // page component does: anything that is not published is a preview Myku
+  // built, and it says so.
+  const title = page.web_status === 'published' ? base : `Preview · ${base}`;
   // States what the page is and what to do on it. Myku does not vouch,
   // including inside a search snippet or a Messenger preview. The unclaimed
   // variant mirrors the composer's own promise: the mechanic has not agreed

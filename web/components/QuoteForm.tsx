@@ -13,8 +13,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // be dropped no matter what the mechanic's service list looks like.
 const NOT_SURE = 'Not sure / something else';
 
-// Hardcoded fallbacks for pages with no usable service list. These are why
-// the page converts with zero mechanic data.
+// Hardcoded fallbacks for a page whose mechanic listed NOTHING. These are why
+// a seeded page converts with zero mechanic data, and that is the only job
+// they have. They used to stand in whenever he had fewer than three services,
+// which meant the specialist who deliberately lists two things got a form
+// asking for oil changes and AC work he does not do, one screen under a
+// section headed "What he does" that listed his actual two. The page must
+// never offer a service on his behalf that he did not choose.
+//
+// They ARE still shown when he named nothing at all, because a page that
+// converts on zero mechanic data is the entire reason a seeded page exists.
+// What stops that from being an assertion on his behalf is the caption that
+// renders with them: see the note under the chip row. Do not drop the chips,
+// and do not drop the caption either. A published mechanic can reach this
+// state too, not only a seeded page - nothing gates publish on having named
+// a single service - and he has no way of knowing his page is doing it.
 const FALLBACK_SERVICES = [
   "Won't start",
   'Brakes',
@@ -35,6 +48,62 @@ const MAX_CHIP_CHARS = 34;
 export interface ServiceOffer {
   name: string;
   priceFrom: number | null;
+}
+
+const GENERIC_ERROR =
+  'Something went wrong. Please try again, or email support@trymyku.com.';
+
+// THREE DIFFERENT REFUSALS WORE ONE SENTENCE, AND TWO OF THEM WERE LIES.
+// /api/lead returns 429 for three unrelated reasons and tags each one with a
+// `scope` and a real `retry_after` (see the header of app/api/lead/route.ts).
+// This form used to discard the body and tell everybody "wait a minute",
+// which is true for exactly one of the three. A customer stopped by the
+// per-sender cap was told to wait a minute and then refused again for the
+// next hour, with nothing on screen explaining why, at the only conversion
+// point the business has.
+//
+// Nothing below promises the mechanic will reply. 'mechanic' deliberately
+// does not claim the request was kept either: the route records it on a best
+// effort basis after the response is already sent, so it may not have been.
+//
+// AND IT TAKES `unclaimed`, which it did not at first, because the sender
+// branch is the one place this component makes a claim about the MECHANIC. On
+// an unclaimed page there is no mechanic account and no Myku inbox for him to
+// have anything in: the success line one screen earlier says "Myku will pass
+// this to <First>", and telling the same person a submission later that he
+// "already has your last few requests" contradicts it at the conversion moment.
+// The 'mechanic' and 'ip' branches say nothing about him and need no split.
+async function refusalMessage(
+  res: Response,
+  first: string,
+  unclaimed: boolean,
+): Promise<string> {
+  let scope = '';
+  let retryAfter = 0;
+  try {
+    const body = (await res.json()) as { scope?: string; retry_after?: number };
+    scope = typeof body.scope === 'string' ? body.scope : '';
+    retryAfter = Number(body.retry_after) || 0;
+  } catch {
+    // An unreadable body is not worth failing over; fall through to the
+    // wording that was here before, which is the safest of the three.
+  }
+  if (scope === 'sender') {
+    if (unclaimed) {
+      return retryAfter > 3600
+        ? `Myku already has your requests from today for ${first}. Please try again tomorrow.`
+        : `Myku already has your last few requests for ${first}. Please give it an hour before sending another.`;
+    }
+    return retryAfter > 3600
+      ? `${first} already has your requests from today. Please try again tomorrow.`
+      : `${first} already has your last few requests. Please give it an hour before sending another.`;
+  }
+  if (scope === 'mechanic') {
+    return 'This page is taking a lot of requests right now. Please try again later, or email support@trymyku.com.';
+  }
+  // 'ip', and anything unrecognised: the per-IP burst bucket is a double tap
+  // on submit, and a minute is literally its window.
+  return 'This page is busy right now. Please wait a minute and try again.';
 }
 
 const TIMING_OPTIONS: { value: string; label: string }[] = [
@@ -116,10 +185,18 @@ export default function QuoteForm({
     };
   }, [focusTextarea]);
 
-  const offered = services.filter(
-    (s) => s.name.trim().length > 0 && s.name.trim().length <= MAX_CHIP_CHARS
-  );
-  const usingFallback = offered.length < 3;
+  // Two separate questions, and conflating them is what put words in his
+  // mouth. `named` asks whether he listed anything at all: that is the ONLY
+  // thing the generic fallback may answer. `offered` then drops anything too
+  // long to sit on a chip, which is a paste guard, not a reason to start
+  // advertising services he never chose.
+  const named = services.filter((s) => s.name.trim().length > 0);
+  const offered = named.filter((s) => s.name.trim().length <= MAX_CHIP_CHARS);
+  const usingFallback = named.length === 0;
+  // One service or two: he gets his own chips plus the always-appended
+  // "Not sure / something else" below, which is a coherent ask on its own.
+  // Nothing here can ever produce an empty group: NOT_SURE is appended
+  // unconditionally where the chips are rendered.
   const chipServices: ServiceOffer[] = usingFallback
     ? FALLBACK_SERVICES.map((n) => ({ name: n, priceFrom: null }))
     : offered.slice(0, 5);
@@ -247,20 +324,25 @@ export default function QuoteForm({
           hp,
         }),
       });
-      if (!res.ok) throw new Error(String(res.status));
-      setDone(true);
-    } catch (thrown) {
-      setBusy(false);
-      const status = thrown instanceof Error ? Number(thrown.message) : NaN;
-      if (status === 400) {
-        setErr('Check your phone number and the details, then try again.');
-      } else if (status === 410) {
-        setErr('This page is no longer taking quote requests.');
-      } else if (status === 429) {
-        setErr('This page is busy right now. Please wait a minute and try again.');
-      } else {
-        setErr('Something went wrong. Please try again, or email support@trymyku.com.');
+      if (!res.ok) {
+        setBusy(false);
+        if (res.status === 400) {
+          setErr('Check your phone number and the details, then try again.');
+        } else if (res.status === 410) {
+          setErr('This page is no longer taking quote requests.');
+        } else if (res.status === 429) {
+          setErr(await refusalMessage(res, mechanicFirstName, unclaimed));
+        } else {
+          setErr(GENERIC_ERROR);
+        }
+        return;
       }
+      setDone(true);
+    } catch {
+      // Network failure or the 15s timeout. There is no response to read, so
+      // nothing more specific is honest here.
+      setBusy(false);
+      setErr(GENERIC_ERROR);
     }
   }
 
@@ -333,6 +415,22 @@ export default function QuoteForm({
               );
             })}
           </div>
+          {/* WHOSE LIST IS THIS. When he has named nothing, the five chips
+              above are Myku's, not his, and they were presented in exactly
+              the same type as a real service list. A visitor reasonably read
+              them as work he offers, and a lead sent from one arrives tagged
+              with that service name. Myku was asserting a service on the
+              mechanic's behalf, which is the one thing the product may never
+              do. The chips stay, because they are why a page with no data
+              still converts; what changes is that the page stops claiming
+              they came from him. Only rendered when he named nothing, so it
+              never contradicts a real list. */}
+          {usingFallback ? (
+            <p className="mp-chip-note">
+              Common requests, not a list of {mechanicFirstName}&apos;s services. Pick the
+              closest one.
+            </p>
+          ) : null}
           {/* The quoting tax dies here: when the mechanic chose to price this
               service, the ballpark answers before anyone has to ask it. */}
           {selectedOffer?.priceFrom ? (

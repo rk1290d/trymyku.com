@@ -5,6 +5,30 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 // Accepts a quote request from a public profile page and stores it in
 // profile_leads. Inserts run under the anon key: row-level security only
 // allows inserts for web-visible mechanics, and nothing can be read back.
+//
+// THE THREE LIMITS A REQUEST PASSES, AND WHY THEY ARE DIFFERENT.
+// This is the conversion moment for the whole business, so a refusal here is
+// never just an error code. There are three, and until migration 118 they were
+// indistinguishable to everyone downstream:
+//
+//   scope 'ip'       the per-IP burst bucket below, 3 a minute. A customer who
+//                    double-taps submit. "Wait a minute" is literally true.
+//   scope 'sender'   the database cap on one phone number to one mechanic,
+//                    3 an hour. He is not losing a lead: the mechanic already
+//                    has this person's last three requests.
+//   scope 'mechanic' the database flood ceiling on one mechanic, 60 an hour
+//                    and 90 a day. THIS ONE IS A LOST LEAD. It is the only one
+//                    that costs the mechanic a customer, so it is logged, and
+//                    the request itself is written to profile_lead_refusals so
+//                    he can still be handed the person's name and number. The
+//                    other two are NOT recorded, on purpose: see the note at
+//                    the recorder below and section D of migration 118.
+//
+// Every 429 carries its scope and a real retry_after in the body and in the
+// Retry-After header, and the composer now reads both: refusalMessage() in
+// components/QuoteForm.tsx says something different, and true, for each of the
+// three. That mapping is by scope STRING, so renaming a scope here goes stale
+// there silently. Change the two together.
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -21,9 +45,37 @@ const SUPABASE_ANON_JWT =
 
 // First-line rate limit: a tiny per-IP token bucket held in module memory.
 // Imperfect across serverless instances by design; it exists to blunt the
-// dumb single-source flood, not to be the real defense (that belongs in a
-// DB-side per-mechanic cap, which cannot be bypassed by hitting PostgREST
-// directly).
+// dumb single-source flood, not to be the real defense. The real one is in the
+// database, because profile_leads takes anon inserts through PostgREST and a
+// bot talking straight to that endpoint never reaches this file at all.
+//
+// That DB-side guard used to count every lead for a mechanic against one
+// shared allowance of five an hour, on a created_at the inserter was allowed
+// to choose. So it stopped honest customers and not the flooder. Migration 118
+// counts a clock the sender cannot set, keys the tight cap on the sender's own
+// phone number, and raises the per-mechanic ceiling to sixty an hour so that a
+// page shared in a busy group cannot trip it. Its daily ceiling is ninety, kept
+// deliberately below the hundred rows the app reads for the mechanic's Inbox.
+//
+// SO WHY DOES THIS ONE STILL KEY ON THE IP, when 118's own header argues at
+// length that an IP is the wrong key - two neighbours on one home connection,
+// or two people on the same carrier NAT, look identical from the server?
+// Because these are not the same kind of limit, and only one of them is a cap.
+// 118's caps decide how much a page may take in an hour and a day; keying THAT
+// on an IP would lock a real customer out for an hour over a stranger's
+// traffic, which is the failure 118 is named after. This is a burst window:
+// three in sixty seconds, per serverless instance, in front of an
+// unauthenticated POST, applied before the body has been parsed or the mechanic
+// identified. Its whole worst case is one refusal that clears in under a
+// minute, and it is the one refusal in this file whose message to the customer
+// is literally true ("wait a minute", refusalMessage() in QuoteForm.tsx).
+//
+// It is still a lost request with no record - see the note where it fires - so
+// the honest reading is that the IP key survives on the strength of its short
+// window, not on the strength of the key. If a busy shared connection ever
+// turns out to cost more than the dumb flood this blunts, RAISE BUCKET_MAX
+// rather than moving the key: after 118 the database carries a real per-sender
+// cap behind this, which it did not when the number 3 was chosen.
 const BUCKET_MAX = 3;
 const BUCKET_WINDOW_MS = 60_000;
 const buckets = new Map<string, number[]>();
@@ -42,6 +94,82 @@ function rateLimited(ip: string): boolean {
   return false;
 }
 
+// ── Refusals ────────────────────────────────────────────────────────────────
+// Which limit turned this customer away, how long it actually lasts, and what
+// to file it under. `reason` matches the check constraint on
+// profile_lead_refusals.reason exactly; anything else would bounce the record.
+type CapScope = 'ip' | 'sender' | 'mechanic';
+
+interface Cap {
+  scope: CapScope;
+  reason: 'sender_hour' | 'sender_day' | 'mechanic_hour' | 'mechanic_day' | 'unknown';
+  retryAfter: number; // seconds, and true rather than optimistic
+}
+
+const IP_BURST: Cap = { scope: 'ip', reason: 'unknown', retryAfter: 60 };
+
+const DB_CAPS: Record<string, Cap> = {
+  sender_hour: { scope: 'sender', reason: 'sender_hour', retryAfter: 3600 },
+  sender_day: { scope: 'sender', reason: 'sender_day', retryAfter: 86_400 },
+  mechanic_hour: { scope: 'mechanic', reason: 'mechanic_hour', retryAfter: 3600 },
+  mechanic_day: { scope: 'mechanic', reason: 'mechanic_day', retryAfter: 86_400 },
+};
+
+// PostgREST hands the database's error back as JSON with a `hint` field, and
+// migration 118 puts a stable token there. Read the token first; fall back to
+// the wording only because this file can deploy before that migration is
+// applied, and the guard it replaces raises the same 23514 with no hint at all.
+// An unrecognised 23514 is a genuine constraint violation, not a cap, and is
+// told apart from one here rather than being reported to the customer as
+// "too many requests" the way it used to be.
+function classifyCap(detail: string): Cap | null {
+  const token = detail.match(/myku_cap=([a-z_]+)/);
+  if (token && DB_CAPS[token[1]]) return DB_CAPS[token[1]];
+  const lower = detail.toLowerCase();
+  if (detail.includes('23514') && (lower.includes('too many requests') || lower.includes('rate'))) {
+    return { scope: 'mechanic', reason: 'unknown', retryAfter: 3600 };
+  }
+  return null;
+}
+
+function tooManyRequests(cap: Cap) {
+  return NextResponse.json(
+    { error: 'too many requests', scope: cap.scope, retry_after: cap.retryAfter },
+    { status: 429, headers: { 'Retry-After': String(cap.retryAfter) } },
+  );
+}
+
+// Write the refused request down. A cap that fires BEFORE INSERT leaves no
+// row, no notification and no trace, so until now a mechanic could lose a
+// customer off his own page and never learn it happened. This is best effort
+// on purpose: it runs after the response is on the wire, it cannot delay or
+// fail the customer's request, and if the table is not there yet (this file
+// deploying ahead of migration 118) it logs one line and stops.
+function recordRefusal(row: Record<string, unknown>, cap: Cap) {
+  after(async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/profile_lead_refusals`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({ ...row, reason: cap.reason }),
+      });
+      if (!res.ok) {
+        console.error(
+          `[lead] refusal NOT recorded: status ${res.status} reason=${cap.reason} ` +
+            `mechanic=${String(row.mechanic_id)}`,
+        );
+      }
+    } catch (e) {
+      console.error(`[lead] refusal recorder unreachable: mechanic=${String(row.mechanic_id)}`, e);
+    }
+  });
+}
+
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
@@ -53,7 +181,16 @@ export async function POST(req: NextRequest) {
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   if (rateLimited(ip)) {
-    return NextResponse.json({ error: 'too many requests' }, { status: 429 });
+    // Nothing is recorded here and that is deliberate: this fires before the
+    // body has been checked, so there is no verified request to file, and the
+    // customer's first submission a few seconds ago almost certainly landed.
+    // The IP itself is never logged.
+    console.error(
+      `[lead] refused by the per-IP burst limit (3 a minute) mechanic=${
+        typeof body.mechanic_id === 'string' ? body.mechanic_id : 'unknown'
+      }`,
+    );
+    return tooManyRequests(IP_BURST);
   }
 
   // Honeypot, now enforced server-side: a bot POSTing the form fields
@@ -179,6 +316,23 @@ export async function POST(req: NextRequest) {
   // push notifier needs the id to target this exact lead.
   const leadId = crypto.randomUUID();
 
+  // NO created_at. The database stamps it, and as of migration 118 anon is not
+  // granted the column at all: the rate guard counts on it, so a value the
+  // sender could choose made every cap optional. Adding it here would 403.
+  const leadRow = {
+    id: leadId,
+    mechanic_id: mechanicId,
+    slug: realSlug,
+    customer_name: name,
+    customer_phone: normalizedPhone,
+    customer_email: email,
+    vehicle,
+    description,
+    service: safeService,
+    preferred_timing: timing,
+    source: 'web',
+  };
+
   const res = await fetch(`${SUPABASE_URL}/rest/v1/profile_leads`, {
     method: 'POST',
     headers: {
@@ -187,19 +341,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
       Prefer: 'return=minimal',
     },
-    body: JSON.stringify({
-      id: leadId,
-      mechanic_id: mechanicId,
-      slug: realSlug,
-      customer_name: name,
-      customer_phone: normalizedPhone,
-      customer_email: email,
-      vehicle,
-      description,
-      service: safeService,
-      preferred_timing: timing,
-      source: 'web',
-    }),
+    body: JSON.stringify(leadRow),
   });
 
   if (!res.ok) {
@@ -208,16 +350,53 @@ export async function POST(req: NextRequest) {
     // That is a permanent no, not a retryable hiccup, and the client shows
     // a different sentence for it.
     if (res.status === 401 || res.status === 403) {
+      // Logged, which it was not before. An unpublished page and a broken
+      // column grant both land here and look identical to the customer, and a
+      // broken grant means EVERY lead is being lost rather than one. The
+      // reason is in the body; the difference is only visible if it is
+      // written down.
+      console.error(
+        `[lead] insert refused with ${res.status} mechanic=${mechanicId}: ` +
+          `${(await res.text()).slice(0, 300)}`,
+      );
       return NextResponse.json({ error: 'page not accepting requests' }, { status: 410 });
     }
-    // The DB-side per-mechanic cap raises check_violation, which PostgREST
-    // returns as 400. Telling that customer "could not save" reads as a bug
-    // in Myku and loses the booking; 429 lets the composer say "try again
-    // shortly", which is what actually happened.
+    // A DB-side cap raises check_violation, which PostgREST returns as 400.
+    // Telling that customer "could not save" reads as a bug in Myku and loses
+    // the booking, so a cap becomes a 429 carrying which cap fired and how
+    // long it really lasts.
     if (res.status === 400) {
       const detail = await res.text();
-      if (detail.includes('23514') || detail.toLowerCase().includes('rate')) {
-        return NextResponse.json({ error: 'too many requests' }, { status: 429 });
+      const cap = classifyCap(detail);
+      if (cap) {
+        console.error(
+          `[lead] refused by the ${cap.scope} cap (${cap.reason}) mechanic=${mechanicId} ` +
+            `slug=${realSlug ?? 'none'}`,
+        );
+        // Only the per-mechanic ceiling is a lost customer: the per-sender cap
+        // means this person's last three requests are already in his Inbox,
+        // and filing those again would bury the ones he can act on.
+        if (cap.scope === 'mechanic') {
+          // Every field of the request except the lead id, which belongs to a
+          // row that was never written. profile_lead_refusals grants insert on
+          // exactly these columns and stamps its own created_at.
+          recordRefusal(
+            {
+              mechanic_id: leadRow.mechanic_id,
+              slug: leadRow.slug,
+              customer_name: leadRow.customer_name,
+              customer_phone: leadRow.customer_phone,
+              customer_email: leadRow.customer_email,
+              vehicle: leadRow.vehicle,
+              description: leadRow.description,
+              service: leadRow.service,
+              preferred_timing: leadRow.preferred_timing,
+              source: leadRow.source,
+            },
+            cap,
+          );
+        }
+        return tooManyRequests(cap);
       }
       console.error(`lead insert rejected: ${detail.slice(0, 200)} mechanic=${mechanicId}`);
       return NextResponse.json({ error: 'invalid fields' }, { status: 400 });

@@ -324,6 +324,269 @@ function listOf(parts: string[]): string {
   return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
 }
 
+/* ------------------------------------------------------------------
+   SERVICE-AREA LABEL LAYOUT
+
+   The drawing places every town pin at its REAL distance and REAL bearing
+   from the mechanic's city, and the outer ring is the radius he lists. That
+   is the whole point of it and none of it is negotiable here: this file must
+   never move a pin to make the picture prettier.
+
+   It follows that a page with no radius gets no rings and no pins, not a
+   decorative set of them. Both are gated on `toScale` in the component below,
+   which is the same flag that lets the caption say "drawn to scale", so the
+   drawing and the sentence under it cannot disagree. Everything in this block
+   describes the drawing WHEN IT IS DRAWN TO SCALE; there is no other kind.
+
+   But a pin's position and a pin's NAME are two different things. Oak Brook's
+   five nearest towns are all under four miles out inside a 25-mile ring, so on
+   an 88-unit plate the five pins land inside a box 13 units across, and the
+   five names, up to 94 units wide each, printed on top of each other and on
+   top of the home city. Live on trymyku.com/fort-nite it read as one smear.
+
+   So the names get laid out properly while the pins stay exactly where the
+   arithmetic put them: each name is pushed along its own town's bearing until
+   its box is clear of every other box, and a hairline leader ties it back to
+   its dot once it has actually moved. A name that cannot find room on its own
+   bearing takes the nearest free spot anywhere on the plate instead, because
+   the DOT is what carries the claim and the leader still points at the right
+   one. Nothing is claimed that was not claimed before, and the radar keeps its
+   drawn-in, stylised character.
+
+   TWO RULES THE SEARCH KEEPS, AND WHY EACH ONE IS THERE.
+
+   1. A NAME IS NEVER BLOCKED BY ITS OWN DOT. The other four pins, the home
+      city label and the centre glyph are obstacles for it; its own pin is not.
+      Seeding a label's own dot into the obstacle list meant any name lying
+      more east-west than north-south had to clear roughly half its own width
+      from the pin it belongs to before a candidate was accepted, so names
+      travelled and grew leaders on maps that had all the room in the world. A
+      name sitting over its own dot is the pairing this drawing wants.
+
+   2. A NAME NEVER LEAVES THE PLATE. townsWithin() only ever returns towns
+      INSIDE the ring, and the caption under the drawing says exactly that, so
+      a town name printed out past the ring invites the one reading the caption
+      denies. Every candidate box has to fit inside the drawn plate, corners
+      included. A name that fits nowhere is dropped WITH its dot, because an
+      unnamed grey dot is a mark that says nothing at all.
+   ------------------------------------------------------------------ */
+
+// The outer ring IS the radius. Everything else is measured against it, so a
+// pin's distance from the centre is its real distance, to scale.
+const R_OUTER = 88;
+// The drawn plate: the dot field is clipped to this circle and the ring he
+// lists sits 4 units inside it. Label boxes are held inside it, corners and
+// all, so no name is printed in the margin outside his own coverage.
+const R_PLATE = 92;
+
+// Advance width per character, in SVG user units, for the two label styles in
+// profile.css. Both are var(--mp-mono) so a glyph is 0.6em wide: .lbl-s is
+// font-size 7.5 with letter-spacing 1.5 (4.5 + 1.5), .lbl-t is font-size 9
+// with letter-spacing 1.9 (5.4 + 1.9). The old estimate was 5.4/char under a
+// hard 92-unit cap, which sat BELOW the real width of a sixteen-character
+// town, so the knockout masks were narrower than the words they cleared.
+const CH_S = 6.0;
+const CH_T = 7.3;
+const LINE_H = 9.2;
+
+type LBox = { x: number; y: number; w: number; h: number };
+
+// Centre-anchored overlap test with a breathing gap.
+function boxHits(a: LBox, b: LBox, gap = 2.5): boolean {
+  return (
+    Math.abs(a.x - b.x) * 2 < a.w + b.w + gap * 2 &&
+    Math.abs(a.y - b.y) * 2 < a.h + b.h + gap * 2
+  );
+}
+
+// The home-city label under the centre glyph. Fixed position, so it is an
+// obstacle every town label has to route around rather than one that moves.
+function cityLabelBox(cityUpper: string): LBox {
+  return { x: 110, y: 132.5, w: cityUpper.length * CH_T + 10, h: 13 };
+}
+
+// How far the box's FARTHEST corner sits from the centre of the plate. A
+// centre-distance test would let a wide name hang half of itself over the
+// edge, which is the version a reader actually sees.
+function cornerReach(b: LBox): number {
+  return Math.hypot(Math.abs(b.x - 110) + b.w / 2, Math.abs(b.y - 110) + b.h / 2);
+}
+
+// "WESTERN SPRINGS" sets 90 units wide on one line, which is more than a
+// third of the 220-unit plate; stacked on two lines its widest word is 42.
+// Two lines keep a long town name inside the plate at full size, instead of
+// shrinking the type or truncating a real place name.
+function splitLabel(s: string): string[] {
+  const words = s.split(/\s+/).filter(Boolean);
+  if (words.length < 2) return [s];
+  let cut = 1;
+  let best = Infinity;
+  for (let i = 1; i < words.length; i++) {
+    const wide = Math.max(
+      words.slice(0, i).join(' ').length,
+      words.slice(i).join(' ').length
+    );
+    if (wide < best) {
+      best = wide;
+      cut = i;
+    }
+  }
+  return [words.slice(0, cut).join(' '), words.slice(cut).join(' ')];
+}
+
+type RawPin = { x: number; y: number; r: number; a: number; label: string };
+// Only pins that found a slot come back, so `lines` is never empty here: a
+// named pin is information, and a bare grey dot with nothing beside it is a
+// mark the reader cannot resolve into anything.
+type PlacedPin = {
+  x: number;
+  y: number;
+  label: string;
+  lines: string[];
+  lx: number;
+  ly: number;
+  w: number;
+  h: number;
+  baseline: number;
+  leader: { x1: number; y1: number; x2: number; y2: number } | null;
+};
+
+function layoutTownLabels(pins: RawPin[], cityUpper: string | null): PlacedPin[] {
+  const taken: LBox[] = [];
+  if (cityUpper) taken.push(cityLabelBox(cityUpper));
+  // The centre map-pin glyph and its halo. A town name parked on the
+  // mechanic's own location is the one collision the rings cannot hide.
+  taken.push({ x: 110, y: 108, w: 34, h: 36 });
+  // The dots, kept SEPARATE from the fixed obstacles and indexed by pin, so a
+  // name can be tested against every dot except the one it belongs to. Rule 1
+  // in the block above: a name is never blocked by its own pin.
+  const dots: LBox[] = pins.map((p) => ({ x: p.x, y: p.y, w: 9, h: 9 }));
+
+  // Outermost first. A pin that already sits near the ring has room where it
+  // is and keeps it; the crushed inner pins are the ones that have to travel.
+  const order = pins.map((_, i) => i).sort((i, j) => pins[j].r - pins[i].r);
+  const placed: PlacedPin[] = pins.map((p) => ({
+    x: p.x,
+    y: p.y,
+    label: p.label,
+    lines: [],
+    lx: p.x,
+    ly: p.y,
+    w: 0,
+    h: 0,
+    baseline: p.y,
+    leader: null,
+  }));
+
+  for (const i of order) {
+    const p = pins[i];
+    const lines = splitLabel(p.label);
+    const w = Math.max(...lines.map((l) => l.length)) * CH_S + 9;
+    const h = lines.length * LINE_H + 5;
+    // Candidate distances from the centre, along the town's OWN bearing so the
+    // name stays in the direction the town actually lies in. Outward first for
+    // a pin crushed near the middle, inward first for one already out by the
+    // ring. The opposite direction is then tried too, and after that the whole
+    // plate: a real place name is never dropped while a slot for it exists.
+    const dir = p.r > R_OUTER * 0.55 ? -1 : 1;
+    const off = 8 + h / 2;
+    const ladder: number[] = [];
+    for (let step = 0; step < 7; step++) ladder.push(p.r + dir * (off + step * 13));
+    for (let step = 0; step < 7; step++) ladder.push(p.r - dir * (off + step * 13));
+
+    // Everything this name has to miss. Its OWN dot is not on the list.
+    const clear = (cand: LBox, gap: number) =>
+      taken.every((t) => !boxHits(cand, t, gap)) &&
+      dots.every((d, j) => j === i || !boxHits(cand, d, gap));
+
+    // FIRST CHOICE: on the town's own bearing, nearest rung first, so the name
+    // sits in the direction the town actually lies in. Rule 2 is enforced by
+    // cornerReach on every candidate: no part of the name may sit outside the
+    // drawn plate. That also keeps every box inside the 220 viewBox, so the
+    // old square clamp is gone with it; that clamp used to slide a box off its
+    // own bearing, which left the leader pointing at nothing in particular.
+    let box: LBox | null = null;
+    search: for (let k = 0; k < ladder.length; k++) {
+      // The very first candidate sits just off its own pin, on its own
+      // bearing, unskewed. Only a name that cannot find room on its own
+      // bearing gets skewed off it, and never by more than 32 degrees.
+      for (const skew of k === 0 ? [0] : [0, 16, -16, 32, -32]) {
+        const ang = p.a + skew * (Math.PI / 180);
+        const rad = Math.max(0, ladder[k]);
+        const cand: LBox = { x: 110 + rad * Math.cos(ang), y: 110 + rad * Math.sin(ang), w, h };
+        if (cornerReach(cand) > R_PLATE) continue;
+        if (clear(cand, 2.5)) {
+          box = cand;
+          break search;
+        }
+      }
+    }
+
+    // SECOND CHOICE: anywhere on the plate at all, closest to its own dot
+    // first, then closest again with the boxes allowed to touch.
+    //
+    // A name that has left its own bearing is still tied to the right dot by
+    // its leader, and the dot is what carries the claim; a name that has been
+    // deleted carries nothing. Losing the bearing is a cost to the picture,
+    // losing the town is a cost to the reader, and the reader wins.
+    if (!box) {
+      const anywhere: LBox[] = [];
+      for (let rad = 0; rad <= R_PLATE; rad += 6) {
+        for (let deg = 0; deg < 360; deg += 15) {
+          const ang = deg * (Math.PI / 180);
+          const cand: LBox = { x: 110 + rad * Math.cos(ang), y: 110 + rad * Math.sin(ang), w, h };
+          if (cornerReach(cand) > R_PLATE) continue;
+          anywhere.push(cand);
+        }
+      }
+      anywhere.sort(
+        (a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y)
+      );
+      box = anywhere.find((c) => clear(c, 2.5)) ?? anywhere.find((c) => clear(c, 0)) ?? null;
+    }
+
+    // Nowhere on the plate this name fits. The dot goes with it (filtered out
+    // below): a dot with no name is a mark the reader cannot resolve.
+    if (!box) continue;
+    taken.push(box);
+
+    // Leader from just outside the dot to the edge of the name's box, drawn
+    // only when the name actually travelled.
+    const dx = box.x - p.x;
+    const dy = box.y - p.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const tx = Math.abs(dx) > 1e-6 ? box.w / (2 * Math.abs(dx)) : Infinity;
+    const ty = Math.abs(dy) > 1e-6 ? box.h / (2 * Math.abs(dy)) : Infinity;
+    const back = Math.min(tx, ty, 1);
+    const x1 = p.x + (dx / len) * 4.8;
+    const y1 = p.y + (dy / len) * 4.8;
+    const x2 = box.x - dx * back;
+    const y2 = box.y - dy * back;
+    // A name allowed to sit ON its own dot has no travel to draw, and the
+    // segment computed above would fall INSIDE the box and run a hairline
+    // behind the letters. This is the pairing the drawing wants; it needs no
+    // leader to explain it.
+    const dotInsideBox = Math.abs(dx) * 2 <= box.w && Math.abs(dy) * 2 <= box.h;
+
+    placed[i] = {
+      ...placed[i],
+      lines,
+      lx: box.x,
+      ly: box.y,
+      w,
+      h,
+      // Optical centring: cap height at 7.5 is about 5.4, so the single-line
+      // baseline sits 2.7 below the box centre.
+      baseline: box.y + 2.7 - ((lines.length - 1) * LINE_H) / 2,
+      leader:
+        !dotInsideBox && Math.hypot(x2 - x1, y2 - y1) > 4.5 ? { x1, y1, x2, y2 } : null,
+    };
+  }
+
+  // Named pins only. A pin that found no slot never reaches the drawing, so
+  // nothing downstream has to ask whether a pin has a name.
+  return placed.filter((p) => p.lines.length > 0);
+}
 
 /* ------------------------------------------------------------------
    PAGE
@@ -346,8 +609,12 @@ export default function Storefront({
   // row, and a rating with no words renders a hollow review card. Both are
   // the "empty box with a heading" the brief forbids, reached through a data
   // shape rather than a missing section.
-  // Dedupe by trimmed name, first row wins its price. The price is the
-  // mechanic's own choice per service: null means he chose not to say.
+  // Dedupe by trimmed name, first row wins its price. A null price prints the
+  // name alone. WHO chose that price depends on the page: on a published page
+  // it is the mechanic's own figure out of his own editor, and on an unclaimed
+  // page Myku typed it off a listing. This pass does not know which, so it
+  // says nothing about authorship; the source line under the rendered list
+  // does (see `servicesSource`).
   const seen = new Map<string, number | null>();
   for (const row of rawServices) {
     const label = (row.service ?? '').trim();
@@ -477,6 +744,45 @@ export default function Storefront({
   const requestNote = page.request_note?.trim() || null;
   const links = socialLinks(page.socials);
 
+  // A ROW LABEL THAT NAMES AN AUTHOR HAS TO NAME THE RIGHT ONE.
+  //
+  // "Hours {first} lists" and "Towns {first} covers" say the mechanic put them
+  // there, and on a published page he did, out of his own editor. On an
+  // unclaimed page he did not: Myku typed them off a listing for a man who
+  // does not know the page exists, so the label names the DATUM and stops. The
+  // claim strip at the top, the Unconfirmed eyebrow, How Myku Works and the
+  // preview panel already say where all of it came from; what they cannot
+  // undo is a label that puts the words in his mouth.
+  //
+  // The line this draws, everywhere on an unclaimed page: a label may name the
+  // mechanic as the SUBJECT ("How {first} works", "About {first}"), never as
+  // the AUTHOR ("{first} lists", "{first} covers", "{first}'s own numbers").
+  const hoursLabel = unclaimed ? 'Hours in the listing' : `Hours ${first} lists`;
+  const townsLabel = unclaimed ? 'Towns in the listing' : `Towns ${first} covers`;
+  // The bio is the one block written in the first person, so on an unclaimed
+  // page it reads as a direct quotation from a man who has never used the
+  // product. Same sourcing sentence as the job cards, directly under the words
+  // it qualifies, the way the paperwork qualification sits under the paperwork.
+  const bioSource = unclaimed ? 'From public listings. Myku has not confirmed it.' : null;
+
+  // THE PRICE LIST IS THE SAME FAULT AS THE FACT STRIP, ONE SECTION LOWER.
+  //
+  // "What {first} does" names him as the SUBJECT, which is allowed, but the
+  // rows under it print dollar figures, and a price with no source beside it
+  // reads as the price its subject set. On a published page it is: those
+  // numbers came out of his own editor. On an unclaimed page Myku copied them
+  // off a listing for a man who has never seen the page, so the section was
+  // showing Myku's numbers as his, three screens after the page said he has
+  // confirmed nothing on it.
+  //
+  // The rows KEEP RENDERING, for the reason the fact strip keeps rendering:
+  // hiding the money question makes the page less useful without making it
+  // more honest, and an unclaimed page exists so the mechanic can be shown
+  // what Myku built for him. Only the sourcing changes, and it changes to the
+  // sentence the fact strip, the job cards and the bio already carry, so the
+  // page has ONE way of saying "Myku copied this from a listing".
+  const servicesSource = unclaimed ? 'From public listings. Myku has not confirmed them.' : null;
+
   // FACT STRIP, fixed priority order, maximum 4 cells. The panel always
   // renders: the money question is never silent. `self` marks the cells the
   // mechanic typed himself, which the note below the strip then attributes.
@@ -514,16 +820,46 @@ export default function Storefront({
   // had no room for it.
   const yearsInStrip = strip.some((c) => c.caption.endsWith('working'));
 
-  // The rate, the fee and the years are mechanic-entered and sit directly
-  // under the Myku mark. The page is scrupulous about his work history two
-  // screens down; it must not be silent about his numbers here.
+  // The rate, the fee and the years sit directly under the Myku mark. The page
+  // is scrupulous about his work history two screens down; it must not be
+  // silent about where his numbers came from here.
   const selfBits: string[] = [];
   if (strip.some((c) => c.caption === 'Labor rate')) selfBits.push('the labor rate');
   if (strip.some((c) => c.caption === 'Diagnostic')) selfBits.push('the diagnostic fee');
   if (yearsInStrip) selfBits.push('the years working');
-  // Three words, not a deposition. The full sentence lives in How Myku
-  // Works; this is just quiet attribution on the numbers themselves.
-  const factsNote = selfBits.length ? `${first}’s own numbers.` : null;
+  // THE NOTE NAMES THE SOURCE, AND THE SOURCE IS NOT THE SAME ON BOTH PAGES.
+  //
+  // On a published page these three came out of the mechanic's own editor, so
+  // "{first}'s own numbers" is simply true. On an UNCLAIMED page they did not:
+  // Myku typed them off a public listing onto a page the man has never seen.
+  // Captioning them as his made the product assert something he never said,
+  // by name, on a page that says in four other places that he has confirmed
+  // nothing on it. Migration 088 refuses to stamp a holder draft for exactly
+  // this reason, and mp_fact_visible cannot tell "he typed 85" from "Myku
+  // typed 85": web_status can, so the renderer is the only layer that can put
+  // this right.
+  //
+  // The cells KEEP RENDERING. Hiding the money question would make the page
+  // less useful without making it more honest, and an unclaimed page exists so
+  // the mechanic can be shown what Myku built for him. Only the attribution
+  // changes, and it changes to the same sentence the job cards already carry,
+  // so the page does not contradict itself one screen apart.
+  const factsNote = !selfBits.length
+    ? null
+    : unclaimed
+      ? 'From public listings. Myku has not confirmed them.'
+      : `${first}’s own numbers.`;
+
+  // Zero cells. The panel still says something positive about how the business
+  // prices, and never goes blank.
+  //
+  // The published wording says what HE has not done and what MYKU will do with
+  // a request. Neither half is true on an unclaimed page: he has not published
+  // anything anywhere, and the page takes no requests, so "describe the job"
+  // points at a composer that three screens down says it is not live yet.
+  const stripFallback = unclaimed
+    ? `No rate in the public listing. Ask ${first} about pricing.`
+    : `${first} has not published a rate. Describe the job and Myku passes it to ${first}.`;
 
   // Gated on the paragraphs that actually render, not on the raw column. A
   // whitespace-only bio is truthy and renders nothing, which would leave the
@@ -578,7 +914,17 @@ export default function Storefront({
 
   // The disclosure never defines a mark that does not appear on this page.
   const howParas: string[] = [
-    `${first} is an independent business. ${first} sets the prices, does the work, and owns the reputation.`,
+    // THIS ONE NAMES HIM AS THE AUTHOR, so it splits like every other label on
+    // the page. "{first} sets the prices" is simply true on a published page:
+    // the rate, the fee and every service price came out of his own editor. On
+    // an unclaimed page it is not, and it lands two paragraphs under a price
+    // list that has just said Myku copied it off a listing, so the published
+    // wording would hand those figures straight back to a man who never typed
+    // them. The unclaimed wording keeps the entire point of the sentence,
+    // which is that Myku is not the seller and does not price the work.
+    unclaimed
+      ? `${first} is an independent business. Myku does not set the prices, do the work, or speak for ${first}.`
+      : `${first} is an independent business. ${first} sets the prices, does the work, and owns the reputation.`,
     // On an unclaimed page Myku has confirmed nothing, so it must not claim
     // it has. Saying so here and denying it three screens down would be an
     // overclaim by Myku about its own diligence.
@@ -636,7 +982,14 @@ export default function Storefront({
         '@type': 'AutoRepair',
         name: page.full_name,
         url: `${SITE_URL}/${page.slug}`,
-        ...(page.photo_url ? { image: page.photo_url } : {}),
+        // Gated on the SAME derived flag the portrait uses, not on the raw
+        // column. "Show my photo" is read as a privacy control, and it was
+        // honoured on the page and on the link-preview card but not here, so
+        // switching it off left his full-resolution portrait handed to search
+        // engines inside the structured data, where he can neither see it nor
+        // take it down. Every surface that publishes the photo now asks the
+        // same question.
+        ...(showPortrait && page.photo_url ? { image: page.photo_url } : {}),
         description: `${specLine}${cityShort ? ` in ${cityShort}` : ''}. Independent mechanic on Myku.`,
         ...(cityShort
           ? { address: { '@type': 'PostalAddress', addressLocality: cityShort } }
@@ -776,33 +1129,43 @@ export default function Storefront({
   //
   // Radius: what he picked in the app. Without a radius, or without a city we
   // can resolve, we draw NO ring and NO pins rather than inventing them.
+  //
+  // THE RING HALF OF THAT SENTENCE WAS NOT TRUE UNTIL NOW, and it showed on the
+  // one page that most needed it to be. The pins were gated on the radius from
+  // the day the drawing was made true; the three rings never were, so they drew
+  // themselves on every page, radius or not. On trymyku.com/marcus-reed, whose
+  // service_radius_mi is null, that put a set of concentric range rings around
+  // his city on a page whose entire premise is that nothing on it is asserted.
+  // Concentric rings centred on a mechanic are the standard grammar of "this is
+  // how far he travels", and the caption underneath does not undo it: "A
+  // drawing, not a live map" denies liveness, not scale.
+  //
+  // ONE FLAG NOW GOVERNS BOTH, so the picture and the sentence under it can
+  // never disagree: the rings render exactly when the caption is entitled to
+  // say "drawn to scale", and never otherwise. Without them the plate keeps its
+  // crosshair, ticks, corner brackets, dot field and city name, so it still
+  // reads as a located point, which is precisely what the page knows.
   const areaCentre = resolveCity(page.service_city);
   const radiusMi =
     typeof page.service_radius_mi === 'number' && page.service_radius_mi > 0
       ? page.service_radius_mi
       : null;
   const areaTowns = areaCentre && radiusMi ? townsWithin(areaCentre, radiusMi, 5) : [];
+  const toScale = Boolean(radiusMi && areaCentre);
 
-  // The outer ring IS the radius. Everything else is measured against it, so a
-  // pin's distance from the centre is its real distance, to scale.
-  const R_OUTER = 88;
-  const townPins = areaTowns.map((t) => {
-    const r = radiusMi ? Math.min(R_OUTER, (t.miles / radiusMi) * R_OUTER) : 0;
-    const a = (t.bearing - 90) * (Math.PI / 180); // 0deg = north, SVG y grows down
-    const x = 110 + r * Math.cos(a);
-    const y = 110 + r * Math.sin(a);
-    // Keep the label clear of the pin and inside the plate.
-    const outward = r > 46 ? -1 : 1;
-    return {
-      x,
-      y,
-      lx: Math.max(34, Math.min(186, x)),
-      ly: Math.max(20, Math.min(200, y + outward * 12)),
-      label: t.name.toUpperCase(),
-      miles: t.miles,
-    };
-  });
-  const labelW = (s: string) => Math.min(92, s.length * 5.4 + 14);
+  // Pin positions are pure arithmetic on his real numbers: R_OUTER is the
+  // radius he lists, so a pin's distance from the centre is its real distance,
+  // to scale. Nothing below this line moves a pin. With no radius there are no
+  // pins to place, and `toScale` above keeps the rings out too.
+  const cityUpper = cityShort ? cityShort.toUpperCase() : null;
+  const townPins = layoutTownLabels(
+    areaTowns.map((t) => {
+      const r = radiusMi ? Math.min(R_OUTER, (t.miles / radiusMi) * R_OUTER) : 0;
+      const a = (t.bearing - 90) * (Math.PI / 180); // 0deg = north, SVG y grows down
+      return { x: 110 + r * Math.cos(a), y: 110 + r * Math.sin(a), r, a, label: t.name.toUpperCase() };
+    }),
+    cityUpper
+  );
 
   return (
     <>
@@ -989,14 +1352,13 @@ export default function Storefront({
                   ))
                 ) : (
                   // Zero cells: a positive statement about how the business
-                  // prices, never a blank and never an "unavailable".
-                  <div className="mp-fact fb">
-                    {/* States how HE prices, and what MYKU does with a
-                        request. It must not promise he will answer: Myku
-                        cannot compel an independent business to reply. */}
-                    {first} has not published a rate. Describe the job and Myku
-                    passes it to {first}.
-                  </div>
+                  // prices, never a blank state.
+                  //
+                  // It must not promise he will answer: Myku cannot compel an
+                  // independent business to reply. Built above, because the
+                  // published and unclaimed versions of this sentence say
+                  // different things (see stripFallback).
+                  <div className="mp-fact fb">{stripFallback}</div>
                 )}
               </div>
               {factsNote ? <p className="mp-facts-note">{factsNote}</p> : null}
@@ -1061,6 +1423,12 @@ export default function Storefront({
                           {p}
                         </p>
                       ))}
+                      {/* AFTER the words, not before: the drop cap belongs to
+                          the first paragraph, and a qualification reads best
+                          in the same breath as the thing it qualifies. Only on
+                          an unclaimed page, where these are not his words to
+                          Myku but a listing Myku copied. */}
+                      {bioSource ? <p className="mp-bio-src">{bioSource}</p> : null}
                     </div>
                   ) : null}
 
@@ -1116,23 +1484,23 @@ export default function Storefront({
                                   strikes through the words. */}
                               <mask id="mp-rlab" maskUnits="userSpaceOnUse" x="0" y="0" width="220" height="220">
                                 <rect width="220" height="220" fill="#fff" />
-                                {cityShort ? (
+                                {cityUpper ? (
                                   <rect
-                                    x={110 - labelW(cityShort) / 2}
+                                    x={110 - cityLabelBox(cityUpper).w / 2}
                                     y={126}
-                                    width={labelW(cityShort)}
+                                    width={cityLabelBox(cityUpper).w}
                                     height="13"
                                     rx="6"
                                     fill="#000"
                                   />
                                 ) : null}
-                                {townPins.map((p) => (
+                                {townPins.map((p, i) => (
                                   <rect
-                                    key={p.label}
-                                    x={p.lx - labelW(p.label) / 2}
-                                    y={p.ly - 10}
-                                    width={labelW(p.label)}
-                                    height="13"
+                                    key={`${p.label}-${i}`}
+                                    x={p.lx - p.w / 2}
+                                    y={p.ly - p.h / 2}
+                                    width={p.w}
+                                    height={p.h}
                                     rx="6"
                                     fill="#000"
                                   />
@@ -1151,25 +1519,64 @@ export default function Storefront({
                             </g>
 
                             <g mask="url(#mp-rlab)">
+                              {/* The crosshair, the ticks and the brackets are
+                                  the plate itself: they locate a centre and
+                                  claim no distance, so they draw on every page.
+                                  The three RINGS are the radius (R_OUTER is it,
+                                  to scale), so they draw only when there is a
+                                  radius and a centre to measure from. See
+                                  `toScale` above for why. */}
                               <path className="fld dr d1" pathLength="100" d="M110 20v70M110 130v70M20 110h70M130 110h70" />
-                              <circle className="ring dr d2" pathLength="100" cx="110" cy="110" r="88" />
-                              <circle className="ring dash fade" cx="110" cy="110" r="62" />
-                              <circle className="ring dr d3" pathLength="100" cx="110" cy="110" r="36" />
+                              {toScale ? (
+                                <>
+                                  <circle className="ring dr d2" pathLength="100" cx="110" cy="110" r="88" />
+                                  <circle className="ring dash fade" cx="110" cy="110" r="62" />
+                                  <circle className="ring dr d3" pathLength="100" cx="110" cy="110" r="36" />
+                                </>
+                              ) : null}
                             </g>
 
-                            <g className="fld fade" strokeWidth="1.4">
+                            {/* Knocked out behind the labels like the rings
+                                are. These two groups sit at r 86 to 96 and r
+                                133, which is exactly where a name pushed
+                                towards the edge of the plate ends up, and
+                                without the mask a stroke ran behind the
+                                letters. */}
+                            <g className="fld fade" strokeWidth="1.4" mask="url(#mp-rlab)">
                               <path d="M110 14v10M110 196v10M14 110h10M196 110h10" />
                             </g>
-                            <g className="fld fade" strokeWidth="1.2" opacity=".7">
+                            <g className="fld fade" strokeWidth="1.2" opacity=".7" mask="url(#mp-rlab)">
                               <path d="M16 32V16h16M188 16h16v16M204 188v16h-16M32 204H16v-16" />
                             </g>
 
                             <g className="fade">
-                              {townPins.map((p) => (
-                                <g key={p.label}>
+                              {townPins.map((p, i) => (
+                                <g key={`${p.label}-${i}`}>
+                                  {/* The dot is the claim. The leader is what
+                                      keeps the name attached to it once the
+                                      name has had to move to stay legible. */}
+                                  {p.leader ? (
+                                    <line
+                                      className="ldr"
+                                      x1={p.leader.x1}
+                                      y1={p.leader.y1}
+                                      x2={p.leader.x2}
+                                      y2={p.leader.y2}
+                                    />
+                                  ) : null}
                                   <circle className="twn" cx={p.x} cy={p.y} r="2.8" />
-                                  <text className="lbl-s" x={p.lx} y={p.ly} textAnchor="middle" fontSize="7.5">
-                                    {p.label}
+                                  <text
+                                    className="lbl-s"
+                                    x={p.lx}
+                                    y={p.baseline}
+                                    textAnchor="middle"
+                                    fontSize="7.5"
+                                  >
+                                    {p.lines.map((line, li) => (
+                                      <tspan key={`${line}-${li}`} x={p.lx} dy={li === 0 ? 0 : LINE_H}>
+                                        {line}
+                                      </tspan>
+                                    ))}
                                   </text>
                                 </g>
                               ))}
@@ -1180,9 +1587,9 @@ export default function Storefront({
                               <path className="dr d4" pathLength="100" d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z" />
                               <circle className="dr d4" pathLength="100" cx="12" cy="10" r="2.7" />
                             </g>
-                            {cityShort ? (
+                            {cityUpper ? (
                               <text className="lbl-t fade" x="110" y="134" textAnchor="middle" fontSize="9">
-                                {cityShort.toUpperCase()}
+                                {cityUpper}
                               </text>
                             ) : null}
                           </svg>
@@ -1206,18 +1613,21 @@ export default function Storefront({
                               </span>
                             </div>
                           ) : null}
-                          {/* Both labelled as HIS listing, like the
-                              certifications row: typed hours and typed towns
-                              are his claims, not Myku's confirmation. */}
+                          {/* Both labelled as HIS listing on a published page,
+                              like the certifications row: typed hours and typed
+                              towns are his claims, not Myku's confirmation. On
+                              an unclaimed page the author is Myku, so the label
+                              drops his name rather than lying about who wrote
+                              it. Built above. */}
                           {hours ? (
                             <div className="mp-arow">
-                              <span className="k">Hours {first} lists</span>
+                              <span className="k">{hoursLabel}</span>
                               <span className="v">{hours}</span>
                             </div>
                           ) : null}
                           {towns.length > 0 ? (
                             <div className="mp-arow">
-                              <span className="k">Towns {first} covers</span>
+                              <span className="k">{townsLabel}</span>
                               <span className="v">{listOf(towns)}</span>
                             </div>
                           ) : null}
@@ -1248,18 +1658,20 @@ export default function Storefront({
                           carry it, and a third repetition made the page sound
                           like it was apologizing for its own mechanic. */}
                       {/* ATTRIBUTION IS LOAD-BEARING, not decoration. The ring
-                          now renders coverage he CLAIMS, where the old pins
-                          were derived from jobs on the page. That stays inside
-                          the trust rules only because this sentence says the
-                          distance is his, exactly like his hours and his
-                          certifications. If "the distance {first} lists" is ever
-                          dropped, the ring silently becomes a Myku assertion
-                          about where he works. */}
+                          renders coverage he CLAIMS, where the old pins were
+                          derived from jobs on the page. That stays inside the
+                          trust rules only because this sentence names whoever
+                          the distance came from, exactly like his hours. If the
+                          source clause is ever dropped, the ring silently
+                          becomes a Myku assertion about where he works. On an
+                          unclaimed page the distance came off the listing with
+                          everything else, so the sentence says so instead of
+                          crediting a man who never set it. */}
                       <p className="mp-area-note">
-                        {radiusMi && areaCentre ? (
+                        {toScale && radiusMi && areaCentre ? (
                           <>
                             Drawn to scale around {areaCentre.name}, at the distance{' '}
-                            {first} lists.{' '}
+                            {unclaimed ? 'in the listing' : `${first} lists`}.{' '}
                             {townPins.length > 0
                               ? 'The towns are real places inside it, not a promise he covers each one. '
                               : ''}
@@ -1287,10 +1699,13 @@ export default function Storefront({
                 <span className="mp-rule" aria-hidden="true" />
               </div>
               <div className="mp-srv-list">
-                {/* A row with no price prints the name alone. A price is the
-                    mechanic's own choice per service, and no price means he
-                    chose not to say. The two kinds sit together without
-                    apology, and the page never invents a "Quoted". */}
+                {/* A row with no price prints the name alone. The two kinds sit
+                    together without apology, and the page never invents a
+                    "Quoted". On a published page a missing price means the
+                    mechanic chose not to name one; on an unclaimed page it
+                    means the listing Myku copied did not carry one. Neither
+                    reading is printed, because the source line below the list
+                    already says which page this is. */}
                 {services.map((s) => (
                   <div className={s.priceFrom ? 'mp-srv mp-rv' : 'mp-srv np mp-rv'} key={s.label}>
                     <span className="n">{s.label}</span>
@@ -1303,6 +1718,11 @@ export default function Storefront({
                   </div>
                 ))}
               </div>
+              {/* AFTER the rows, not before, and inside the same section: a
+                  qualification reads best in the same breath as the thing it
+                  qualifies, which is where the bio's source line and the
+                  paperwork qualification both sit. Unclaimed only. */}
+              {servicesSource ? <p className="mp-srv-src">{servicesSource}</p> : null}
             </div>
           </section>
         ) : null}

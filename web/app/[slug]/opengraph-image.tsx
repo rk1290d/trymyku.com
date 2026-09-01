@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { getMechanicPage, SUPABASE_URL } from '@/lib/supabase';
-import { initials } from '@/lib/format';
+import { firstName, initials } from '@/lib/format';
 
 // THE LINK PREVIEW.
 // This is the first thing a stranger sees when the link lands in a WhatsApp,
@@ -10,6 +10,56 @@ import { initials } from '@/lib/format';
 // Myku advertisement. Same paper, same ink, same rules as the page itself:
 // no orange, no teal, no badges, no pills, no wordmark lockup, and no
 // paperwork claim on a page the mechanic has never agreed to.
+//
+// AN UNCLAIMED CARD MUST SAY SO, AND IT MUST SAY SO IN THE IMAGE.
+// An unclaimed page is one Myku built for a mechanic who has not signed up:
+// his real name, his trade, his town and his years, typed by Myku off a
+// public listing. The page body carries five separate signals of that state
+// (the claim strip, "Unconfirmed" in the eyebrow, the "From public listings"
+// chip, the softened How Myku Works paragraph, and no structured data). This
+// card used to carry NONE of them - it suppressed the paperwork line and
+// stopped there, so an unclaimed card and a claimed card for a mechanic with
+// no documents on file were byte-identical, and a real person's name went
+// into a group chat on a card that read as a live, agreed profile.
+//
+// The route's og:description does carry the caveat, and WhatsApp, Slack,
+// Discord, Facebook, X and LinkedIn all render it. iMessage does not: it
+// shows the IMAGE, the title and the domain. So the state has to live in the
+// pixels, and it has to survive the scale a chat bubble renders them at.
+//
+// That last part was measured, not guessed: this card was rendered and
+// downsampled to 300px wide, roughly an iMessage bubble. At that size the
+// uppercase letter-spaced eyebrow still reads; the 26/22px sourcing lines
+// beneath it are at or past the edge of legible. Hence BOTH placements, each
+// doing a different job - the eyebrow directly above the name for the
+// scaled-down case, the sourcing sentence in the slot the paperwork line
+// vacated for anyone who opens the card at size. The route's <title> carries
+// the same marker in real text, for the surfaces that shrink the image
+// hardest.
+//
+// The wording is the page body's own disclosure sentence, recased and
+// repunctuated to stand alone on a card: the page says "nothing on the page
+// has been confirmed by {first}", the card says "Nothing on this page has
+// been confirmed by {first}." Copied rather than reworded on purpose, because
+// two independently phrased versions of the same disclosure drift apart.
+//
+// WHAT THAT DOES AND DOES NOT GUARANTEE, because the difference matters and
+// an earlier version of this comment overstated it. It guarantees the card
+// repeats the page's own disclosure, so the card can never be the MORE
+// confident of the two surfaces. It does not by itself make the pair
+// consistent: that depends on what the PAGE says, and it has to be re-checked
+// whenever the page's attribution copy moves. As of 2026-09-01 the two do
+// agree, checked in the rendered page and not only in source: on an unclaimed
+// page the facts strip captions the Myku-typed numbers (hourly rate,
+// diagnostic fee, years) "From public listings. Myku has not confirmed them."
+// rather than as his own - see `factsNote` in components/Storefront.tsx. So
+// the card and the page now say the same thing one tap apart. If they ever
+// disagree again, fix the page. Do NOT resolve it by weakening the card.
+//
+// It is a disclosure, not a redaction. The card still leads with his name,
+// his trade and his town, and it should still look good - an unclaimed page
+// exists so a mechanic can be shown what Myku made for him. Nothing is
+// hidden; it is only correctly attributed.
 
 const PAPER = '#FAF7F2';
 const PAPER_2 = '#F1EDE5';
@@ -183,9 +233,16 @@ export default async function Image({
   const bizName = page.business_name?.trim() || null;
   const bizLeads = Boolean(bizName);
   const headline = bizName ?? page.full_name;
+  // Same literal fallback the page body uses, so the card can never print an
+  // empty trade line and never disagrees with the page about what it says.
+  const specLine = page.specialization || 'Independent mechanic';
 
-  // Self-reported facts. These are on the page for claimed and unclaimed
-  // pages alike, so they travel with the card either way.
+  // The town, the years and the rating. These are on the page for claimed and
+  // unclaimed pages alike, so they travel with the card either way - but WHO
+  // said them differs, and the card must not be silent about that. On a
+  // published page the mechanic typed them. On an unclaimed page Myku typed
+  // them off a public listing, and the block below the meta line says exactly
+  // that rather than letting them read as his.
   const meta = [
     city || null,
     years > 0 ? `${years} yrs working` : null,
@@ -267,6 +324,33 @@ export default async function Image({
               minWidth: 0,
             }}
           >
+            {/* THE STATE, ABOVE THE NAME. The page body puts "Unconfirmed" in
+                its eyebrow so the signal survives the claim strip scrolling
+                away; the card puts it in the same place for the same reason,
+                and because this is the one line of qualifying text that was
+                still readable when the rendered card was downsampled to a
+                chat-bubble 300px. So it is set as display type, not fine
+                print: uppercase and letter-spaced like the page's own
+                eyebrow, at the full extra-bold weight, in ink rather than a
+                badge or a pill. The file's rules at the top forbid a badge
+                anyway, and a badge would read as a Myku stamp on the one
+                kind of page Myku is explicitly vouching for nothing on.
+                The middot is carried by both font files; checked in their
+                cmap tables, not assumed. */}
+            {unclaimed ? (
+              <div
+                style={{
+                  display: 'flex',
+                  color: INK_2,
+                  fontSize: 30,
+                  fontWeight: 800,
+                  letterSpacing: 3,
+                  marginBottom: 14,
+                }}
+              >
+                PREVIEW · NOT CLAIMED
+              </div>
+            ) : null}
             {/* The headline follows the PAGE's rule (decision 4): the business
                 name leads when he has set one, with his own name beneath it.
                 The card used to print full_name unconditionally, so a mechanic
@@ -308,16 +392,57 @@ export default async function Image({
                 {page.full_name}
               </div>
             ) : null}
+            {/* THE ONE FIELD ON THIS CARD THAT CAN GROW WITHOUT LIMIT.
+                `specialization` is plain `text` in the database with no
+                length CHECK and no cap in the app, and this column has a
+                fixed height. A size ramp alone only moves the breaking point
+                and never removes it, which is what was here before and what
+                was measured on 2026-09-01 by rendering this exact layout with
+                the real font files at a range of lengths:
+
+                  * 160 characters: the last line of the block below sat ON
+                    the footer rule, the rule running through its descenders.
+                  * 219 characters: the rule struck clean THROUGH the middle
+                    of that line.
+
+                Which line that is decides how bad it is, and it is the worst
+                one either way. On an unclaimed card it is "Nothing on this
+                page has been confirmed by {first}." On a published card with
+                three documents on file it is "Myku checked these documents.
+                That is not a recommendation." - rendered and confirmed struck
+                through at 300 characters. So an unbounded field the mechanic
+                types was able to deface, on the first thing anyone sees, the
+                one sentence that stops a document check reading as a Myku
+                endorsement. That is the trust line, not a layout nit.
+
+                So the block is BOUNDED rather than merely shrunk. `lineClamp`
+                is a hard three-line budget satori honours (verified: at 300
+                and at 400 characters the rendered PNGs are byte-identical, so
+                nothing below can move again however long the field gets), and
+                the ellipsis says plainly that there is more. The extra 20px
+                step is not a fix on its own; it exists so more of his own
+                words survive inside those three lines before the clamp bites.
+
+                Truncating here reverses an earlier decision in this file, on
+                purpose. The words are still all on the page one tap away; the
+                disclosure has nowhere else to go. When the two compete for
+                the last line of a share card, the disclosure wins.
+
+                Neither live card moves: rendered old and new for marcus-reed
+                (40 characters) and fort-nite (35), both byte-identical. */}
             <div
               style={{
-                display: 'flex',
+                display: 'block',
+                lineClamp: 3,
+                textOverflow: 'ellipsis',
                 color: INK_2,
-                fontSize: 32,
+                fontSize:
+                  specLine.length > 150 ? 20 : specLine.length > 100 ? 24 : specLine.length > 48 ? 28 : 32,
                 fontWeight: 500,
                 marginTop: 16,
               }}
             >
-              {page.specialization || 'Independent mechanic'}
+              {specLine}
             </div>
             {meta.length > 0 ? (
               <div
@@ -354,6 +479,43 @@ export default async function Image({
                   }}
                 >
                   Myku checked these documents. That is not a recommendation.
+                </div>
+              </div>
+            ) : unclaimed ? (
+              // WHERE THE NUMBERS CAME FROM, in the slot the paperwork line
+              // vacated. Same two-line shape as the block above - a statement
+              // with its qualification in the same breath - so the card never
+              // has an empty space where its state should be. The two branches
+              // are mutually exclusive by construction: `credentials` is forced
+              // to [] whenever `unclaimed` is true.
+              //
+              // Both sentences are the page body's own words (its How Myku
+              // Works block reads "{first} has not claimed this page. The
+              // details here came from public listings, and nothing on the page
+              // has been confirmed by {first}."), split across the two lines.
+              // Copied rather than reworded on purpose: the card and the page
+              // are one tap apart, and the moment they are phrased
+              // independently they start to drift.
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  marginTop: 20,
+                }}
+              >
+                <div style={{ display: 'flex', color: INK_2, fontSize: 26, fontWeight: 500 }}>
+                  The details here came from public listings.
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    color: INK_3,
+                    fontSize: 22,
+                    fontWeight: 500,
+                    marginTop: 8,
+                  }}
+                >
+                  Nothing on this page has been confirmed by {firstName(page.full_name)}.
                 </div>
               </div>
             ) : null}
