@@ -52,7 +52,7 @@ export default function MechanicsPage() {
               <div>
                 <div className="hm-hero-eyebrow">
                   <p className="hm-eyebrow">
-                    <span>Now onboarding across Chicago and the suburbs</span>
+                    <span>Now onboarding independent mechanics</span>
                   </p>
                   <span className="hm-ln" aria-hidden="true" />
                 </div>

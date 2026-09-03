@@ -79,7 +79,7 @@ export default function CustomersPage() {
 
                 <p className="hm-hero-foot">
                   <span className="dot" aria-hidden="true" />
-                  Live across Chicago and the suburbs.
+                  See who the mechanic is before you book.
                 </p>
               </div>
 

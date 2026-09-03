@@ -77,7 +77,7 @@ export default function Home() {
               <div>
                 <div className="hm-hero-eyebrow">
                   <p className="hm-eyebrow">
-                    <span>Live across Chicago and the suburbs</span>
+                    <span>A marketplace for car repair</span>
                   </p>
                   <span className="hm-ln" aria-hidden="true" />
                 </div>
@@ -164,7 +164,7 @@ export default function Home() {
                         <div className="pq-r2">
                           <span className="pq-meta">
                             <Pin />
-                            <span className="tnum">2.1 mi · Naperville · Today</span>
+                            <span className="tnum">2.1 mi · Today</span>
                           </span>
                           <span className="pq-verified">
                             <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" /></svg>
@@ -403,8 +403,7 @@ export default function Home() {
               <p className="hm-rv">
                 <b>Myku is a marketplace, not a repair shop.</b> We connect you with
                 independent mechanics, keep the facts transparent, and let you choose.
-                We do not employ them, set their prices, or do the work. It starts with
-                mechanics in Chicago, and grows from there.
+                We do not employ them, set their prices, or do the work.
               </p>
             </div>
 

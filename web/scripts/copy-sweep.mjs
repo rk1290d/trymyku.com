@@ -44,6 +44,71 @@ function isClaim(line, re) {
   return !NEGATED.test(line.slice(Math.max(0, m.index - 40), m.index));
 }
 
+/* ====================================================================
+   GEOGRAPHY  ::  the launch metro is not a fact about Myku (2026-09-02)
+
+   Rohaan, 2026-09-02: "this startup is starting from chicago and suburbs
+   but mentioning that in the app and website over and over doesnt help
+   our long term goal or the short term goal but it hurts us in many
+   ways."
+
+   THE PRINCIPLE: GEOGRAPHY IS DERIVED, NEVER DECLARED. A mechanic's own
+   page says where HE works, because that is a fact about him and it is
+   computed from his row: Storefront's JSON-LD `areaServed` is built from
+   his city and that is CORRECT and must keep working. What is refused is
+   the SITE declaring where Myku operates.
+
+   Why a gate: the metro had reached eighteen places across this repo and
+   the app, and the two worst were not the marketing lines anyone would
+   have thought to check. One was the placeholder on the signup form on
+   /mechanics, the page whose entire job is converting a mechanic, telling
+   him to type "e.g. Naperville or 60540". A mechanic anywhere else reads
+   that as "not for you" on the form he was about to fill in.
+
+   SCOPE is deliberately narrow: the metro, its county, the three seed
+   towns used as worked examples, the state, and the state code in an
+   address-like example. It does NOT try to catch "any place name". A
+   mechanic's own town reaches this site as DATA, never as a literal in
+   source, so nothing here can collide with it.
+
+   If this ever blocks a genuinely innocent line, REPHRASE THE LINE. Do
+   not loosen the rule.
+   ==================================================================== */
+const GEOGRAPHY = [
+  /\bchicago\b/i,
+  /\bdupage\b/i,
+  /\bnaperville\b/i,
+  /\blombard\b/i,
+  /\boak\s+brook\b/i,
+  /\billinois\b/i,
+  /\bsuburb/i, // also catches the Spanish suburbio / suburbios
+  /,\s*IL\b/,  // case-sensitive on purpose: the state code in "Naperville, IL"
+];
+
+// SELF-PROOF. A gate is worth what the evidence that it FIRES is worth.
+// The first four are real strings that shipped on this site and are now
+// gone; the last three must stay legal. "independent mechanics" is the one
+// that matters in the negative set: it describes the MECHANICS, not Myku's
+// coverage, and it is load-bearing copy on the home page.
+const GEO_SELFTEST = [
+  ['Live across Chicago and the suburbs', true],
+  ['Now onboarding across Chicago and the suburbs', true],
+  ['e.g. Naperville or 60540', true],
+  ['It starts with mechanics in Chicago, and grows from there.', true],
+  ['We connect you with independent mechanics, keep the facts transparent, and let you choose.', false],
+  ['Town name or ZIP code', false],
+  ['Myku is a marketplace, not a repair shop.', false],
+];
+for (const [sentence, shouldFire] of GEO_SELFTEST) {
+  if (!!GEOGRAPHY.find((r) => r.test(sentence)) !== shouldFire) {
+    console.error(
+      '\ncopy-sweep: THE GEOGRAPHY GATE IS BROKEN. It ' +
+        (shouldFire ? 'failed to flag' : 'wrongly flagged') + ': ' + sentence
+    );
+    process.exit(1);
+  }
+}
+
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
@@ -146,6 +211,9 @@ export function runCopySweep() {
         if (AVAILABLE_WORD.test(line) && !AVAILABLE_DELETE.test(line)) {
           hits.push({ rule: 'availability', text: `${where}  \`available\` field  ${snip}` });
         }
+
+        const geo = GEOGRAPHY.find((r) => r.test(line));
+        if (geo) hits.push({ rule: 'geography', text: `${where}  ${geo}  ${snip}` });
       });
     }
   }
@@ -172,6 +240,7 @@ export function runCopySweep() {
 export function reportCopySweep(hits) {
   const vouching = hits.filter((h) => h.rule === 'vouching');
   const availability = hits.filter((h) => h.rule === 'availability');
+  const geography = hits.filter((h) => h.rule === 'geography');
 
   if (vouching.length) {
     console.error('\ncopy-sweep: vouching phrase in site copy (Myku confirms facts, it never endorses):');
@@ -187,7 +256,18 @@ export function reportCopySweep(hits) {
     );
     for (const h of availability) console.error('  ' + h.text);
   }
-  if (vouching.length || availability.length) return false;
+  if (geography.length) {
+    console.error(
+      '\ncopy-sweep: the launch metro is declared in site copy. It must not be.\n' +
+        '  Geography is DERIVED, never declared. A mechanic\'s page says where HE\n' +
+        '  works, computed from his own row, and Storefront\'s areaServed is built\n' +
+        '  that way on purpose. The SITE never says where Myku operates: it caps\n' +
+        '  the ambition, it reads as a coverage promise the product cannot keep,\n' +
+        '  and on /mechanics it tells the next mechanic he is in the wrong place.'
+    );
+    for (const h of geography) console.error('  ' + h.text);
+  }
+  if (vouching.length || availability.length || geography.length) return false;
 
   console.log('copy-sweep: clean.');
   return true;

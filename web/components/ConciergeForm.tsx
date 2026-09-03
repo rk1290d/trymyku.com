@@ -135,7 +135,7 @@ export default function ConciergeForm() {
         id="cf-city"
         type="text"
         autoComplete="off"
-        placeholder="e.g. Naperville or 60540"
+        placeholder="Town name or ZIP code"
         maxLength={120}
         value={city}
         onChange={(e) => setCity(e.target.value)}
