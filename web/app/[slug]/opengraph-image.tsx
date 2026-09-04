@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { getMechanicPage, SUPABASE_URL } from '@/lib/supabase';
+import { getMechanicPage, getReviews, SUPABASE_URL } from '@/lib/supabase';
 import { firstName, initials } from '@/lib/format';
 
 // THE LINK PREVIEW.
@@ -220,12 +220,23 @@ export default async function Image({
   // the link preview IS the page to everyone who never taps it, so a photo
   // he hid from the page must not keep riding on every share of the link.
   // Missing (older rows) reads as shown, the same default the page uses.
-  const photo =
-    page.photo_url && page.show_photo !== false ? await safePhoto(page.photo_url) : null;
+  // The review rows are fetched alongside the photo, not read off the
+  // page row. page.review_count is a trigger-maintained counter that
+  // survives deleted rows and seeded profiles, so the card could print
+  // "4.8 out of 5 (94)" for a mechanic whose page shows no review at all.
+  // The page body (components/Storefront.tsx) now counts the rows it fetched
+  // through the same getReviews call, keeping every rated row, so the card
+  // counts the same rows the same way and the two cannot disagree. A failed
+  // fetch comes back as [] and the rating line simply stays off the card.
+  const [photo, reviewRows] = await Promise.all([
+    page.photo_url && page.show_photo !== false ? safePhoto(page.photo_url) : null,
+    getReviews(page.id),
+  ]);
 
   const ratingNum =
     typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
-  const hasRating = (page.review_count ?? 0) > 0 && ratingNum > 0;
+  const reviewCount = reviewRows.filter((r) => r.rating > 0).length;
+  const hasRating = reviewCount > 0 && ratingNum > 0;
   const city = page.service_city?.split(',')[0]?.trim();
   const years = page.years_experience ?? 0;
 
@@ -236,6 +247,8 @@ export default async function Image({
   // Same literal fallback the page body uses, so the card can never print an
   // empty trade line and never disagrees with the page about what it says.
   const specLine = page.specialization || 'Independent mechanic';
+  const headlineSize =
+    headline.length > 40 ? 38 : headline.length > 28 ? 48 : headline.length > 18 ? 62 : 76;
 
   // The town, the years and the rating. These are on the page for claimed and
   // unclaimed pages alike, so they travel with the card either way - but WHO
@@ -246,7 +259,7 @@ export default async function Image({
   const meta = [
     city || null,
     years > 0 ? `${years} yrs working` : null,
-    hasRating ? `${ratingNum.toFixed(1)} out of 5 (${page.review_count})` : null,
+    hasRating ? `${ratingNum.toFixed(1)} out of 5 (${reviewCount})` : null,
   ].filter(Boolean) as string[];
 
   // Myku's document checks. SUPPRESSED ENTIRELY on unclaimed pages, exactly
@@ -366,14 +379,23 @@ export default async function Image({
                 The size ramp is wider than the old two-step because these are
                 different lengths of thing: a full name is short, while
                 business_name is CHECKed at up to 60 characters, which at the
-                old 62px would have run straight off the card. */}
+                old 62px would have run straight off the card.
+
+                The tracking scales with the step. It used to be a fixed -3px,
+                which is a tight display setting at 76px and, at 38px, eight
+                percent of the em: a long business name on the smallest step
+                rendered with its word gaps closed, one run-on word across
+                the card. -0.04em keeps the 76px step exactly where it was
+                (-3px) and eases the 38px step to -1.5px. Satori takes
+                letterSpacing as pixels only, so the em value is applied by
+                hand. */}
             <div
               style={{
                 display: 'flex',
                 color: INK,
-                fontSize: headline.length > 40 ? 38 : headline.length > 28 ? 48 : headline.length > 18 ? 62 : 76,
+                fontSize: headlineSize,
                 fontWeight: 800,
-                letterSpacing: -3,
+                letterSpacing: Math.round(headlineSize * -0.04 * 10) / 10,
                 lineHeight: 1.05,
               }}
             >

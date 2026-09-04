@@ -1,9 +1,17 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
 import HmHeader from '@/components/HmHeader';
 import AppStoreBadge from '@/components/AppStoreBadge';
 import StorefrontFx from '@/components/StorefrontFx';
 import './home.css';
+
+// Title and description come from the root layout. The canonical is the one
+// thing the layout cannot give this page: www and the apex both serve it, and
+// without this the two count as separate pages.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 // The front page, in the storefront's own language. The mechanic pages set
 // the visual bar for the whole ecosystem; the page that introduces Myku
@@ -371,7 +379,7 @@ export default function Home() {
                 <Check /> Insurance on file
               </span>
               <span className="hm-tchip">
-                <Check /> ID verified
+                <Check /> Certifications on file
               </span>
             </div>
 

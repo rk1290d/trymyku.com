@@ -9,6 +9,11 @@ import { SUPPORT_EMAIL, SITE_URL } from '@/lib/site';
 import { socialLinks } from '@/lib/socials';
 import type { PageData } from '@/lib/pageData';
 
+// The smallest confirmed-job count the fact strip will print. Mirrors
+// MIN_JOBS_SHOWN in the app (constants/config.ts) so the page and the app
+// never disagree about whether his ledger is big enough to show.
+const MIN_JOBS_SHOWN = 3;
+
 /* ------------------------------------------------------------------
    GLYPHS
    ------------------------------------------------------------------ */
@@ -605,10 +610,10 @@ export default function Storefront({
 }) {
   const { page, services: rawServices, shared, verified, reviews: rawReviews } = data;
 
-  // Non-empty content only. A blank service string renders an empty ruled
-  // row, and a rating with no words renders a hollow review card. Both are
-  // the "empty box with a heading" the brief forbids, reached through a data
-  // shape rather than a missing section.
+  // Non-empty services only. A blank service string renders an empty ruled
+  // row, the "empty box with a heading" the brief forbids, reached through a
+  // data shape rather than a missing section. (Reviews are handled below and
+  // follow a different rule: a wordless rating is still a review.)
   // Dedupe by trimmed name, first row wins its price. A null price prints the
   // name alone. WHO chose that price depends on the page: on a published page
   // it is the mechanic's own figure out of his own editor, and on an unclaimed
@@ -623,7 +628,14 @@ export default function Storefront({
     seen.set(label, p);
   }
   const services = Array.from(seen, ([label, priceFrom]) => ({ label, priceFrom }));
-  const reviews = rawReviews.filter((r) => Boolean(r.text?.trim()));
+  // A review is a rating; the words are optional (the app lets a customer
+  // submit stars alone). Every rated row is kept, so a star-only review gets a
+  // card carrying its rating and date and no quote, and the number of cards on
+  // the page is the number the page claims. Dropping the textless ones while
+  // still counting them let the page say "3 reviews" over two cards.
+  const reviews = rawReviews
+    .map((r) => ({ ...r, text: r.text?.trim() || null }))
+    .filter((r) => r.rating > 0);
 
   // Strictly chronological across both kinds. Platform jobs are never
   // floated to the top: ranking them would read as Myku promoting them.
@@ -662,7 +674,21 @@ export default function Storefront({
   const first = firstName(page.full_name);
   const ratingNum =
     typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
-  const reviewCount = page.review_count ?? 0;
+  // Counted from the rows actually fetched, NOT from page.review_count. The
+  // stored counter is a trigger-maintained column that survives deleted rows
+  // and seeded profiles, so a page could print "94 reviews" over an empty
+  // section, and hand the same figure to search engines in the JSON-LD below.
+  // The app applies the same rule (reviewCountUnbacked in app/mechanic/[id]):
+  // when the counter and the rows disagree, the rows win. The fact-strip cell,
+  // the reviews heading and the aggregateRating all key off these two values,
+  // so none of them can claim a review the page does not show.
+  // The rows come from two sources with two caps: the live page fetches up to
+  // 100 (getReviews in lib/supabase), while the mechanic's own preview gets
+  // its rows from the web_preview_bundle RPC, which returns at most 20. So a
+  // mechanic with more than 20 reviews sees a smaller count in his preview
+  // than on the live page until that RPC's limit is raised in a Myku
+  // migration. Both figures are honest counts of cards actually rendered.
+  const reviewCount = reviews.length;
   const hasRating = reviewCount > 0 && ratingNum > 0;
   const work = workTypeLabel(page.work_type);
   const city = page.service_city?.trim() || null;
@@ -810,10 +836,15 @@ export default function Storefront({
   // Caption is a NOUN like every other cell ("Labor rate", "Years working").
   // A bare number over "Confirmed by Myku" in the page's most authoritative
   // slot reads as Myku confirming the mechanic, not the jobs.
-  if (verifiedCount > 0)
+  // Same floor as the app (MIN_JOBS_SHOWN in the app's constants/config.ts):
+  // a count under three is withheld. "1 | Job through Myku" in the page's
+  // most authoritative slot reads as a mechanic who has barely worked, and the
+  // app already refuses to print it; the page he actually shares must not be
+  // the one surface that does.
+  if (verifiedCount >= MIN_JOBS_SHOWN)
     cells.push({
       value: String(verifiedCount),
-      caption: verifiedCount === 1 ? 'Job through Myku' : 'Jobs through Myku',
+      caption: 'Jobs through Myku',
     });
   const strip = cells.slice(0, 4);
   // Never print a fact twice: the About rows only carry years when the strip
@@ -1109,7 +1140,10 @@ export default function Storefront({
     const ago = timeAgo(r.created_at);
     return (
       <div className="mp-rev mp-rv" key={r.id}>
-        <QuoteGlyph />
+        {/* The glyph frames words. A star-only review has none, so it gets
+            the rating and date alone rather than quotation marks around
+            nothing. */}
+        {r.text ? <QuoteGlyph /> : null}
         {r.text ? <p>{r.text}</p> : null}
         <div className="att">{`${r.rating} out of 5${ago ? ` · ${ago}` : ''}`}</div>
       </div>
@@ -1744,9 +1778,8 @@ export default function Storefront({
               </div>
               <div className="mp-rev-list">{reviews.slice(0, 5).map(reviewCard)}</div>
               {reviews.length > 5 ? (
-                // A DELTA, not a total: the query is capped at 20 while the
-                // header prints the true review_count, so "Show all 20" under
-                // "43 reviews" would read as a data error.
+                // A DELTA: the header counts the same rows this list holds,
+                // so "Show 15 more" under "20 reviews" adds up on the page.
                 <details className="mp-more">
                   <summary>Show {reviews.length - 5} more reviews</summary>
                   <div className="mp-rev-list">{reviews.slice(5).map(reviewCard)}</div>

@@ -200,7 +200,15 @@ export async function getVerifiedJobs(mechanicId: string): Promise<VerifiedJob[]
 export async function getReviews(mechanicId: string): Promise<Review[]> {
   return (
     (await rest<Review[]>(
-      `web_mechanic_reviews?mechanic_id=eq.${mechanicId}&order=created_at.desc&limit=20`
+      // 100, not 20. The page and the link-preview card now count reviews from
+      // the rows this returns rather than from the stored counter, so the cap
+      // here is the number a mechanic can be shown to have on the LIVE page.
+      // Twenty would have printed "20 reviews" for anyone with more, in the
+      // headline stats and in the rating Google reads. 100 matches what the
+      // app loads. The mechanic's own preview does not go through here: it
+      // takes its rows from the web_preview_bundle RPC, which still caps at
+      // 20, so the preview can print a smaller count than the live page.
+      `web_mechanic_reviews?mechanic_id=eq.${mechanicId}&order=created_at.desc&limit=100`
     )) ?? []
   );
 }

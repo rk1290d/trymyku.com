@@ -268,7 +268,7 @@ export default function CustomersPage() {
                 <Check /> Insurance on file
               </span>
               <span className="hm-tchip">
-                <Check /> ID verified
+                <Check /> Certifications on file
               </span>
             </div>
 

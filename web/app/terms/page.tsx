@@ -17,7 +17,9 @@ export default function TermsPage() {
       <main>
         <div className="page">
           <h1>Terms of Service</h1>
-          <p className="updated">Last updated: May 2026</p>
+          {/* Change this date whenever this file changes. It is the last edit
+              date of the terms text, not the date they were first written. */}
+          <p className="updated">Last updated: July 24, 2026</p>
 
           <h2>Agreement</h2>
           <p>By using Myku you agree to these Terms. If you do not agree, do not use the app.</p>

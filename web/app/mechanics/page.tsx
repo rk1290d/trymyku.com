@@ -231,7 +231,7 @@ export default function MechanicsPage() {
                 <h3>Every job builds the page</h3>
                 <p>
                   Work done through Myku gets a verified badge: real job, real price,
-                  real date. Tied to a real customer and a real date, and it compounds.
+                  real date. Tied to a real customer, and it compounds.
                 </p>
               </div>
             </div>

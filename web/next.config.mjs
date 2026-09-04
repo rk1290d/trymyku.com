@@ -24,9 +24,21 @@ const nextConfig = {
     return [{ source: '/stats', destination: '/stats.html' }];
   },
   async headers() {
-    // Private previews: never indexed, never cached, and the token in the
-    // URL never leaks through a Referer to any link on the page.
     return [
+      // Every page: nobody else's site gets to frame a mechanic's page, the
+      // browser never sniffs a response into a different type, and a Referer
+      // sent off-site carries the origin only. The /preview entry below wins
+      // on Referrer-Policy for its own paths because it is listed later.
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
+      // Private previews: never indexed, never cached, and the token in the
+      // URL never leaks through a Referer to any link on the page.
       {
         source: '/preview/:path*',
         headers: [

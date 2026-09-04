@@ -17,7 +17,9 @@ export default function PrivacyPage() {
       <main>
         <div className="page">
           <h1>Privacy Policy</h1>
-          <p className="updated">Last updated: May 2026</p>
+          {/* Change this date whenever this file changes. It is the last edit
+              date of the policy text, not the date it was first written. */}
+          <p className="updated">Last updated: July 24, 2026</p>
 
           <h2>Overview</h2>
           <p>

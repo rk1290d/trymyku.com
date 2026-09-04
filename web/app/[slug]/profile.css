@@ -1302,6 +1302,8 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
   color: var(--mp-slate);
   font-variant-numeric: tabular-nums;
 }
+/* A star-only review has no quote above the line, so the line sits flush. */
+.mp-rev .att:first-child { margin-top: 0; }
 .mp-reviews .mp-more > summary { background: #FFFFFF; }
 .mp-reviews .mp-more .mp-rev-list { margin-top: clamp(14px, 2.4vw, 20px); }
 
@@ -1581,10 +1583,17 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
 .mp-ft { border-top: 1px solid rgba(255, 255, 255, 0.09); padding-block: 26px calc(112px + env(safe-area-inset-bottom)); }
 .mp-ft .note { font-size: 13.5px; line-height: 1.6; color: #9BA3AE; max-width: 62ch; }
 .mp-ft .note a { color: #D8DCE3; text-decoration: underline; text-underline-offset: 3px; }
-.mp-ft .links { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 18px; }
+/* No top margin: the links' own block padding now supplies the 14px gap. */
+.mp-ft .links { display: flex; flex-wrap: wrap; gap: 0 18px; }
+/* 12px type inside a 44px-tall target: the block padding does the reaching,
+   the low colour keeps the visual weight down. Measured at 16px tall before,
+   with "Report this page" among them. */
 .mp-ft .links a {
+  display: inline-block;
+  padding-block: 14px;
   font-family: var(--mp-mono);
-  font-size: 10.5px;
+  font-size: 12px;
+  line-height: 16px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #8A929C;
