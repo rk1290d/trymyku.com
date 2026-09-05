@@ -112,17 +112,20 @@ export async function generateMetadata({
 // The route only loads and gates. The page itself is components/Storefront.tsx,
 // so the private preview route can render the same component from the same
 // data.
-// THE REDIRECTS BELOW DROP THE QUERY STRING, AND THAT IS NOT AN OVERSIGHT.
-// Carrying it means reading searchParams, and touching searchParams anywhere
-// in this component turns the whole route dynamic again - which is exactly
-// what generateStaticParams above exists to stop. Built and measured, not
+// THE REDIRECTS BELOW STILL DROP THE QUERY STRING, AND THEY ARE NOW ONLY A
+// BACKSTOP. The canonical lowercase hop moved to middleware.ts, which runs
+// before this route renders, so /Fort-Nite?service=Brakes keeps its
+// ?service= preselect and its ?src= attribution on the way to /fort-nite.
+// It cannot be done here: reading searchParams anywhere in this component
+// turns the whole route dynamic again - which is exactly what
+// generateStaticParams above exists to stop. Built and measured, not
 // guessed: with an `await searchParams` inside the redirect branch, a cold
 // request to /Fort-Nite answered 500 (DYNAMIC_SERVER_USAGE) instead of
-// redirecting at all. Losing ?service= on a link somebody RETYPED with a
-// capital is a smaller loss than a per-visit serverless render on every
-// storefront, and a hand-typed URL does not carry a query anyway. If this
-// ever needs both, the canonical hop has to move to middleware, where the
-// query survives and the page stays static.
+// redirecting at all. What stays below is the net for what middleware does
+// not do: the retired-slug hop needs a database lookup that has no business
+// running in middleware, and a path the matcher declines still lands here
+// with the case fold done by the lookup itself. Those two lose the query,
+// which is the accepted loss - not the shared-link path any more.
 export default async function ProfilePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const data = await loadPublicPage(slug);
@@ -150,11 +153,13 @@ export default async function ProfilePage({ params }: { params: Promise<Params> 
     if (current && current !== normalizeSlug(slug)) redirect('/' + current);
     notFound();
   }
-  // The lookup folds case, so /Fort-Nite now finds the page instead of 404ing.
+  // The lookup folds case, so /Fort-Nite finds the page instead of 404ing.
   // Send it on to the one canonical address anyway, so the URL bar, the
   // analytics row and anything the visitor shares onward all carry the same
-  // lowercase form the mechanic sees in the app. Same redirect() as above and
-  // for the same reason: never a cacheable 308.
+  // lowercase form the mechanic sees in the app. In practice middleware.ts
+  // has already sent it, query string intact; this fires only for a request
+  // that reached the route with its case unfolded. Same redirect() as above
+  // and for the same reason: never a cacheable 308.
   if (slug !== data.page.slug) redirect('/' + data.page.slug);
   return <Storefront data={data} />;
 }
