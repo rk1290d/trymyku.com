@@ -19,7 +19,7 @@ export default function PrivacyPage() {
           <h1>Privacy Policy</h1>
           {/* Change this date whenever this file changes. It is the last edit
               date of the policy text, not the date it was first written. */}
-          <p className="updated">Last updated: July 24, 2026</p>
+          <p className="updated">Last updated: September 5, 2026</p>
 
           <h2>Overview</h2>
           <p>
@@ -49,9 +49,20 @@ export default function PrivacyPage() {
             Mechanics can have a public profile page on trymyku.com showing their name,
             photo, services, service area, verification status, reviews, and job
             history they choose to share. Public pages never show a mechanic&apos;s
-            contact details, documents, or precise location. Quote requests submitted
-            on a public page (your name, phone number, and job description) are shared
-            only with that mechanic.
+            contact details, documents, or precise location.
+          </p>
+          {/* NOT "shared only with that mechanic". Myku's own safety net routes a
+              quote request to Myku staff, by push and by email, whenever the
+              mechanic has no reachable device or has not claimed the page - see
+              needsNet in the notify-lead function. That net is deliberate and it
+              is what stops a lead dying silently, so the policy has to describe
+              it. The quote form's sub-line was reworded for the same reason;
+              these two sentences must keep saying the same thing. */}
+          <p>
+            A quote request you submit on a public page (your name, phone number, and
+            job description) goes to that mechanic, and waits for him in his Myku inbox.
+            If we cannot reach his phone, Myku staff are notified as well, so the
+            request is not lost while it waits. It is not shared with anyone else.
           </p>
 
           <h2>Location privacy</h2>
@@ -65,9 +76,10 @@ export default function PrivacyPage() {
           <h2>Who we share with</h2>
           <p>
             Service providers that help us run the app: Supabase (database and
-            authentication), a payment processor (for transactions, when in-app
-            payments are enabled), and mapping/geocoding providers (to find and display
-            nearby jobs and mechanics). We do not sell your personal data.
+            authentication), Resend (email delivery, including the quote request
+            hand-off described above), a payment processor (for transactions, when
+            in-app payments are enabled), and mapping/geocoding providers (to find and
+            display nearby jobs and mechanics). We do not sell your personal data.
           </p>
 
           <h2>Data retention &amp; deletion</h2>

@@ -83,20 +83,43 @@ export interface Review {
   created_at: string;
 }
 
+// null means THE READ FAILED, and nothing else: PostgREST answers "there is
+// no such row" with an empty array, which comes back as [] and is a perfectly
+// good answer. Callers must keep the two apart. Reporting a failed read as
+// "no such page" is how a Supabase blip turns a link the mechanic texted
+// somebody into "This link doesn't go anywhere".
+//
+// Retries ONCE, because the failures that actually happen here are transient:
+// a 5xx, a saturated connection pool, a rate limit, a DNS hiccup. A 4xx is a
+// settled answer - a revoked grant will refuse the retry too - so it is not
+// retried, only shouted about.
 async function rest<T>(path: string, revalidate = 60): Promise<T | null> {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-      next: { revalidate },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+  let why = '';
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        next: { revalidate },
+      });
+      if (res.ok) return (await res.json()) as T;
+      why = `HTTP ${res.status}`;
+      if (res.status < 500 && res.status !== 429) break;
+    } catch (e) {
+      why = e instanceof Error ? e.message : 'fetch threw';
+    }
+    if (attempt === 0) await new Promise((r) => setTimeout(r, 250));
   }
+  // LOUD, and the same argument the lead route makes for its own refusals: a
+  // one-minute wobble and a grant that has been revoked on one of the web_*
+  // views look identical from the outside, and the second is losing every
+  // visitor to every mechanic. The difference is only visible if it is
+  // written down. Table only, never the query: the row filter carries the
+  // mechanic's id.
+  console.error(`[supabase] read failed: ${path.split('?')[0]} - ${why}`);
+  return null;
 }
 
 // A slug is MINTED lowercase and stored lowercase: the database CHECK
@@ -158,12 +181,28 @@ const PAGE_COLUMNS = [
   'page_lang',
 ].join(',');
 
-export async function getMechanicPage(slug: string): Promise<MechanicPage | null> {
+/** `ok: false` means the read never got an answer. It is NOT "no such page",
+ *  and the two must not produce the same page for the visitor. */
+export type PageRead =
+  | { ok: true; page: MechanicPage | null }
+  | { ok: false };
+
+export async function readMechanicPage(slug: string): Promise<PageRead> {
   const rows = await rest<MechanicPage[]>(
     `web_mechanic_pages?slug=eq.${encodeURIComponent(normalizeSlug(slug))}` +
       `&select=${PAGE_COLUMNS}&limit=1`
   );
-  return rows?.[0] ?? null;
+  if (rows === null) return { ok: false };
+  return { ok: true, page: rows[0] ?? null };
+}
+
+// Collapses the two back together for the callers that cannot act on the
+// difference: the link-preview card draws the same generic tile either way,
+// and the metadata pass has no page to title either way. The route that
+// decides whether a visitor is told the link is dead uses readMechanicPage.
+export async function getMechanicPage(slug: string): Promise<MechanicPage | null> {
+  const read = await readMechanicPage(slug);
+  return read.ok ? read.page : null;
 }
 
 export interface ServiceRow {
@@ -174,30 +213,39 @@ export interface ServiceRow {
 
 // The mechanic's own order first, then name, so two rows he never reordered
 // still come back in a stable order.
-export async function getServices(mechanicId: string): Promise<ServiceRow[]> {
+// NULL MEANS THE READ FAILED, and it is no longer folded into "he has none".
+// That conflation became dangerous the moment /[slug] started being cached: a
+// one-second Supabase blip during a revalidation would be frozen into the CDN as a
+// mechanic with no services, no past work and no reviews, and served for the next
+// minute to everyone he sent the link to. readMechanicPage already refuses to make
+// this mistake one level up; these four now match it. The page route turns a null
+// into a throw, which is an uncached 500 that self-heals and lets
+// stale-while-revalidate keep serving the last good copy. The link-preview card
+// coerces to [] instead, because a generic card beats no card at all.
+export async function getServices(mechanicId: string): Promise<ServiceRow[] | null> {
   const rows = await rest<ServiceRow[]>(
     `web_mechanic_services?mechanic_id=eq.${mechanicId}&select=service,price_from,sort_order&order=sort_order.asc,service.asc`
   );
-  return rows ?? [];
+  return rows;
 }
 
-export async function getSharedJobs(mechanicId: string): Promise<SharedJob[]> {
+export async function getSharedJobs(mechanicId: string): Promise<SharedJob[] | null> {
   return (
     (await rest<SharedJob[]>(
       `web_shared_jobs?mechanic_id=eq.${mechanicId}&order=done_on.desc.nullslast&limit=40`
-    )) ?? []
+    ))
   );
 }
 
-export async function getVerifiedJobs(mechanicId: string): Promise<VerifiedJob[]> {
+export async function getVerifiedJobs(mechanicId: string): Promise<VerifiedJob[] | null> {
   return (
     (await rest<VerifiedJob[]>(
       `web_verified_jobs?mechanic_id=eq.${mechanicId}&order=completed_at.desc&limit=40`
-    )) ?? []
+    ))
   );
 }
 
-export async function getReviews(mechanicId: string): Promise<Review[]> {
+export async function getReviews(mechanicId: string): Promise<Review[] | null> {
   return (
     (await rest<Review[]>(
       // 100, not 20. The page and the link-preview card now count reviews from
@@ -205,11 +253,10 @@ export async function getReviews(mechanicId: string): Promise<Review[]> {
       // here is the number a mechanic can be shown to have on the LIVE page.
       // Twenty would have printed "20 reviews" for anyone with more, in the
       // headline stats and in the rating Google reads. 100 matches what the
-      // app loads. The mechanic's own preview does not go through here: it
-      // takes its rows from the web_preview_bundle RPC, which still caps at
-      // 20, so the preview can print a smaller count than the live page.
+      // app loads, and what the web_preview_bundle RPC returns to the
+      // mechanic's own preview, so the two surfaces print the same figure.
       `web_mechanic_reviews?mechanic_id=eq.${mechanicId}&order=created_at.desc&limit=100`
-    )) ?? []
+    ))
   );
 }
 
@@ -246,8 +293,16 @@ export async function resolveRetiredSlug(slug: string): Promise<string | null> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ p_slug: normalized }),
-      // A redirect must follow the latest rename. Never revalidate-cached.
-      cache: 'no-store',
+      // 60s, NOT no-store, and the reason is structural. This runs inside
+      // /[slug], which is now an ISR route (generateStaticParams there), and
+      // a no-store fetch inside a static render is dynamic usage: Next
+      // answered "Page changed from static to dynamic at runtime" and served
+      // a 500 where a retired link had been redirecting and an unknown slug
+      // had been 404ing. Measured on a production build, not reasoned about.
+      // Nothing is lost by caching it either: the render this sits inside is
+      // itself held for 60 seconds, so a no-store read here could never make
+      // the redirect any fresher than the page around it.
+      next: { revalidate: 60 },
     });
     if (!res.ok) return null;
     const out = (await res.json()) as unknown;

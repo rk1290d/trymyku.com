@@ -283,12 +283,34 @@ export async function POST(req: NextRequest) {
       { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } },
     ),
   ]);
-  const pageRows = pageRes.ok ? ((await pageRes.json()) as { slug: string | null }[]) : null;
-  if (!pageRows || pageRows.length === 0) {
+  // A non-200 is NOT "he is not taking requests". The same argument the RLS
+  // branch below makes: a wobble and a revoked grant on web_mechanic_pages
+  // look identical from here, and the second is destroying EVERY lead on the
+  // site while telling every customer the mechanic has stopped taking work.
+  // So it is logged, and it comes back retryable rather than as the permanent
+  // 410 the composer renders as a closed door.
+  if (!pageRes.ok) {
+    console.error(
+      `[lead] page lookup failed with ${pageRes.status} mechanic=${mechanicId}: ` +
+        `${(await pageRes.text()).slice(0, 300)}`,
+    );
+    return NextResponse.json({ error: 'temporarily unavailable' }, { status: 503 });
+  }
+  const pageRows = (await pageRes.json()) as { slug: string | null }[];
+  if (pageRows.length === 0) {
     return NextResponse.json({ error: 'page not accepting requests' }, { status: 410 });
   }
   const realSlug = pageRows[0].slug ?? null;
 
+  // Its own failure is survivable - the chip is dropped, the description
+  // carries the job - but it must not be silent, because the one case where
+  // it is NOT survivable is handled forty lines down.
+  if (!svcRes.ok) {
+    console.error(
+      `[lead] service list lookup failed with ${svcRes.status} mechanic=${mechanicId}. ` +
+        `His own services cannot be recognised on this request.`,
+    );
+  }
   const ownServices = svcRes.ok
     ? ((await svcRes.json()) as { service: string }[]).map((r) => (r.service ?? '').trim())
     : [];
@@ -309,6 +331,13 @@ export async function POST(req: NextRequest) {
   // Dropping an unrecognised service must not also drop the whole request:
   // if it was the only thing describing the job, the prose rule applies.
   if (safeService === null && description.length < 5) {
+    // Unless the only reason we cannot recognise it is that his service list
+    // never loaded. A chip and a phone number is a complete submission as far
+    // as the composer is concerned, so answering it with "invalid fields"
+    // blames the customer for a form they filled in correctly, on our fault.
+    if (service !== null && !svcRes.ok) {
+      return NextResponse.json({ error: 'temporarily unavailable' }, { status: 503 });
+    }
     return NextResponse.json({ error: 'invalid fields' }, { status: 400 });
   }
 

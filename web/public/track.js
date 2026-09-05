@@ -10,15 +10,9 @@
    visitor's data, which is a guard that fires when there is nothing to guard.
    The place the values are actually made safe is /stats.js, which renders
    every one of them with textContent instead of building markup, backed by
-   the Content-Security-Policy in stats.html. That is the ONLY lock standing
-   today, and it is the one that holds whatever reaches the table.
-
-   A second lock is written but NOT YET APPLIED: the page_views CHECK
-   constraints in the app repo's migration 20240101000120 refuse to store
-   markup at all. Checked against the live database on 2026-09-01 - page_views
-   still carries only its four length CHECKs (path, referrer, src, visitor_id),
-   so until that migration is applied a row CAN hold markup and the render end
-   is what stops it running. Delete this paragraph once it is applied.
+   the Content-Security-Policy in stats.html. The page_views no-markup CHECK
+   constraints are live too, so a hostile row is refused at the table; the
+   render end is what holds anything that still gets in.
 
    If a value ever needs to be trusted, trust it there, not here. */
 (function () {

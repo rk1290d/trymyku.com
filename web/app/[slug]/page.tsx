@@ -1,12 +1,27 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Storefront from '@/components/Storefront';
-import { getMechanicPage, resolveRetiredSlug, normalizeSlug } from '@/lib/supabase';
+import { readMechanicPage, resolveRetiredSlug, normalizeSlug } from '@/lib/supabase';
 import { loadPublicPage } from '@/lib/pageData';
 import { firstName } from '@/lib/format';
 import './profile.css';
 
 export const revalidate = 60;
+
+// `revalidate` alone does NOTHING on a dynamic segment. Without a
+// generateStaticParams export Next treats /[slug] as fully dynamic and every
+// visit to a link a mechanic shared was a fresh serverless render answering
+// `Cache-Control: private, no-cache, no-store` - no CDN copy, five Supabase
+// reads per tap, and a cold render in front of the one page the whole funnel
+// runs through. Returning an empty list prerenders nothing at build time (the
+// slugs are not known then) but puts the route on the ISR path: first visit
+// renders and is cached, later visits are served from the edge, the copy is
+// refreshed at most once a minute, and POST /api/revalidate still busts it the
+// instant he saves. Measured before and after: no-store becomes
+// `s-maxage=60, stale-while-revalidate` with `x-nextjs-prerender: 1`.
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
+}
 
 // The mechanic's own storefront. Myku is the quiet trust layer underneath
 // it, never the brand on top of it.
@@ -25,7 +40,13 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const page = await getMechanicPage(slug);
+  const read = await readMechanicPage(slug);
+  // A read that never got an answer is not a missing page. Titling the tab
+  // "Page not found" during a Supabase blip states, in the one place a
+  // visitor is guaranteed to look, that the link the mechanic sent them is
+  // dead. The page function below throws on the same condition.
+  if (!read.ok) return { title: 'Myku' };
+  const page = read.page;
   if (!page) {
     // Metadata cannot redirect; the page function below does. This only
     // keeps the tab from reading "Page not found" during the hop.
@@ -91,10 +112,37 @@ export async function generateMetadata({
 // The route only loads and gates. The page itself is components/Storefront.tsx,
 // so the private preview route can render the same component from the same
 // data.
+// THE REDIRECTS BELOW DROP THE QUERY STRING, AND THAT IS NOT AN OVERSIGHT.
+// Carrying it means reading searchParams, and touching searchParams anywhere
+// in this component turns the whole route dynamic again - which is exactly
+// what generateStaticParams above exists to stop. Built and measured, not
+// guessed: with an `await searchParams` inside the redirect branch, a cold
+// request to /Fort-Nite answered 500 (DYNAMIC_SERVER_USAGE) instead of
+// redirecting at all. Losing ?service= on a link somebody RETYPED with a
+// capital is a smaller loss than a per-visit serverless render on every
+// storefront, and a hand-typed URL does not carry a query anyway. If this
+// ever needs both, the canonical hop has to move to middleware, where the
+// query survives and the page stays static.
 export default async function ProfilePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const data = await loadPublicPage(slug);
   if (!data) {
+    // WHY it is missing decides what the visitor is told. An empty answer is
+    // a real "no such page"; a failed read is Supabase being unreachable, and
+    // rendering the global 404 for that tells someone the mechanic personally
+    // texted that his link goes nowhere - the one sentence this page must
+    // never say wrongly, and the one a visitor never retries. Throwing gives
+    // Next's bare 500 instead, which is plainly OUR fault and gets refreshed;
+    // nothing about it is cached, so the next tap gets the real page. The read
+    // is already logged in lib/supabase, and it already retried once. In
+    // practice a page that has been visited before does not even reach here:
+    // the ISR entry above carries stale-while-revalidate, so a failed
+    // revalidation serves the last good copy rather than anything at all. This
+    // costs one extra read, and only on the path that was going to 404 anyway.
+    const read = await readMechanicPage(slug);
+    if (!read.ok) {
+      throw new Error(`storefront: upstream read failed for /${slug}`);
+    }
     // A retired slug follows the page to its current address. redirect(),
     // not permanentRedirect(): a 308 is cached by browsers, and a rename
     // A -> B -> A would then loop on the cached hop.

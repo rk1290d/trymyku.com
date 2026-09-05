@@ -55,6 +55,18 @@ export async function loadPublicPage(slug: string): Promise<PageData | null> {
     getReviews(page.id),
   ]);
 
+  // A failed sub-read is NOT an empty mechanic. Since /[slug] became a cached ISR
+  // route, returning [] here would have let one bad second be stored and served as
+  // a page with no services, no work history and no reviews - to the person he just
+  // sent the link to, which VISION.md calls the whole point of the page. Throwing
+  // gives Next an uncached 500 that self-heals on the next request, and a page that
+  // has been visited before never even reaches it: stale-while-revalidate keeps
+  // serving the last good copy. Same reasoning, and same choice, as the page route
+  // already makes for a failed readMechanicPage.
+  if (rawServices === null || shared === null || verified === null || rawReviews === null) {
+    throw new Error(`storefront: upstream read failed for /${slug}`);
+  }
+
   return { page: cleanPageInPlace(page), services: rawServices, shared, verified, reviews: rawReviews };
 }
 

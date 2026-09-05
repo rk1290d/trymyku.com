@@ -682,12 +682,10 @@ export default function Storefront({
   // when the counter and the rows disagree, the rows win. The fact-strip cell,
   // the reviews heading and the aggregateRating all key off these two values,
   // so none of them can claim a review the page does not show.
-  // The rows come from two sources with two caps: the live page fetches up to
-  // 100 (getReviews in lib/supabase), while the mechanic's own preview gets
-  // its rows from the web_preview_bundle RPC, which returns at most 20. So a
-  // mechanic with more than 20 reviews sees a smaller count in his preview
-  // than on the live page until that RPC's limit is raised in a Myku
-  // migration. Both figures are honest counts of cards actually rendered.
+  // Both sources now cap at 100 (getReviews in lib/supabase for the live page,
+  // the web_preview_bundle RPC for the mechanic's own preview), so the preview
+  // and the live page print the same figure. Both are honest counts of cards
+  // actually rendered.
   const reviewCount = reviews.length;
   const hasRating = reviewCount > 0 && ratingNum > 0;
   const work = workTypeLabel(page.work_type);
@@ -993,10 +991,25 @@ export default function Storefront({
     );
   else if (sharedCount > 0)
     howParas.push(`${sharedDef} Myku has not confirmed them.`);
-  if (credentials.length > 0)
+  // Built from the marks that ACTUALLY rendered, for the same reason the job
+  // provenance above branches on its counts. The fixed sentence named all
+  // three on every page that carried any one of them, so a page showing only
+  // "ID verified" told the visitor, in Myku's voice, that Myku had insurance
+  // and certifications on file for a man it holds neither for.
+  if (credentials.length > 0) {
+    // Sentence case: the marks print title-cased in the About strip, but
+    // mid-sentence only the initialism keeps its capital.
+    const marks = credentials.map((c) => (c === 'ID verified' ? c : c.toLowerCase()));
+    const list =
+      marks.length === 1
+        ? marks[0]
+        : `${marks.slice(0, -1).join(', ')} and ${marks[marks.length - 1]}`;
     howParas.push(
-      'ID verified, insurance on file and certifications on file mean Myku reviewed documents. They do not mean Myku recommends the work.'
+      marks.length === 1
+        ? `${list} means Myku reviewed documents. It does not mean Myku recommends the work.`
+        : `${list} mean Myku reviewed documents. They do not mean Myku recommends the work.`
     );
+  }
   if (unclaimed)
     howParas.push(
       `${first} has not claimed this page. The details here came from public listings, and nothing on the page has been confirmed by ${first}.`
@@ -1817,6 +1830,18 @@ export default function Storefront({
               // number, same heading, so he sees the shape of what visitors
               // get, but no live form: a preview takes no requests.
               <div className="mp-composer mp-composer-inert" aria-disabled="true">
+                {/* His request note, in the same slot the live page puts it:
+                    above the section number, because the live branch prints it
+                    before QuoteForm and QuoteForm owns that number. It is the
+                    one line on the page he wrote himself for the people who
+                    fill in the form, and the preview is the only place he can
+                    check it before he shares the link. Missing here, a saved
+                    note and a broken save look identical. */}
+                {requestNote ? (
+                  <p className="mp-note">
+                    <span className="k">A note from {first}</span> {requestNote}
+                  </p>
+                ) : null}
                 {numAsk ? <span className="mp-sec-num">{numAsk} · Your quote</span> : null}
                 <h2>Get a price from {first}</h2>
                 <p className="mp-lead">

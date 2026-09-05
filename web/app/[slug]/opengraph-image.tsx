@@ -230,7 +230,7 @@ export default async function Image({
   // fetch comes back as [] and the rating line simply stays off the card.
   const [photo, reviewRows] = await Promise.all([
     page.photo_url && page.show_photo !== false ? safePhoto(page.photo_url) : null,
-    getReviews(page.id),
+    getReviews(page.id).then((r) => r ?? []),
   ]);
 
   const ratingNum =

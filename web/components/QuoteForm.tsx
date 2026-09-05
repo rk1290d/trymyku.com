@@ -304,11 +304,20 @@ export default function QuoteForm({
       return;
     }
     setBusy(true);
+    // AbortController, NOT AbortSignal.timeout. That helper does not exist on
+    // Safari before 16 or Chrome before 103, Next does not polyfill it, and
+    // building these options threw a TypeError before the request was ever
+    // made - so on an older phone every submit landed in the catch below as
+    // "something went wrong", forever, no matter what was typed, and no lead
+    // row and no log line existed to say the customer had tried. The one
+    // conversion event on the mechanic's page is not gated on a 2022 API.
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 15000);
     try {
       const res = await fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(15000),
+        signal: ctrl.signal,
         body: JSON.stringify({
           mechanic_id: mechanicId,
           slug,
@@ -332,6 +341,11 @@ export default function QuoteForm({
           setErr('This page is no longer taking quote requests.');
         } else if (res.status === 429) {
           setErr(await refusalMessage(res, mechanicFirstName, unclaimed));
+        } else if (res.status === 503) {
+          // Ours, not his and not theirs. The route sends this when a lookup
+          // it needs did not answer, which used to be reported as the
+          // permanent 410 above, closing the conversion over a blip.
+          setErr('Myku could not be reached just now. Wait a moment and send it again.');
         } else {
           setErr(GENERIC_ERROR);
         }
@@ -343,6 +357,8 @@ export default function QuoteForm({
       // nothing more specific is honest here.
       setBusy(false);
       setErr(GENERIC_ERROR);
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
