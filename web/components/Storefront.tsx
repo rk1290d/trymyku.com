@@ -1065,7 +1065,10 @@ export default function Storefront({
   )}`;
   // On EVERY page, claimed or not. A visitor who thinks the page is wrong
   // about someone needs a door, and it is the one link here that is not
-  // gated on the mechanic's data.
+  // gated on the mechanic's data. This is now the CONVENIENCE path only: it
+  // lives inside the .mp-report disclosure in the footer, whose visible text
+  // is the address itself, so the door still works on a machine where a
+  // mailto click does nothing.
   const reportMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
     `Reporting a Myku page (${page.slug})`
   )}`;
@@ -1912,7 +1915,21 @@ export default function Storefront({
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
               <Link href="/support">Support</Link>
-              <a href={reportMailto}>Report this page</a>
+              {/* A disclosure, not a bare mailto. On a machine with no mail app a mailto
+                  click does visibly nothing, and this link's text was "Report this page",
+                  so a failed click left the visitor with no address and no door: the same
+                  lesson the claim buttons above already learned (see claimHref). The panel
+                  spells the address out so the action works even when the link cannot,
+                  and the mailto stays as the convenience path. Native <details>, like the
+                  two overflow disclosures: zero JavaScript, opens with scripting disabled. */}
+              <details className="mp-report">
+                <summary>Report this page</summary>
+                <p>
+                  Something wrong here? Write to <a href={reportMailto}>{SUPPORT_EMAIL}</a> with the page
+                  address, <span className="mp-report-url">trymyku.com/{page.slug}</span>, and what is
+                  wrong. If this page is about you and you did not ask for it, say so.
+                </p>
+              </details>
             </div>
           </div>
         </section>

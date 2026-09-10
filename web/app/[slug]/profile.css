@@ -1587,8 +1587,10 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
 .mp-ft .links { display: flex; flex-wrap: wrap; gap: 0 18px; }
 /* 12px type inside a 44px-tall target: the block padding does the reaching,
    the low colour keeps the visual weight down. Measured at 16px tall before,
-   with "Report this page" among them. */
-.mp-ft .links a {
+   with "Report this page" among them. That one is now a <summary>, not an
+   <a>, so it is named here too: closed, it has to be indistinguishable from
+   the links beside it. */
+.mp-ft .links a, .mp-ft .links .mp-report > summary {
   display: inline-block;
   padding-block: 14px;
   font-family: var(--mp-mono);
@@ -1598,7 +1600,32 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   text-transform: uppercase;
   color: #8A929C;
 }
-.mp-ft .links a:hover { color: #E7EAEF; }
+.mp-ft .links a:hover, .mp-ft .links .mp-report > summary:hover, .mp-ft .links .mp-report[open] > summary { color: #E7EAEF; }
+/* The report disclosure is one of the footer links until it opens; open, it
+   takes the row so the address has room. */
+.mp-ft .links .mp-report > summary { cursor: pointer; list-style: none; }
+.mp-ft .links .mp-report > summary::-webkit-details-marker { display: none; }
+.mp-ft .links .mp-report[open] { flex-basis: 100%; }
+.mp-ft .links .mp-report > p { margin: 0 0 14px; max-width: 62ch; font-size: 13.5px; line-height: 1.6; color: #9BA3AE; }
+/* The address sits inside a sentence, so it has to opt OUT of the footer link
+   type above: uppercased, letter-spaced, 12px mono with 14px of block padding
+   is a nav label, and it would have rendered the support address as shouting
+   and knocked the paragraph's line rhythm apart. Everything reset here is a
+   property `.mp-ft .links a` sets and this rule must undo. */
+.mp-ft .links .mp-report > p a {
+  display: inline;
+  padding-block: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #D8DCE3;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.mp-report-url { color: #D8DCE3; font-family: var(--mp-mono); font-size: 12.5px; overflow-wrap: anywhere; user-select: all; }
 
 /* ---------- sticky mobile CTA ---------- */
 .mp-dock {

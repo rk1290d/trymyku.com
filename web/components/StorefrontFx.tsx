@@ -295,8 +295,13 @@ export default function StorefrontFx({ prefix = 'mp' }: { prefix?: string } = {}
         let moving = false;
         for (let i = 0; i < mags.length; i++) {
           const s = state[i];
-          s.vx = (s.vx + (s.tx - s.x) * 0.16) * 0.76;
-          s.vy = (s.vy + (s.ty - s.y) * 0.16) * 0.76;
+          // 0.66, not 0.76: how much velocity survives a frame. At 0.76 the spring was
+          // under-damped enough to overshoot the cursor by about a third and wobble back,
+          // which Rohaan called "a little too bouncy when it's reaching for the mouse"
+          // (2026-09-08). At 0.66 the first overshoot is about a tenth and it settles.
+          // The pull strengths (0.3 / 0.42 below) are untouched so the reach is the same.
+          s.vx = (s.vx + (s.tx - s.x) * 0.16) * 0.66;
+          s.vy = (s.vy + (s.ty - s.y) * 0.16) * 0.66;
           s.x += s.vx;
           s.y += s.vy;
           if (Math.abs(s.vx) > 0.01 || Math.abs(s.vy) > 0.01 || Math.abs(s.tx - s.x) > 0.01) moving = true;
