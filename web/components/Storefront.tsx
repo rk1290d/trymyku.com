@@ -7,6 +7,8 @@ import StorefrontFx from '@/components/StorefrontFx';
 import { timeAgo, money, firstName, workTypeLabel } from '@/lib/format';
 import { SUPPORT_EMAIL, SITE_URL } from '@/lib/site';
 import { socialLinks } from '@/lib/socials';
+import { appFixUrl, pageGaps, GAP_JOBS_MIN, GAP_SERVICES_MIN } from '@/lib/gaps';
+import type { PageGap, PageGapKey } from '@/lib/gaps';
 import type { PageData } from '@/lib/pageData';
 
 // The smallest confirmed-job count the fact strip will print. Mirrors
@@ -53,6 +55,18 @@ function DocCheck() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// The empty portrait slot on a preview. A featureless silhouette on purpose:
+// it stands for "a photo goes here", and it must not look like a person, an
+// initial or a placeholder avatar the page might have chosen for him.
+function PersonGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8.4" r="3.9" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M4.8 20.2a7.2 7.2 0 0 1 14.4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
@@ -604,9 +618,13 @@ function layoutTownLabels(pins: RawPin[], cityUpper: string | null): PlacedPin[]
 export default function Storefront({
   data,
   mode = 'live',
+  appLinks = false,
 }: {
   data: PageData;
   mode?: 'live' | 'preview';
+  /** iPhone only, decided by the preview route. Adds the myku:// deep link
+   *  beside each marker; everywhere else the path is printed in words. */
+  appLinks?: boolean;
 }) {
   const { page, services: rawServices, shared, verified, reviews: rawReviews } = data;
 
@@ -703,6 +721,69 @@ export default function Storefront({
   // section renders. It is not a column on MechanicPage either.
   const verifiedCount = wall.filter((j) => j.verified).length;
   const hasSharedJob = wall.some((j) => !j.verified);
+
+  /* ── THE BEFORE AND AFTER  ::  ONE GATE, AND IT IS THIS LINE ─────────────
+     Rohaan, 2026-09-09: the preview should show a mechanic what a section
+     WOULD look like filled in, so a page that degrades gracefully stops
+     hiding the gap from the only person who can close it.
+
+     THIS IS THE ONLY PLACE THE FEATURE IS SWITCHED ON, on purpose. Every
+     ghost below is keyed on `gap(...)`, which reads this array and nothing
+     else, so on a live page and on an unclaimed page the array is empty and
+     not one byte of ghost markup exists. There is exactly one condition to
+     get right rather than a dozen scattered `mode === 'preview'` tests that
+     drift apart.
+
+     WHY BOTH HALVES OF THE CONDITION:
+     - `mode === 'preview'` because a customer he sent the link to must never
+       see his page annotated with what he has not done. VISION.md: a thin
+       page loses him the customer and loses us the mechanic. A page dressed
+       in sample content would be worse than a thin one, because it would be
+       a page that lies.
+     - `!unclaimed` because a holder draft belongs to a man who does not know
+       it exists. There is nobody to send to an editor, and the page already
+       carries the claim panel, which is the only thing it can honestly ask.
+
+     The deploy check that proves it: `curl trymyku.com/<any-slug> |
+     grep -c mp-gap` must be 0, and > 0 on a fresh preview token. */
+  const gaps: PageGap[] = mode === 'preview' && !unclaimed ? pageGaps(data) : [];
+  const gap = (k: PageGapKey): PageGap | undefined => gaps.find((g) => g.key === k);
+  const numbersGap = gap('numbers');
+
+  // The tag that makes a ghost unmistakable. NEVER a check mark and never
+  // `.ver`: a check on this page means Myku confirmed a job, and the teal is
+  // the one semantic colour on it. Orange is Myku's own voice, which is
+  // exactly what a labelled example is: Myku talking to him about his page,
+  // not the page making a claim about him.
+  // The `gaps.length` test is belt and braces, and deliberately so. Every
+  // caller is already inside a `gap(...)` branch, but this tag is the one
+  // piece of ghost markup that is not itself a gap check, and a future edit
+  // that drops one would print EXAMPLE on a real page. It cannot: with no
+  // gaps there is no tag, on any route.
+  const gapTag = (text = 'Example') =>
+    gaps.length === 0 ? null : <span className="mp-gap-tag">{text}</span>;
+
+  // The line under every ghost. It names the screen in words (works on any
+  // device) and, on an iPhone, adds the one-tap route into that same editor.
+  // Without the route this feature is nagging; with it, it closes the loop.
+  const gapFix = (k: PageGapKey, lead: string, extra?: string) => {
+    const g = gap(k);
+    if (!g) return null;
+    return (
+      <p className="mp-gap-fix">
+        {extra ? `${extra} ` : ''}
+        {g.appPath ? `${lead} ${g.appPath}.` : lead}
+        {appLinks && g.fix ? (
+          <>
+            {' '}
+            <a className="mp-gap-open" href={appFixUrl(g.fix)}>
+              Open in the app
+            </a>
+          </>
+        ) : null}
+      </p>
+    );
+  };
 
   // Paperwork checks are suppressed entirely on unclaimed pages. Attaching
   // document claims to someone who has not agreed to the page is the worst
@@ -849,6 +930,19 @@ export default function Storefront({
   // had no room for it.
   const yearsInStrip = strip.some((c) => c.caption.endsWith('working'));
 
+  // GHOST CELLS. A ghost NEVER displaces a real cell: it takes what is left of
+  // the four slots after his own numbers have taken theirs, so the strip he is
+  // looking at is still the strip a visitor gets, with the empty slots drawn
+  // in. Only the rate and the years get a cell; the work type has no number to
+  // show and is illustrated as an About row instead.
+  const ghostCells: { value: string; unit?: string; caption: string }[] = [];
+  if (numbersGap?.sub?.rate) ghostCells.push({ value: '$85', unit: '/hr', caption: 'Labor rate' });
+  if (numbersGap?.sub?.years) ghostCells.push({ value: '12', unit: 'yrs', caption: 'Years working' });
+  const ghostStrip = ghostCells.slice(0, Math.max(0, 4 - strip.length));
+  // Same rule as yearsInStrip, one line down: a years ghost that found room up
+  // here must not be drawn a second time in the About rows.
+  const yearsGhostInStrip = ghostStrip.some((c) => c.caption === 'Years working');
+
   // The rate, the fee and the years sit directly under the Myku mark. The page
   // is scrupulous about his work history two screens down; it must not be
   // silent about where his numbers came from here.
@@ -940,6 +1034,17 @@ export default function Storefront({
     certs.length > 0 ||
     credentials.length > 0 ||
     links.length > 0;
+
+  // WHICH GHOSTS THE ABOUT BAND HAS TO HOLD. A section that renders only
+  // because of them is marked with .mp-gap-sec, so "show the page as visitors
+  // see it" takes the whole frame away rather than leaving an empty heading
+  // over nothing, which is the one thing that view must never show.
+  const workTypeGhost = Boolean(numbersGap?.sub?.workType) && !work;
+  const yearsGhost = Boolean(numbersGap?.sub?.years) && !yearsInStrip && !yearsGhostInStrip;
+  const hasAreaGhost =
+    Boolean(gap('city')) || Boolean(gap('hours')) || Boolean(gap('radius')) || workTypeGhost || yearsGhost;
+  const hasAboutGhost =
+    hasAreaGhost || Boolean(gap('bio')) || Boolean(gap('verify')) || Boolean(gap('links'));
 
   // The disclosure never defines a mark that does not appear on this page.
   const howParas: string[] = [
@@ -1152,6 +1257,57 @@ export default function Storefront({
     </article>
   );
 
+  // THE SAMPLE WORK WALL. Three ordinary jobs, in the third person, with no
+  // name, no town and no customer on them: the point is the SHAPE of the
+  // section he is not using, not a history he did not do. They are drawn with
+  // Myku's own plate art, which is what an empty card would have used anyway,
+  // so the "after" is the real layout with the ghost skin over it.
+  const GHOST_JOBS: {
+    key: string;
+    plate: PlateKey;
+    vehicle: string;
+    job: string;
+    price: string;
+    when: string;
+  }[] = [
+    { key: 'g-brake', plate: 'brake', vehicle: '2015 Honda Civic', job: 'Front brake pads and rotors', price: '$260', when: 'Jun 2026' },
+    { key: 'g-oil', plate: 'oil', vehicle: '2018 Ford F-150', job: 'Oil and filter change', price: '$70', when: 'Jun 2026' },
+    { key: 'g-batt', plate: 'battery', vehicle: '2012 Toyota Camry', job: 'Battery replacement', price: '$180', when: 'Jun 2026' },
+  ];
+
+  // The same three jobs the sample wall shows, priced as a starting figure.
+  const GHOST_SERVICES: { label: string; priceFrom: number }[] = [
+    { label: 'Brake pads and rotors', priceFrom: 180 },
+    { label: 'Oil and filter change', priceFrom: 60 },
+    { label: 'Check-engine diagnostic', priceFrom: 55 },
+  ];
+
+  const ghostJobCard = (j: (typeof GHOST_JOBS)[number], tag: string) => (
+    <article className="mp-card mp-gap" key={j.key}>
+      <Plate kind={j.plate} />
+      <span className="mp-rail" aria-hidden="true" />
+      <div className="mp-card-body">
+        <div className="mp-card-top">
+          {/* InfoMark, never CheckMark, and never the `ver` class. The check
+              and the teal on this page mean one thing only: Myku confirmed
+              this job ran through the platform. Nothing about a drawing is
+              confirmed, and a sample wearing that mark would be the page
+              telling him a lie about itself. */}
+          <span className="mp-badge mp-gap-badge">
+            <InfoMark />
+            {tag}
+          </span>
+        </div>
+        <h3>{j.vehicle}</h3>
+        <p className="job">{j.job}</p>
+      </div>
+      <div className="mp-card-foot">
+        <span className="mp-price">{j.price}</span>
+        <span className="mp-when">{j.when}</span>
+      </div>
+    </article>
+  );
+
   const reviewCard = (r: (typeof reviews)[number]) => {
     const ago = timeAgo(r.created_at);
     return (
@@ -1243,6 +1399,33 @@ export default function Storefront({
           </div>
         ) : null}
 
+        {/* THE LEDGER, and the way back out of it. It counts the gaps once, at
+            the top, so he is not left to add up dashed boxes as he scrolls,
+            and the checkbox strips every one of them so he can see the page a
+            visitor actually gets. Native checkbox, CSS only: no JavaScript, so
+            it works on the same terms as the rest of this page. A browser
+            without :has() keeps the examples on screen, which is the safe way
+            round: the annotation staying is a nuisance, the annotation
+            wrongly vanishing would hide the whole feature. */}
+        {gaps.length > 0 ? (
+          <div className="mp-gap-ledger">
+            <div className="mp-wrap">
+              <p className="on">
+                Your page is missing {gaps.length} {gaps.length === 1 ? 'thing' : 'things'}. The
+                dashed boxes below show what each would look like filled in. Visitors never see
+                them.
+              </p>
+              <p className="off">
+                Examples hidden. This is exactly what someone opening your link sees.
+              </p>
+              <label htmlFor="mp-gaps-off">
+                <input type="checkbox" id="mp-gaps-off" />
+                Show the page as visitors see it
+              </label>
+            </div>
+          </div>
+        ) : null}
+
         {/* One slim line ABOVE everything. The full explanation lives in HOW
             MYKU WORKS and the eyebrow carries UNCONFIRMED, so three lines of
             preamble above the mechanic's own name buys nothing. */}
@@ -1330,6 +1513,17 @@ export default function Storefront({
                   priority
                 />
               </div>
+            ) : gap('photo') ? (
+              // Only when there is no photo at all. A photo he has switched
+              // off with "Show my photo" is a decision he made, and the page
+              // must not second-guess it with an empty circle.
+              <div className="mp-portrait mp-gap-only">
+                <span className="mp-gap mp-gap-portrait" aria-hidden="true">
+                  <PersonGlyph />
+                </span>
+                {gapTag()}
+                {gapFix('photo', 'Add a photo of yourself:')}
+              </div>
             ) : null}
 
             <h1 className={nameClass}>
@@ -1346,6 +1540,20 @@ export default function Storefront({
             </svg>
 
             <p className="mp-spec">{specLine}</p>
+
+            {/* The fallback above stays exactly as it is. The example sits
+                UNDER it, so he can see the difference between the sentence the
+                page writes when he says nothing and the one he could write
+                himself. Third person, no trade he has not claimed as his. */}
+            {gap('headline') ? (
+              <div className="mp-gap-only">
+                <p className="mp-spec mp-gap mp-gap-block">
+                  {gapTag()}
+                  <span>Brakes, suspension and check-engine diagnostics. Mobile.</span>
+                </p>
+                {gapFix('headline', 'Write your headline:')}
+              </div>
+            ) : null}
 
             {/* One pill, and it is how he works. The row is gated on that
                 pill alone, so with no work type there is no empty band
@@ -1387,10 +1595,18 @@ export default function Storefront({
           {/* The panel ALWAYS renders. The money question is never silent. */}
           <div className="mp-facts">
             <div className="mp-wrap">
-              <div className={`mp-facts-in n${strip.length || 1}`}>
+              {/* TWO counts, and the second one is what makes "show the page as
+                  visitors see it" honest. `n` is every cell in the DOM and sets
+                  the grid while the examples are showing. `v` is the REAL cells
+                  alone: hiding the ghosts with display:none does not change a
+                  grid's column count or re-run :last-child, so without it the
+                  band that claims to be the live page stood in a 3-column grid
+                  holding 2 cells, with a trailing hairline the live page does
+                  not have. */}
+              <div className={`mp-facts-in n${strip.length + ghostStrip.length || 1} v${strip.length || 1}`}>
                 {strip.length > 0 ? (
-                  strip.map((c) => (
-                    <div className="mp-fact" key={c.caption}>
+                  strip.map((c, i) => (
+                    <div className={`mp-fact${i === strip.length - 1 ? ' mp-fact-lastreal' : ''}`} key={c.caption}>
                       <span className="v">
                         <span className="mp-msk">
                           <i>{c.value}</i>
@@ -1400,7 +1616,7 @@ export default function Storefront({
                       <span className="k">{c.caption}</span>
                     </div>
                   ))
-                ) : (
+                ) : ghostStrip.length === 0 ? (
                   // Zero cells: a positive statement about how the business
                   // prices, never a blank state.
                   //
@@ -1409,24 +1625,83 @@ export default function Storefront({
                   // published and unclaimed versions of this sentence say
                   // different things (see stripFallback).
                   <div className="mp-fact fb">{stripFallback}</div>
-                )}
+                ) : null}
+                {/* Ghost cells LAST in the DOM, always. The strip's hairlines
+                    are :nth-child rules, so a cell inserted ahead of the real
+                    ones would take their borders as well as their slots. */}
+                {ghostStrip.map((c) => (
+                  <div className="mp-fact mp-gap" key={`g-${c.caption}`}>
+                    <span className="v">
+                      {c.value}
+                      {c.unit ? <span className="u">{c.unit}</span> : null}
+                    </span>
+                    <span className="k">
+                      {c.caption} {gapTag()}
+                    </span>
+                  </div>
+                ))}
+                {/* The examples took the band, so the fallback sentence does
+                    NOT co-render beside them: the two say opposite things
+                    about the same strip and would read as a page arguing with
+                    itself. It is still emitted, hidden, and CSS brings it back
+                    the moment he ticks "show the page as visitors see it",
+                    which is the moment it becomes true again and the moment
+                    the band would otherwise go empty. */}
+                {strip.length === 0 && ghostStrip.length > 0 ? (
+                  <div className="mp-fact fb mp-gap-fb">{stripFallback}</div>
+                ) : null}
               </div>
               {factsNote ? <p className="mp-facts-note">{factsNote}</p> : null}
+              {ghostStrip.length > 0
+                ? gapFix(
+                    'numbers',
+                    'Confirm your numbers in the app:',
+                    strip.length === 0 ? `Visitors currently see: “${stripFallback}”.` : undefined
+                  )
+                : null}
             </div>
           </div>
         </section>
 
         {/* ============ WORK ============ */}
-        {wall.length > 0 ? (
-          <section className="mp-work" id="work">
+        {/* THE SECTION THE SPARSE PAGE USED TO SWALLOW WHOLE. With no jobs the
+            page simply omitted its most valuable band and re-numbered around
+            it so smoothly that nothing hinted the section existed. That is
+            graceful degradation hiding the gap from the one person who could
+            close it, and it is the reason this feature was asked for. */}
+        {wall.length > 0 || gap('work') ? (
+          <section
+            className={`mp-work${wall.length === 0 ? ' mp-gap-sec' : ''}`}
+            id="work"
+          >
             <div className="mp-wrap">
               <div className="mp-sec-head mp-rv">
-                <span className="mp-sec-num">{numWork}</span>
+                {/* The real numbering does not move. A ghost section takes no
+                    number, because the numbers count the sections a visitor
+                    gets, and lending one to an example would make the preview
+                    disagree with the page it is previewing. */}
+                {numWork ? (
+                  <span className="mp-sec-num">{numWork}</span>
+                ) : (
+                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
+                )}
                 <h2>The work</h2>
                 <span className="mp-rule" aria-hidden="true" />
                 <span className="mp-sec-meta tnum">{wall.length} listed</span>
               </div>
-              <div className="mp-cards">{wall.slice(0, 10).map(jobCard)}</div>
+              <div className="mp-cards">
+                {wall.slice(0, 10).map(jobCard)}
+                {gap('work')
+                  ? GHOST_JOBS.slice(wall.length, GAP_JOBS_MIN).map((j) =>
+                      ghostJobCard(
+                        j,
+                        wall.length === 0
+                          ? 'Example'
+                          : `Example · Add ${GAP_JOBS_MIN - wall.length} more`
+                      )
+                    )
+                  : null}
+              </div>
               {wall.length > 10 ? (
                 // Native <details>. Zero JavaScript, so the overflow opens
                 // with scripting disabled.
@@ -1435,13 +1710,17 @@ export default function Storefront({
                   <div className="mp-cards">{wall.slice(10).map(jobCard)}</div>
                 </details>
               ) : null}
+              {gapFix(
+                'work',
+                'Three jobs is when this section starts to carry the page. Add past work:'
+              )}
             </div>
           </section>
         ) : null}
 
         {/* ============ ABOUT ============ */}
-        {hasAbout ? (
-          <section className="mp-ink mp-bio">
+        {hasAbout || hasAboutGhost ? (
+          <section className={`mp-ink mp-bio${hasAbout ? '' : ' mp-gap-sec'}`}>
             <svg className="mp-bio-mark" viewBox="0 0 400 400" aria-hidden="true">
               <g fill="none" stroke="#F97316" strokeWidth="1">
                 <circle cx="200" cy="200" r="196" />
@@ -1459,7 +1738,11 @@ export default function Storefront({
                   language of an assignment: it says Myku is sending you this
                   person and presupposes the job will happen. */}
               <div className="mp-sec-head mp-rv" style={{ color: '#fff' }}>
-                <span className="mp-sec-num">{numAbout}</span>
+                {numAbout ? (
+                  <span className="mp-sec-num">{numAbout}</span>
+                ) : (
+                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
+                )}
                 <h2>About {first}</h2>
                 <span className="mp-rule" aria-hidden="true" />
               </div>
@@ -1482,6 +1765,26 @@ export default function Storefront({
                     </div>
                   ) : null}
 
+                  {/* THIRD PERSON, and it says so out loud: "a short bio reads
+                      like this". The bio is the one block on this page written
+                      in the first person, so an example in his voice would be
+                      words put in his mouth on his own page, which is the
+                      failure the unclaimed-page rules were written about. No
+                      name, no town, no trade claimed as his. */}
+                  {gap('bio') ? (
+                    <div className="mp-gap-only">
+                      <div className="mp-gap mp-gap-block">
+                        {gapTag()}
+                        <p className="mp-bio-p mp-gap-bio">
+                          A short bio reads like this: ten years on brakes, suspension and
+                          check-engine diagnostics; comes to the driveway with the tools for most
+                          jobs; no work starts before the price is agreed.
+                        </p>
+                      </div>
+                      {gapFix('bio', 'Write yours:')}
+                    </div>
+                  ) : null}
+
                   {/* Paperwork. The qualification sits adjacent to the claim,
                       same size, same breath. That adjacency IS the feature:
                       never render one without the other. */}
@@ -1494,6 +1797,25 @@ export default function Storefront({
                       <p className="mp-qual">
                         Myku checked these documents. That is not a recommendation.
                       </p>
+                    </div>
+                  ) : null}
+
+                  {/* The paperwork line he does not have yet. It carries an
+                      INFO mark, not the DocCheck the real row uses: a tick
+                      beside the words "ID verified" is the page stating a
+                      checked fact, and it must never appear next to something
+                      Myku has not checked, even inside a dashed box. */}
+                  {gap('verify') ? (
+                    <div className="mp-gap-only">
+                      <div className="mp-cred mp-gap">
+                        <InfoMark />
+                        <span>
+                          {gapTag()}
+                          <br />
+                          ID verified · Insurance on file
+                        </span>
+                      </div>
+                      {gapFix('verify', 'Send your documents:')}
                     </div>
                   ) : null}
 
@@ -1515,11 +1837,27 @@ export default function Storefront({
                       </span>
                     </div>
                   ) : null}
+
+                  {/* PLAIN TEXT, never anchors. Every real link on this page
+                      passed a per-platform host allowlist, and a sample cannot
+                      pass anything: an <a> here would be a live control that
+                      goes nowhere, on the page whose whole job is not being
+                      broken in front of a customer. */}
+                  {gap('links') ? (
+                    <div className="mp-gap-only">
+                      <div className="mp-find mp-gap mp-gap-block">
+                        {gapTag()}
+                        <span className="k">Find {first} online</span>
+                        <span className="v">Instagram · Facebook</span>
+                      </div>
+                      {gapFix('links', 'Add yours:')}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div>
-                  {hasArea ? (
-                    <div className="mp-area mp-rv mp-rv-d2">
+                  {hasArea || hasAreaGhost ? (
+                    <div className={`mp-area mp-rv mp-rv-d2${hasArea ? '' : ' mp-gap-only'}`}>
                       <div className="mp-area-head">
                         <span className="k">Service area</span>
                         <span className="mp-rule" aria-hidden="true" />
@@ -1655,12 +1993,37 @@ export default function Storefront({
                               </span>
                             </div>
                           ) : null}
+                          {/* NO TOWN AND NO METRO IN ANY SAMPLE. A real place
+                              name in a dashed box on a page about a specific
+                              mechanic is the one example a reader could take
+                              for a fact about him, and the site never declares
+                              geography of its own anyway. */}
+                          {gap('city') ? (
+                            <div className="mp-arow mp-gap">
+                              <span className="k">Based in {gapTag()}</span>
+                              <span className="v">
+                                <PinGlyph /> Your city
+                              </span>
+                              {gapFix('city', 'Set it:')}
+                            </div>
+                          ) : null}
                           {work ? (
                             <div className="mp-arow">
                               <span className="k">How {first} works</span>
                               <span className="v">
                                 <VanGlyph /> {work}
                               </span>
+                            </div>
+                          ) : null}
+                          {workTypeGhost ? (
+                            <div className="mp-arow mp-gap">
+                              <span className="k">
+                                How {first} works {gapTag()}
+                              </span>
+                              <span className="v">
+                                <VanGlyph /> Mobile
+                              </span>
+                              {gapFix('numbers', 'Pick how you work:')}
                             </div>
                           ) : null}
                           {/* Both labelled as HIS listing on a published page,
@@ -1675,6 +2038,15 @@ export default function Storefront({
                               <span className="v">{hours}</span>
                             </div>
                           ) : null}
+                          {gap('hours') ? (
+                            <div className="mp-arow mp-gap">
+                              <span className="k">
+                                {hoursLabel} {gapTag()}
+                              </span>
+                              <span className="v">Mon to Fri 8am to 6pm, Sat by appointment</span>
+                              {gapFix('hours', 'Set yours:')}
+                            </div>
+                          ) : null}
                           {towns.length > 0 ? (
                             <div className="mp-arow">
                               <span className="k">{townsLabel}</span>
@@ -1687,6 +2059,29 @@ export default function Storefront({
                               <span className="v tnum">
                                 {years} {years === 1 ? 'year' : 'years'}
                               </span>
+                            </div>
+                          ) : null}
+                          {/* Radius is a ROW, never a ring. The drawing places
+                              every pin at its real distance and real bearing,
+                              which is the whole point of it, so it gets no
+                              sample rings and no sample pins: a drawn ring on
+                              a page with no distance set is the page claiming
+                              coverage nobody entered. */}
+                          {gap('radius') ? (
+                            <div className="mp-arow mp-gap">
+                              <span className="k">Travels up to {gapTag()}</span>
+                              <span className="v tnum">25 miles</span>
+                              {gapFix(
+                                'radius',
+                                'With a distance set, the drawing above shows rings to scale and the real towns inside them. Set it:'
+                              )}
+                            </div>
+                          ) : null}
+                          {yearsGhost ? (
+                            <div className="mp-arow mp-gap">
+                              <span className="k">Years working {gapTag()}</span>
+                              <span className="v tnum">12 years</span>
+                              {gapFix('numbers', 'Confirm your numbers:')}
                             </div>
                           ) : null}
                           {certs.length > 0 ? (
@@ -1740,11 +2135,18 @@ export default function Storefront({
         ) : null}
 
         {/* ============ SERVICES ============ */}
-        {services.length > 0 ? (
-          <section className="mp-services mp-grain" id="services">
+        {services.length > 0 || gap('services') ? (
+          <section
+            className={`mp-services mp-grain${services.length === 0 ? ' mp-gap-sec' : ''}`}
+            id="services"
+          >
             <div className="mp-wrap" style={{ position: 'relative' }}>
               <div className="mp-sec-head mp-rv">
-                <span className="mp-sec-num">{numServices}</span>
+                {numServices ? (
+                  <span className="mp-sec-num">{numServices}</span>
+                ) : (
+                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
+                )}
                 <h2>What {first} does</h2>
                 <span className="mp-rule" aria-hidden="true" />
               </div>
@@ -1767,22 +2169,45 @@ export default function Storefront({
                     ) : null}
                   </div>
                 ))}
+                {/* Sample rows fill the list to three, AFTER his own. Prices
+                    are round numbers on ordinary jobs, so nothing here can be
+                    mistaken for a figure he set: the row it sits in is dashed
+                    and tagged, and the real ones above it are not. */}
+                {gap('services')
+                  ? GHOST_SERVICES.slice(services.length, GAP_SERVICES_MIN).map((s) => (
+                      <div className="mp-srv mp-gap" key={s.label}>
+                        <span className="n">{s.label}</span>
+                        <span className="dots" aria-hidden="true" />
+                        <span className="p">
+                          from <b>${s.priceFrom}</b> {gapTag()}
+                        </span>
+                      </div>
+                    ))
+                  : null}
               </div>
               {/* AFTER the rows, not before, and inside the same section: a
                   qualification reads best in the same breath as the thing it
                   qualifies, which is where the bio's source line and the
                   paperwork qualification both sit. Unclaimed only. */}
               {servicesSource ? <p className="mp-srv-src">{servicesSource}</p> : null}
+              {gapFix('services', 'Add what you do and what it starts at:')}
             </div>
           </section>
         ) : null}
 
         {/* ============ REVIEWS ============ */}
-        {reviews.length > 0 ? (
-          <section className="mp-reviews" id="reviews">
+        {reviews.length > 0 || gap('reviews') ? (
+          <section
+            className={`mp-reviews${reviews.length === 0 ? ' mp-gap-sec' : ''}`}
+            id="reviews"
+          >
             <div className="mp-wrap">
               <div className="mp-sec-head mp-rv">
-                <span className="mp-sec-num">{numReviews}</span>
+                {numReviews ? (
+                  <span className="mp-sec-num">{numReviews}</span>
+                ) : (
+                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
+                )}
                 <h2>What people said</h2>
                 <span className="mp-rule" aria-hidden="true" />
                 {hasRating ? (
@@ -1792,7 +2217,24 @@ export default function Storefront({
                   </span>
                 ) : null}
               </div>
-              <div className="mp-rev-list">{reviews.slice(0, 5).map(reviewCard)}</div>
+              <div className="mp-rev-list">
+                {reviews.slice(0, 5).map(reviewCard)}
+                {/* The one gap he cannot close by typing, so it must not read
+                    as something he forgot to enter. No link either: there is
+                    no editor to open, and a marker pointing at nothing is
+                    worse than no marker. */}
+                {gap('reviews') ? (
+                  <div className="mp-rev mp-gap">
+                    {gapTag()}
+                    <p>Showed up on time, explained the problem, price matched the quote.</p>
+                    <div className="att">5 out of 5 · 2 weeks ago</div>
+                  </div>
+                ) : null}
+              </div>
+              {gapFix(
+                'reviews',
+                'Reviews arrive on their own: when a job runs through Myku, the customer is asked to rate it. There is nothing to type.'
+              )}
               {reviews.length > 5 ? (
                 // A DELTA: the header counts the same rows this list holds,
                 // so "Show 15 more" under "20 reviews" adds up on the page.
@@ -1844,6 +2286,15 @@ export default function Storefront({
                   <p className="mp-note">
                     <span className="k">A note from {first}</span> {requestNote}
                   </p>
+                ) : null}
+                {gap('note') ? (
+                  <div className="mp-gap-only">
+                    <p className="mp-note mp-gap mp-gap-block">
+                      <span className="k">A note from you {gapTag()}</span> Send the year, make and
+                      model, and a photo of the part if you have one. Replies come the same day.
+                    </p>
+                    {gapFix('note', 'Write yours:')}
+                  </div>
                 ) : null}
                 {numAsk ? <span className="mp-sec-num">{numAsk} · Your quote</span> : null}
                 <h2>Get a price from {first}</h2>

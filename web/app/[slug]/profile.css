@@ -548,6 +548,19 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
 /* Three cells below 760px: two up, the third spanning, so a caption like
    YEARS WORKING never has to survive a 100px column. */
 .mp-facts-in.n3 .mp-fact:last-child { grid-column: 1 / -1; }
+/* PREVIEW ONLY, and only while "show the page as visitors see it" is ticked.
+   The ghosts go display:none, which leaves the grid still sized for them, so
+   the band would claim to be the live page while laid out for cells nobody can
+   see. `v` counts the real cells; these mirror the `n` rules above and there is
+   a second copy inside the 760px query, which must stay in step with it. */
+.mp:has(#mp-gaps-off:checked) .mp-facts-in.v1 { grid-template-columns: 1fr; }
+.mp:has(#mp-gaps-off:checked) .mp-facts-in.v2,
+.mp:has(#mp-gaps-off:checked) .mp-facts-in.v3,
+.mp:has(#mp-gaps-off:checked) .mp-facts-in.v4 { grid-template-columns: repeat(2, 1fr); }
+.mp:has(#mp-gaps-off:checked) .mp-facts-in.v3 .mp-fact.mp-fact-lastreal { grid-column: 1 / -1; }
+/* :last-child is the ghost, not the last real cell, so the hairline the live
+   page drops was still being drawn. */
+.mp:has(#mp-gaps-off:checked) .mp-fact.mp-fact-lastreal { border-right: 0; }
 .mp-fact {
   padding: clamp(18px, 3.4vw, 28px) clamp(6px, 2vw, 10px);
   border-right: 1px solid rgba(255, 255, 255, 0.09);
@@ -1688,6 +1701,13 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   .mp-facts-in.n2 { grid-template-columns: repeat(2, 1fr); }
   .mp-facts-in.n3 { grid-template-columns: repeat(3, 1fr); }
   .mp-facts-in.n3 .mp-fact:last-child { grid-column: auto; }
+  /* The wide half of the pair above; see the comment there. Same specificity,
+     later in the file, so it wins inside this query and only inside it. */
+  .mp:has(#mp-gaps-off:checked) .mp-facts-in.v1 { grid-template-columns: 1fr; }
+  .mp:has(#mp-gaps-off:checked) .mp-facts-in.v2 { grid-template-columns: repeat(2, 1fr); }
+  .mp:has(#mp-gaps-off:checked) .mp-facts-in.v3 { grid-template-columns: repeat(3, 1fr); }
+  .mp:has(#mp-gaps-off:checked) .mp-facts-in.v4 { grid-template-columns: repeat(4, 1fr); }
+  .mp:has(#mp-gaps-off:checked) .mp-facts-in.v3 .mp-fact.mp-fact-lastreal { grid-column: auto; }
   .mp-fact { border-bottom: 0; }
   .mp-fact .v { font-size: clamp(28px, 4.2vw, 60px); }
   .mp-fact:nth-child(2n) { border-right: 1px solid rgba(255, 255, 255, 0.09); }
@@ -1749,6 +1769,13 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   .mp-card,
   .mp-rail,
   .mp-msk > i { opacity: 1 !important; transform: none !important; }
+  /* Except the example cards, whose dimming is not an entrance animation but
+     part of how they read as examples. The blanket rule above restored them to
+     full strength for a reduced-motion reader, which is the one reader who most
+     needs "this is a sample" to be obvious at a glance. They keep their dashed
+     border, hatch and EXAMPLE tag either way, so nothing ever read as a real
+     job; this puts the fourth signal back. */
+  .mp-card.mp-gap { opacity: 0.78 !important; }
   .mp-plate .ln > *,
   .mp-plate .acc > * { stroke-dashoffset: 0 !important; }
   .mp-plate .dash { stroke-dasharray: 3 4 !important; }
@@ -1830,3 +1857,259 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   margin-bottom: 4px;
 }
 .mp-cap { margin: 4px 0 0; font-size: 12.5px; line-height: 1.4; opacity: .78; color: #524D45; }
+
+/* ============================================================
+   BEFORE AND AFTER  ::  the mechanic's own preview, and NOWHERE else
+
+   Every rule here is inert unless the markup exists, and the markup
+   exists on one route only: Storefront computes its gap list from
+   `mode === 'preview' && !unclaimed` and nothing else, so a live page
+   and an unclaimed page carry no .mp-gap element at all. This sheet is
+   shared by both routes on purpose; it is the component that decides.
+
+   THE SKIN IS THE SAFETY. A ghost has to be impossible to read as
+   content: dashed rather than ruled, hatched rather than filled, tagged
+   EXAMPLE in Myku's own orange, and never wearing the two marks that
+   mean a checked fact on this page (the teal .ver and the check glyph).
+   Orange is Myku speaking; teal is Myku confirming. An example is the
+   first and never the second.
+   ============================================================ */
+
+/* One skin, two grounds. The two tokens are the only thing that changes
+   between the ink sections and the paper ones. */
+.mp-gap {
+  --mp-gap-line: rgba(255, 255, 255, 0.28);
+  --mp-gap-hatch: rgba(255, 255, 255, 0.06);
+  position: relative;
+  border: 1px dashed var(--mp-gap-line);
+  border-radius: 16px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--mp-gap-hatch) 0 6px,
+    transparent 6px 13px
+  );
+  opacity: 0.78;
+}
+.mp-work .mp-gap,
+.mp-services .mp-gap,
+.mp-reviews .mp-gap {
+  --mp-gap-line: #C9C2B4;
+  --mp-gap-hatch: rgba(20, 16, 10, 0.05);
+}
+
+/* A ghost with no host element of its own to sit inside. */
+.mp-gap-block { padding: 14px 16px; }
+
+.mp-gap-tag {
+  font-family: var(--mp-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--mp-o);
+  white-space: nowrap;
+}
+.mp-gap-block > .mp-gap-tag { display: block; margin-bottom: 8px; }
+.mp-work .mp-gap-tag,
+.mp-services .mp-gap-tag,
+.mp-reviews .mp-gap-tag { color: var(--mp-o-deep); }
+/* In the section-number slot, where a real section prints its number. */
+.mp-gap-num { letter-spacing: 0; }
+
+/* The line that turns a marker into a tool: where in the app this is
+   edited, in words, plus the one-tap route on an iPhone. */
+.mp-gap-fix {
+  margin: 8px 0 0;
+  font-family: var(--mp-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  font-weight: 400;
+  text-transform: none;
+  text-align: left;
+  color: var(--mp-steel-2);
+  max-width: 52ch;
+}
+.mp-work .mp-gap-fix,
+.mp-services .mp-gap-fix,
+.mp-reviews .mp-gap-fix { color: var(--mp-slate-2); }
+.mp-gap-open { color: var(--mp-o-hot); text-decoration: underline; text-underline-offset: 2px; }
+.mp-work .mp-gap-open,
+.mp-services .mp-gap-open,
+.mp-reviews .mp-gap-open { color: var(--mp-o-deep); }
+
+/* ---------- the ledger, and the way out of it ---------- */
+.mp-gap-ledger {
+  background: var(--mp-ink-1);
+  color: var(--mp-paper);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+  padding: 12px 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.mp-gap-ledger p { margin: 0; max-width: 66ch; color: #D2D8E0; }
+/* The second sentence belongs to the hidden state, so it starts hidden. A
+   browser without :has() never reaches that state and never shows it. */
+.mp-gap-ledger .off { display: none; }
+.mp-gap-ledger label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 9px;
+  font-family: var(--mp-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mp-steel-2);
+  cursor: pointer;
+}
+.mp-gap-ledger input {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  accent-color: var(--mp-o);
+  cursor: pointer;
+}
+
+/* THE TOGGLE. CSS only, no JavaScript, the same terms as the rest of this
+   page. A browser with no :has() keeps the examples on screen: annotation
+   that stays is a nuisance, annotation that vanishes silently would hide
+   the whole feature, so the failure goes the harmless way. */
+.mp:has(#mp-gaps-off:checked) .mp-gap,
+.mp:has(#mp-gaps-off:checked) .mp-gap-fix,
+.mp:has(#mp-gaps-off:checked) .mp-gap-tag,
+.mp:has(#mp-gaps-off:checked) .mp-gap-only,
+/* A section that exists ONLY because of a gap goes with its contents. A
+   heading left standing over nothing is not what a visitor sees, which is
+   the one thing this view has to get right. */
+.mp:has(#mp-gaps-off:checked) .mp-gap-sec { display: none; }
+.mp:has(#mp-gaps-off:checked) .mp-gap-ledger .on { display: none; }
+.mp:has(#mp-gaps-off:checked) .mp-gap-ledger .off { display: block; }
+
+/* ---------- hero: portrait and headline ---------- */
+.mp-gap-portrait {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+}
+.mp-gap-portrait svg { width: 32px; height: 32px; color: var(--mp-steel); }
+/* The example headline sets at the same size as the real line above it,
+   because the point is what the line would LOOK like, not what it says. */
+.mp-spec.mp-gap { margin-top: 14px; }
+
+/* ---------- fact strip ---------- */
+/* The strip's hairlines ARE its grid, and they are :nth-child rules. A
+   ghost cell keeps them exactly, dashed, and takes no box of its own: a
+   rounded dashed card dropped inside the fact band would break the band. */
+.mp-facts-in .mp-fact.mp-gap {
+  border: 0;
+  border-radius: 0;
+  border-right: 1px dashed var(--mp-gap-line);
+  border-bottom: 1px dashed var(--mp-gap-line);
+}
+.mp-facts-in .mp-fact.mp-gap:nth-child(2n) { border-right: 0; }
+.mp-facts-in .mp-fact.mp-gap:nth-child(n + 3) { border-bottom: 0; }
+.mp-facts-in .mp-fact.mp-gap:last-child { border-right: 0; }
+.mp-fact.mp-gap .k { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+/* The fallback sentence, emitted but withheld while the examples hold the
+   band. It comes back with them gone; see Storefront for why the two must
+   never render together. */
+.mp-fact.mp-gap-fb { display: none; }
+.mp:has(#mp-gaps-off:checked) .mp-fact.mp-gap-fb { display: block; }
+
+/* ---------- work wall ---------- */
+/* The radius matches the real card's 20px, not the skin's default 16: the
+   "after" has to be the shape of the thing it stands in for. */
+.mp-card.mp-gap {
+  border-radius: 20px;
+  background: #F6F3EC;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--mp-gap-hatch) 0 6px,
+    transparent 6px 13px
+  );
+  border-style: dashed;
+  border-color: var(--mp-gap-line);
+  box-shadow: none;
+}
+/* .mp-card carries its own reveal (opacity 0 until .in) at a specificity
+   the plain .mp-gap skin cannot reach, so the dimmed state is restated at
+   both ends. Without this a ghost card fades in to FULL opacity and stops
+   looking like a ghost at the exact moment it is read. */
+@media (scripting: enabled) {
+  .mp-card.mp-gap { opacity: 0; }
+  .mp-card.mp-gap.in { opacity: 0.78; }
+}
+.mp-badge.mp-gap-badge {
+  color: var(--mp-o-deep);
+  background: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.4);
+}
+
+/* ---------- about: bio, paperwork, links ---------- */
+/* No drop cap on a sample. The oversized orange initial is the page
+   dressing up the mechanic's own words, and it must not dress up Myku's
+   illustration of them. */
+.mp-gap-bio { margin-bottom: 0; }
+.mp-gap-bio::first-letter {
+  font-family: inherit;
+  font-size: inherit;
+  float: none;
+  line-height: inherit;
+  padding: 0;
+  color: inherit;
+}
+.mp-cred.mp-gap {
+  border: 0;
+  border-radius: 0;
+  border-top: 1px dashed var(--mp-gap-line);
+  padding-left: 0;
+  padding-right: 0;
+}
+.mp-find.mp-gap .k { margin-bottom: 4px; }
+.mp-find.mp-gap .v { display: block; }
+
+/* ---------- about: service-area rows ---------- */
+/* A ghost row keeps the row's ruling, dashed. Its fix line wraps onto its
+   own line inside the same flex row, the way .mp-notconf does on a card. */
+.mp-arow.mp-gap {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px dashed var(--mp-gap-line);
+}
+.mp-arow.mp-gap:first-child { border-top: 1px dashed var(--mp-gap-line); }
+.mp-arow.mp-gap .k { display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.mp-arow .mp-gap-fix { width: 100%; order: 9; margin-top: 6px; }
+
+/* ---------- services ---------- */
+.mp-srv.mp-gap {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px dashed var(--mp-gap-line);
+}
+/* No hover travel and no wash on a sample: those are the affordances of a
+   real row, and they invite a click the example cannot answer. */
+.mp-srv.mp-gap:hover .n { transform: none; color: inherit; }
+.mp-srv.mp-gap::before { display: none; }
+.mp-srv.mp-gap .p { display: inline-flex; align-items: baseline; gap: 8px; }
+
+/* ---------- reviews ---------- */
+.mp-rev.mp-gap {
+  border-radius: 20px;
+  background: #FBF9F5;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--mp-gap-hatch) 0 6px,
+    transparent 6px 13px
+  );
+  border-style: dashed;
+  border-color: var(--mp-gap-line);
+  box-shadow: none;
+}
+.mp-rev.mp-gap > .mp-gap-tag { display: block; margin-bottom: 10px; }
+
+/* ---------- the ask ---------- */
+.mp-note.mp-gap .k { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
