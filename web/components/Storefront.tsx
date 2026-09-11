@@ -747,7 +747,11 @@ export default function Storefront({
      The deploy check that proves it: `curl trymyku.com/<any-slug> |
      grep -c mp-gap` must be 0, and > 0 on a fresh preview token. */
   const gaps: PageGap[] = mode === 'preview' && !unclaimed ? pageGaps(data) : [];
-  const gap = (k: PageGapKey): PageGap | undefined => gaps.find((g) => g.key === k);
+  // Narrowed by key, so `gap('numbers')` and `gap('services')` hand back the
+  // `sub` that key carries, typed, and the renderer never re-derives from the
+  // rows a case the gap list has already decided.
+  const gap = <K extends PageGapKey>(k: K) =>
+    gaps.find((g): g is Extract<PageGap, { key: K }> => g.key === k);
   const numbersGap = gap('numbers');
 
   // The tag that makes a ghost unmistakable. NEVER a check mark and never
@@ -766,6 +770,15 @@ export default function Storefront({
   // The line under every ghost. It names the screen in words (works on any
   // device) and, on an iPhone, adds the one-tap route into that same editor.
   // Without the route this feature is nagging; with it, it closes the loop.
+  //
+  // THE ROUTE HAS TO LOOK LIKE ONE. Rohaan, 2026-09-11, on his own preview:
+  // only one "Open in the app" was a different colour, and every other one
+  // "is the same color as the rest of the text... I thought it was just
+  // text." A CSS specificity loss had coloured it like the sentence around it
+  // in most sections (see .mp a.mp-gap-open in profile.css). The arrow is the
+  // same glyph every CTA on this page ends in, so it reads as "tap this" in
+  // the page's own vocabulary, and it sits inside the link so the two can
+  // never wrap apart.
   const gapFix = (k: PageGapKey, lead: string, extra?: string) => {
     const g = gap(k);
     if (!g) return null;
@@ -778,6 +791,9 @@ export default function Storefront({
             {' '}
             <a className="mp-gap-open" href={appFixUrl(g.fix)}>
               Open in the app
+              <span className="mp-arrow" aria-hidden="true">
+                &#8594;
+              </span>
             </a>
           </>
         ) : null}
@@ -1275,12 +1291,45 @@ export default function Storefront({
     { key: 'g-batt', plate: 'battery', vehicle: '2012 Toyota Camry', job: 'Battery replacement', price: '$180', when: 'Jun 2026' },
   ];
 
-  // The same three jobs the sample wall shows, priced as a starting figure.
-  const GHOST_SERVICES: { label: string; priceFrom: number }[] = [
-    { label: 'Brake pads and rotors', priceFrom: 180 },
-    { label: 'Oil and filter change', priceFrom: 60 },
-    { label: 'Check-engine diagnostic', priceFrom: 55 },
+  // Ordinary jobs, priced as a starting figure. The first three are the list
+  // an empty page gets; the rest exist so there is still a sample left
+  // when he already offers most of the first three.
+  //
+  // `covers` is the SUBJECT, not the label, and a sample is dropped when any
+  // of his own rows is about the same thing. An exact-label test is not
+  // enough: a page listing "Oil Change" with a dashed "Oil and filter change"
+  // under it reads as the same job twice, one priced by Myku, which is the
+  // page appearing to put a price on work he has chosen not to price.
+  const GHOST_SERVICES: { label: string; priceFrom: number; covers: RegExp }[] = [
+    { label: 'Brake pads and rotors', priceFrom: 180, covers: /brake|rotor/i },
+    { label: 'Oil and filter change', priceFrom: 60, covers: /\boil\b/i },
+    { label: 'Check-engine diagnostic', priceFrom: 55, covers: /diagnos|check.?engine/i },
+    { label: 'Battery replacement', priceFrom: 120, covers: /batter/i },
+    // /spark/, not /spark|plug/: "Tire plug" is a common listing, and matching
+    // it dropped this sample for a job it has nothing to do with.
+    { label: 'Spark plug replacement', priceFrom: 90, covers: /spark/i },
+    // Two more, so a mechanic who already covers every subject above still
+    // gets ONE priced example in the unpriced case. An empty pool there
+    // printed the "add a price" line with no example beside it, which is the
+    // exact thing Rohaan asked this for.
+    { label: 'Coolant flush', priceFrom: 110, covers: /coolant|radiator|flush/i },
+    { label: 'Serpentine belt replacement', priceFrom: 140, covers: /belt/i },
   ];
+  const servicesGap = gap('services');
+  const ghostServicePool = GHOST_SERVICES.filter(
+    (g) => !services.some((s) => g.covers.test(s.label))
+  );
+  // Two cases, and the gap list names which one this is (see ServicesGapSub):
+  // - few: fill the list to three, as it always has.
+  // - unpriced: he has a real list and has priced none of it, so ONE sample
+  //   shows what a priced line looks like. Exactly one, and always AFTER his
+  //   rows in its own dashed box: an invented figure must never sit on, or
+  //   read as belonging to, a service he actually listed.
+  const ghostServiceRows = !servicesGap
+    ? []
+    : servicesGap.sub.reason === 'few'
+      ? ghostServicePool.slice(0, Math.max(0, GAP_SERVICES_MIN - services.length))
+      : ghostServicePool.slice(0, 1);
 
   const ghostJobCard = (j: (typeof GHOST_JOBS)[number], tag: string) => (
     <article className="mp-card mp-gap" key={j.key}>
@@ -2169,28 +2218,36 @@ export default function Storefront({
                     ) : null}
                   </div>
                 ))}
-                {/* Sample rows fill the list to three, AFTER his own. Prices
-                    are round numbers on ordinary jobs, so nothing here can be
-                    mistaken for a figure he set: the row it sits in is dashed
-                    and tagged, and the real ones above it are not. */}
-                {gap('services')
-                  ? GHOST_SERVICES.slice(services.length, GAP_SERVICES_MIN).map((s) => (
-                      <div className="mp-srv mp-gap" key={s.label}>
-                        <span className="n">{s.label}</span>
-                        <span className="dots" aria-hidden="true" />
-                        <span className="p">
-                          from <b>${s.priceFrom}</b> {gapTag()}
-                        </span>
-                      </div>
-                    ))
-                  : null}
+                {/* Sample rows, AFTER his own: enough to fill a short list to
+                    three, or one priced line under a list with no prices on
+                    it. Prices are round numbers on ordinary jobs, so nothing
+                    here can be mistaken for a figure he set: the row it sits in
+                    is dashed and tagged, and the real ones above it are not. */}
+                {ghostServiceRows.map((s) => (
+                  <div className="mp-srv mp-gap" key={`g-${s.label}`}>
+                    <span className="n">{s.label}</span>
+                    <span className="dots" aria-hidden="true" />
+                    <span className="p">
+                      from <b>${s.priceFrom}</b> {gapTag()}
+                    </span>
+                  </div>
+                ))}
               </div>
               {/* AFTER the rows, not before, and inside the same section: a
                   qualification reads best in the same breath as the thing it
                   qualifies, which is where the bio's source line and the
                   paperwork qualification both sit. Unclaimed only. */}
               {servicesSource ? <p className="mp-srv-src">{servicesSource}</p> : null}
-              {gapFix('services', 'Add what you do and what it starts at:')}
+              {/* "One is enough" is load-bearing. Prices are optional per
+                  service, and without it he reads the marker as "price every
+                  row", which is a rule the page does not have. */}
+              {servicesGap?.sub.reason === 'unpriced'
+                ? gapFix(
+                    'services',
+                    'Add a starting price in the app:',
+                    'None of your services shows a price yet. One is enough.'
+                  )
+                : gapFix('services', 'Add what you do and what it starts at:')}
             </div>
           </section>
         ) : null}

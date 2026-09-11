@@ -78,17 +78,44 @@ export function appFixUrl(key: PageFixKey): string {
   return `myku://page-fix?fix=${key}`;
 }
 
-export interface PageGap {
-  key: PageGapKey;
+/** `numbers` only: which of the three cells the page is not printing. */
+export interface NumbersGapSub {
+  rate: boolean;
+  years: boolean;
+  workType: boolean;
+}
+
+/** `services` only: WHICH of the two ways the list falls short. They need
+ *  different examples and a different sentence, so the renderer must not have
+ *  to re-derive it from the rows and risk landing on the other answer.
+ *  - `few`: fewer than GAP_SERVICES_MIN services. Example rows fill the list
+ *    to three, prices included.
+ *  - `unpriced`: three or more, and not one of them names a starting price.
+ *    One example row shows what a priced line looks like, and it is never
+ *    one of his. */
+export interface ServicesGapSub {
+  reason: 'few' | 'unpriced';
+}
+
+interface PageGapBase {
   tier: 'core' | 'more';
   /** null for `reviews` only: there is nothing for him to open. */
   fix: PageFixKey | null;
   /** Where in the app it is edited, in words, for anyone not on an iPhone.
    *  Empty for `reviews`, which has no editor to name. */
   appPath: string;
-  /** Present on `numbers` alone: which of the three cells is missing. */
-  sub?: { rate: boolean; years: boolean; workType: boolean };
 }
+
+// The keys that carry nothing beyond the base. Spread over a mapped type so
+// each is its OWN union member: that is what lets `Extract<PageGap, { key: K }>`
+// narrow to one member, and it is how Storefront's `gap('numbers')` hands back
+// a `sub` it can read without a cast.
+type PlainGapKey = Exclude<PageGapKey, 'numbers' | 'services'>;
+
+export type PageGap =
+  | (PageGapBase & { key: 'numbers'; sub: NumbersGapSub })
+  | (PageGapBase & { key: 'services'; sub: ServicesGapSub })
+  | { [K in PlainGapKey]: PageGapBase & { key: K } }[PlainGapKey];
 
 // NULL means "this page is not saying it", and nothing else does.
 //
@@ -123,14 +150,13 @@ export function pageGaps(data: PageData): PageGap[] {
   const { page, services: rawServices, shared, verified, reviews } = data;
   const gaps: PageGap[] = [];
 
-  const add = (key: PageGapKey, appPath: string, sub?: PageGap['sub']) => {
-    gaps.push({
-      key,
-      tier: CORE_KEYS.includes(key) ? 'core' : 'more',
-      fix: key === 'reviews' ? null : (key as PageFixKey),
-      appPath,
-      ...(sub ? { sub } : {}),
-    });
+  const base = (key: PageGapKey, appPath: string): PageGapBase => ({
+    tier: CORE_KEYS.includes(key) ? 'core' : 'more',
+    fix: key === 'reviews' ? null : (key as PageFixKey),
+    appPath,
+  });
+  const add = (key: PlainGapKey, appPath: string) => {
+    gaps.push({ key, ...base(key, appPath) });
   };
 
   // A photo he has switched off is a choice he made, not a gap. Only the
@@ -143,7 +169,11 @@ export function pageGaps(data: PageData): PageGap[] {
   const years = missing(page.years_experience);
   const workType = blank(page.work_type);
   if (rate || years || workType) {
-    add('numbers', 'Profile, My page, Your numbers', { rate, years, workType });
+    gaps.push({
+      key: 'numbers',
+      ...base('numbers', 'Profile, My page, Your numbers'),
+      sub: { rate, years, workType },
+    });
   }
 
   // Both kinds of card count. The wall does not care which half a job came
@@ -172,13 +202,37 @@ export function pageGaps(data: PageData): PageGap[] {
   // and a radius is a column he either set or did not.
   if (missing(page.service_radius_mi)) add('radius', 'Profile, My page, How far you travel');
 
-  // Counted the way the section counts them: trimmed, deduped, blanks dropped.
-  const names = new Set<string>();
+  // Counted the way the section counts them: trimmed, deduped, blanks dropped,
+  // and FIRST ROW WINS ITS PRICE. That last clause is not pedantry: the section
+  // keeps the first row's price for a repeated label and discards the rest, so
+  // a price that only sits on the duplicate is never printed and must not
+  // count as one here. The price test is the renderer's own, character for
+  // character: a positive number is exactly when the row prints "from $X".
+  const seen = new Set<string>();
+  let priced = 0;
   for (const row of rawServices) {
     const label = (row.service ?? '').trim();
-    if (label) names.add(label);
+    if (!label || seen.has(label)) continue;
+    seen.add(label);
+    if (typeof row.price_from === 'number' && row.price_from > 0) priced++;
   }
-  if (names.size < GAP_SERVICES_MIN) add('services', 'Profile, My Services');
+  // OPEN while the list is short, OR while nothing on it names a price.
+  // Rohaan, 2026-09-11: the preview showed no example in the pricing column,
+  // so a mechanic with five bare names never saw what a "from $X" line looks
+  // like. ONE priced row closes the second half, and that is deliberate:
+  // prices are optional per service by design (some jobs he will only quote
+  // after he has seen the car), so a rule of "every row priced" would turn a
+  // choice the editor offers him into a chore he can only clear by giving it
+  // up. That is the same trap the numbers gap fell into over "I quote per
+  // job", described above `missing`. The app's twin uses this same rule.
+  const few = seen.size < GAP_SERVICES_MIN;
+  if (few || priced === 0) {
+    gaps.push({
+      key: 'services',
+      ...base('services', 'Profile, My Services'),
+      sub: { reason: few ? 'few' : 'unpriced' },
+    });
+  }
 
   // A rating with no stars is not a review, and the section drops it, so it
   // must not count towards one here either.

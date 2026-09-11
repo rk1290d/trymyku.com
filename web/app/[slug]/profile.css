@@ -44,7 +44,11 @@
   /* ---- MYKU ORANGE ---- */
   --mp-o:        #F97316;
   --mp-o-hot:    #FF9A4D;
-  --mp-o-deep:   #C2530A;   /* the only orange with 4.5:1 on paper */
+  /* CORRECTED 2026-09-11. This line used to say "the only orange with 4.5:1
+     on paper". Measured: 4.15:1 on --mp-paper, 3.75:1 on --mp-paper-2. That
+     clears 3:1 (large text, UI marks, focus rings) but NOT 4.5:1 for small
+     text, so do not reach for it as a small-text colour on paper. */
+  --mp-o-deep:   #C2530A;
 
   /* ---- PLATFORM VERIFICATION TEAL ----
      Used ONLY on work Myku itself confirmed. Never decorative,
@@ -1933,10 +1937,47 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
 .mp-work .mp-gap-fix,
 .mp-services .mp-gap-fix,
 .mp-reviews .mp-gap-fix { color: var(--mp-slate-2); }
-.mp-gap-open { color: var(--mp-o-hot); text-decoration: underline; text-underline-offset: 2px; }
-.mp-work .mp-gap-open,
-.mp-services .mp-gap-open,
-.mp-reviews .mp-gap-open { color: var(--mp-o-deep); }
+/* "Open in the app" is the one control in a line of instructions, and it has
+   to read as one. It did not: a bare .mp-gap-open (0,1,0) LOST to the anchor
+   reset `.mp a { color: inherit }` (0,1,1) on every ink ground, so the link
+   took the grey of the sentence around it. Only the three paper sections,
+   whose rule happened to be (0,2,0), came out orange. Rohaan, 2026-09-11, on
+   his own preview: "I thought it was just text." Same fix, and same reason,
+   as `.mp a.mp-btn` above: the element in the selector is what outranks the
+   reset. Bold, and the CTA arrow, so colour is not the only thing saying it
+   is a link.
+
+   CONTRAST, 13px bold, which WCAG still counts as normal text (4.5:1).
+   Measured, not assumed (2026-09-11):
+   - Ink grounds: hot orange. 9.5:1 on ink, 7.4:1 under the hero's blue
+     glow, 6.6:1 on the lightest pixel of the service-area panel, 5.9:1
+     inside the at-rest composer (which sits at 0.85 opacity).
+   - Paper grounds: NOT --mp-o-deep. Its comment used to say 4.5:1 on
+     paper; it is 4.15:1 on paper and 3.75:1 on the services band, so this
+     link would have failed on exactly the three sections that did show it
+     in orange. #A3450A is the same burnt orange a shade down: 5.5:1 on
+     paper, 5.0:1 on the services band, 4.6:1 on its darkest grain pixel.
+   Hot orange is 1.9:1 on paper and deep orange 4.3:1 on ink, so no single
+   colour works on both grounds. */
+.mp a.mp-gap-open {
+  color: var(--mp-o-hot);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  /* One line, never "Open in the" with "app" and the arrow orphaned below. */
+  white-space: nowrap;
+  /* 13px of text is a small thing to hit with a thumb. Vertical padding on an
+     inline box grows the tappable area without moving a single line. */
+  padding: 10px 0;
+  -webkit-tap-highlight-color: rgba(249, 115, 22, 0.22);
+}
+.mp :is(.mp-work, .mp-services, .mp-reviews) a.mp-gap-open { color: #A3450A; }
+/* inline-block, so the underline stops at the words (decoration does not
+   reach an inline-block child) and the arrow can travel like the CTAs'. */
+.mp a.mp-gap-open .mp-arrow { display: inline-block; margin-left: 0.3em; }
+.mp a.mp-gap-open:hover .mp-arrow,
+.mp a.mp-gap-open:active .mp-arrow { transform: translateX(3px); }
 
 /* ---------- the ledger, and the way out of it ---------- */
 .mp-gap-ledger {
@@ -2081,6 +2122,13 @@ textarea.mp-inp { resize: vertical; min-height: 104px; }
   border-bottom: 1px dashed var(--mp-gap-line);
 }
 .mp-arow.mp-gap:first-child { border-top: 1px dashed var(--mp-gap-line); }
+/* The fix line lives INSIDE this row (it has to, to wrap under it), and a
+   parent's opacity cannot be undone by a child. At the skin's 0.78 the
+   instruction and its link were dimmed with the sample, so the one part of
+   the row that is real and actionable read as part of the example. The dim
+   moves down onto the sample's own two cells instead. */
+.mp-arow.mp-gap { opacity: 1; }
+.mp-arow.mp-gap > :not(.mp-gap-fix) { opacity: 0.78; }
 .mp-arow.mp-gap .k { display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .mp-arow .mp-gap-fix { width: 100%; order: 9; margin-top: 6px; }
 
