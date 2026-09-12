@@ -1,5 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+// THE OTHER CANONICAL HOP, THE HOST ONE, IS NOT HERE. It is in vercel.json,
+// which sends every www.trymyku.com request to the bare domain with a 308.
+// It lives there for two reasons: this file's matcher deliberately skips
+// /api/*, /_next/* and /preview/*, so a hop written here would leave those
+// three reachable on both hosts, and a platform redirect costs no function
+// invocation at all. vercel.json cannot carry a comment, which is why this
+// note is here: if you are looking for where www is handled, that is the file.
+//
 // THE CANONICAL LOWERCASE HOP LIVES HERE, NOT IN app/[slug]/page.tsx.
 //
 // The page can fold case on the lookup, but it cannot carry the query string
