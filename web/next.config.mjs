@@ -1,6 +1,46 @@
 import { PHASE_PRODUCTION_BUILD } from 'next/constants.js';
 import { runCopySweep, reportCopySweep } from './scripts/copy-sweep.mjs';
 
+// WHAT THE SITE IS ALLOWED TO LOAD, AND WHY EACH LINE IS THERE.
+// Until 2026-09-13 the only content policy here was frame-ancestors, so an
+// injected tag could have pulled a script from anywhere. Everything the site
+// actually needs is same-origin or our own Supabase project:
+//   script-src   'unsafe-inline' is required by Next's own hydration bootstrap,
+//                which is inlined into every page. It is not a nonce, but it
+//                still stops a script being fetched from another host, which
+//                is the half an injection needs.
+//   style-src    same reason: Next inlines critical CSS.
+//   font-src     next/font/google downloads the two typefaces at BUILD time
+//                and serves them from our own origin, so no font host is
+//                needed at runtime.
+//   img-src      profile photos and job thumbnails come from our Supabase
+//                storage, either straight or through the optimizer.
+//   connect-src  track.js posts a page view to our Supabase project; the quote
+//                form posts to our own /api/lead.
+//   object-src / base-uri / form-action close the three classic injection
+//                escape hatches: a plugin, a rewritten relative-URL base, and
+//                a form retargeted at someone else's server.
+// JSON-LD is a data block rather than executable script, so it is unaffected.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob: https://fioiaoxaozqfwdqukoho.supabase.co",
+  "connect-src 'self' https://fioiaoxaozqfwdqukoho.supabase.co",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  'upgrade-insecure-requests',
+].join('; ');
+
+// /stats is the one page that loads a typeface at runtime.
+const STATS_CSP = CSP.replace(
+  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+).replace("font-src 'self' data:", "font-src 'self' data: https://fonts.gstatic.com");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
@@ -32,10 +72,29 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
-          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+          { key: 'Content-Security-Policy', value: CSP },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // A mechanic's page never asks for a camera, a microphone or a
+          // location, so the browser should refuse on our behalf if a script
+          // ever does.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+          // Two years, every subdomain, and eligible for the browser preload
+          // list. A mechanic hands this link to a customer who types it by
+          // hand; the first request is the one worth protecting.
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         ],
+      },
+      // The stats dashboard is a static page that pulls its typeface from
+      // Google Fonts and carries its own stricter meta policy. Listed after
+      // the block above so this value wins for its own two paths.
+      {
+        source: '/stats',
+        headers: [{ key: 'Content-Security-Policy', value: STATS_CSP }],
+      },
+      {
+        source: '/stats.html',
+        headers: [{ key: 'Content-Security-Policy', value: STATS_CSP }],
       },
       // Private previews: never indexed, never cached, and the token in the
       // URL never leaks through a Referer to any link on the page.
