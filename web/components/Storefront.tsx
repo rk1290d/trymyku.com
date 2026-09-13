@@ -331,7 +331,7 @@ function jobDate(dateStr: string | null | undefined): string | null {
 function isSupabaseImage(url: string): boolean {
   try {
     const u = new URL(url);
-    return u.protocol === 'https:' && u.hostname.endsWith('.supabase.co');
+    return u.protocol === 'https:' && u.hostname === 'fioiaoxaozqfwdqukoho.supabase.co';
   } catch {
     return false;
   }

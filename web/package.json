@@ -10,7 +10,7 @@
     "copy-sweep": "node scripts/copy-sweep.mjs"
   },
   "dependencies": {
-    "next": "^15.5.21",
+    "next": "15.5",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
