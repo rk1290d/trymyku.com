@@ -740,13 +740,26 @@ export default function Storefront({
        page loses him the customer and loses us the mechanic. A page dressed
        in sample content would be worse than a thin one, because it would be
        a page that lies.
-     - `!unclaimed` because a holder draft belongs to a man who does not know
-       it exists. There is nobody to send to an editor, and the page already
-       carries the claim panel, which is the only thing it can honestly ask.
+     - an UNCLAIMED page now shows them too (changed 2026-09-22), and the old
+       reason for excluding it has been overtaken by how recruiting actually
+       works. It read: "a holder draft belongs to a man who does not know it
+       exists. There is nobody to send to an editor." That is no longer true.
+       An unclaimed page is built for ONE named mechanic and the link is sent
+       to HIM, by hand, as the pitch: he is exactly the person the ghosts were
+       written for, and with his work, photo and reviews all absent his page
+       was three short sections and two disclaimers. Every ghost still carries
+       the EXAMPLE tag in Myku's orange, so nothing on it reads as his.
 
-     The deploy check that proves it: `curl trymyku.com/<any-slug> |
-     grep -c mp-gap` must be 0, and > 0 on a fresh preview token. */
-  const gaps: PageGap[] = mode === 'preview' && !unclaimed ? pageGaps(data) : [];
+     WHAT STILL MUST NEVER HAPPEN: ghosts on a CLAIMED page. A customer he
+     sent his live link to must never see his page annotated with what he has
+     not done. VISION.md: a thin page loses him the customer and loses us the
+     mechanic. A page dressed in sample content would be worse than a thin
+     one, because it would be a page that lies.
+
+     The deploy check that proves it: `curl trymyku.com/<a published slug> |
+     grep -c mp-gap` must be 0, and > 0 on an unclaimed slug or a fresh
+     preview token. */
+  const gaps: PageGap[] = mode === 'preview' || unclaimed ? pageGaps(data) : [];
   // Narrowed by key, so `gap('numbers')` and `gap('services')` hand back the
   // `sub` that key carries, typed, and the renderer never re-derives from the
   // rows a case the gap list has already decided.
