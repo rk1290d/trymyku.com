@@ -472,7 +472,9 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
 /* His own ad, unclaimed pitch pages only. Sits under the hero CTA, full column
    width, framed like a pinned flyer: a hairline and a soft shadow, never a
    filter over his artwork. */
-.mp-ad { margin-top: clamp(26px, 4.4vw, 38px); margin-bottom: clamp(8px, 1.6vw, 14px); }
+/* position + z-index match .mp-hero-in: without them the band sits UNDER the
+   hero's mesh canvas and reads as a faint ghost of itself (seen live). */
+.mp-ad { position: relative; z-index: 5; margin-top: clamp(26px, 4.4vw, 38px); margin-bottom: clamp(8px, 1.6vw, 14px); }
 .mp-ad img {
   display: block;
   width: 100%;
