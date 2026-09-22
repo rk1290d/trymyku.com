@@ -740,26 +740,23 @@ export default function Storefront({
        page loses him the customer and loses us the mechanic. A page dressed
        in sample content would be worse than a thin one, because it would be
        a page that lies.
-     - an UNCLAIMED page now shows them too (changed 2026-09-22), and the old
-       reason for excluding it has been overtaken by how recruiting actually
-       works. It read: "a holder draft belongs to a man who does not know it
-       exists. There is nobody to send to an editor." That is no longer true.
-       An unclaimed page is built for ONE named mechanic and the link is sent
-       to HIM, by hand, as the pitch: he is exactly the person the ghosts were
-       written for, and with his work, photo and reviews all absent his page
-       was three short sections and two disclaimers. Every ghost still carries
-       the EXAMPLE tag in Myku's orange, so nothing on it reads as his.
+     - `!unclaimed` because a holder draft belongs to a man who does not know
+       it exists. There is nobody to send to an editor, and the page already
+       carries the claim panel, which is the only thing it can honestly ask.
 
-     WHAT STILL MUST NEVER HAPPEN: ghosts on a CLAIMED page. A customer he
-     sent his live link to must never see his page annotated with what he has
-     not done. VISION.md: a thin page loses him the customer and loses us the
-     mechanic. A page dressed in sample content would be worse than a thin
-     one, because it would be a page that lies.
+     TRIED AND REVERTED, 2026-09-22: switching the ghosts on for unclaimed
+     pages, on the theory that a recruiting page IS sent to the man himself.
+     It made the pitch worse, not better. The ledger speaks to an owner, so
+     the first line of the first page a recruited mechanic ever sees became
+     "Your page is missing 9 things", and the hero led with "Add a photo of
+     yourself" and an app path he has no account for. A pitch cannot open by
+     listing what is wrong with him. The thin-page problem is real; the fix
+     is content the page can honestly carry (see the ad band below), not an
+     editing aid pointed at a stranger.
 
-     The deploy check that proves it: `curl trymyku.com/<a published slug> |
-     grep -c mp-gap` must be 0, and > 0 on an unclaimed slug or a fresh
-     preview token. */
-  const gaps: PageGap[] = mode === 'preview' || unclaimed ? pageGaps(data) : [];
+     The deploy check that proves it: `curl trymyku.com/<any-slug> |
+     grep -c mp-gap` must be 0, and > 0 on a fresh preview token. */
+  const gaps: PageGap[] = mode === 'preview' && !unclaimed ? pageGaps(data) : [];
   // Narrowed by key, so `gap('numbers')` and `gap('services')` hand back the
   // `sub` that key carries, typed, and the renderer never re-derives from the
   // rows a case the gap list has already decided.
@@ -1653,6 +1650,24 @@ export default function Storefront({
               ) : null}
             </div>
           </div>
+
+          {/* HIS OWN AD, on an unclaimed pitch page only (2026-09-22). A cold
+              prospect has no photo, no work and no reviews, so his page was
+              three short sections and two disclaimers. The one thing he DID
+              publish is his flyer, and showing it back to him, captioned as
+              his, is the only honest way to make the page look like him. The
+              view returns null on any status but 'unclaimed', so the moment
+              he claims the page this band is gone and his own content fills
+              it. Same-origin path or our own storage only (the column's CHECK
+              enforces it too): a third-party URL here would make every visit
+              to his page a request to someone else's server. */}
+          {unclaimed && page.ad_image_url && /^(\/|https:\/\/[a-z0-9.-]+\.supabase\.co\/storage\/)/.test(page.ad_image_url) ? (
+            <figure className="mp-wrap mp-ad">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={page.ad_image_url} alt={`${first}’s own ad`} loading="eager" decoding="async" />
+              <figcaption className="mp-bio-src">From {first}’s own ad. Myku has not confirmed it.</figcaption>
+            </figure>
+          ) : null}
 
           {/* The panel ALWAYS renders. The money question is never silent. */}
           <div className="mp-facts">

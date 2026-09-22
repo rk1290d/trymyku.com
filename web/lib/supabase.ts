@@ -51,6 +51,9 @@ export interface MechanicPage {
   hours_json: unknown | null;
   show_photo: boolean;
   page_lang: 'en' | 'es';
+  /** Unclaimed pitch pages only (the view returns null on any other status):
+   *  a crop of his OWN public ad, same-origin path or our own storage. */
+  ad_image_url?: string | null;
 }
 
 export interface SharedJob {
@@ -179,6 +182,7 @@ const PAGE_COLUMNS = [
   'hours_json',
   'show_photo',
   'page_lang',
+  'ad_image_url',
 ].join(',');
 
 /** `ok: false` means the read never got an answer. It is NOT "no such page",
