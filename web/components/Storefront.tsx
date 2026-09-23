@@ -10,6 +10,7 @@ import { socialLinks } from '@/lib/socials';
 import { appFixUrl, pageGaps, GAP_JOBS_MIN, GAP_SERVICES_MIN } from '@/lib/gaps';
 import type { PageGap, PageGapKey } from '@/lib/gaps';
 import type { PageData } from '@/lib/pageData';
+import { isSampleId, pitchSamples } from '@/lib/samples';
 
 // The smallest confirmed-job count the fact strip will print. Mirrors
 // MIN_JOBS_SHOWN in the app (constants/config.ts) so the page and the app
@@ -311,6 +312,8 @@ interface WallJob {
   // verified card carries Myku's record of the job, not his caption of it.
   caption: string | null;
   ts: number;
+  /** A pitch sample from lib/samples.ts, labelled "Sample" in its chip slot. */
+  sample: boolean;
 }
 
 // ONE absolute date format on the work wall. Relative dates flatter: they
@@ -626,7 +629,16 @@ export default function Storefront({
    *  beside each marker; everywhere else the path is printed in words. */
   appLinks?: boolean;
 }) {
-  const { page, services: rawServices, shared, verified, reviews: rawReviews } = data;
+  const { page, services: rawServices, shared: realShared, verified, reviews: realReviews } = data;
+
+  // PITCH SAMPLES (lib/samples.ts, 2026-09-23). An unclaimed page is the pitch
+  // to the one man it was built for, so the slots he has nothing in are filled
+  // with LABELLED examples of what a full page looks like: work, reviews, a
+  // rate. Never stored, never on a published page, never in the structured
+  // data below, and a real row always wins over a sample.
+  const pitch = page.web_status !== 'published' ? pitchSamples(data) : null;
+  const shared = realShared.length === 0 && pitch ? pitch.shared : realShared;
+  const rawReviews = realReviews.length === 0 && pitch ? pitch.reviews : realReviews;
 
   // Non-empty services only. A blank service string renders an empty ruled
   // row, the "empty box with a heading" the brief forbids, reached through a
@@ -672,6 +684,7 @@ export default function Storefront({
       photo: null,
       caption: null,
       ts: new Date(j.completed_at).getTime() || 0,
+      sample: false,
     })),
     ...shared.map((j) => ({
       key: `s-${j.id}`,
@@ -686,6 +699,7 @@ export default function Storefront({
       photo: j.photo_url,
       caption: j.caption?.trim() || null,
       ts: j.done_on ? new Date(j.done_on).getTime() || 0 : 0,
+      sample: isSampleId(j.id),
     })),
   ].sort((a, b) => b.ts - a.ts);
 
@@ -706,6 +720,14 @@ export default function Storefront({
   // actually rendered.
   const reviewCount = reviews.length;
   const hasRating = reviewCount > 0 && ratingNum > 0;
+  // DISPLAY ONLY. Pitch-sample reviews get an average for the strip and the
+  // reviews heading, labelled Sample in both. `hasRating` stays false for them
+  // (page.rating is 0 on a page with no real reviews), and it is `hasRating`
+  // alone that feeds the aggregateRating handed to search engines.
+  const sampleReviews = reviewCount > 0 && reviews.every((r) => isSampleId(r.id));
+  const sampleRating = sampleReviews
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+    : 0;
   const work = workTypeLabel(page.work_type);
   const city = page.service_city?.trim() || null;
   const cityShort = city?.split(',')[0]?.trim() || null;
@@ -824,9 +846,13 @@ export default function Storefront({
   // Eyebrow. Answers "is this a person near me" in under a second, and
   // carries the unconfirmed state so it survives the claim strip scrolling
   // away. This is the PERSISTENT unclaimed signal.
+  // "Unconfirmed" left the eyebrow on 2026-09-23 with the rest of the preview
+  // furniture: an unclaimed page is now the pitch and reads as a live page.
+  // Its honesty moved to where the content is: "Sample" on every example, the
+  // "From public listings" line under what came from his listing, and the How
+  // Myku Works paragraph that explains both.
   const eyebrowBits = [
     cityShort ? `Mechanic · ${cityShort}` : 'Independent mechanic',
-    unclaimed ? 'Unconfirmed' : null,
   ].filter(Boolean) as string[];
 
   // The specialization line has a literal fallback, so it can never be
@@ -920,6 +946,8 @@ export default function Storefront({
   const cells: { value: string; unit?: string; caption: string; self?: boolean }[] = [];
   if ((page.hourly_rate ?? 0) > 0)
     cells.push({ value: `$${page.hourly_rate}`, unit: '/hr', caption: 'Labor rate', self: true });
+  else if (pitch)
+    cells.push({ value: `$${pitch.rate}`, unit: '/hr', caption: 'Labor rate · Sample' });
   if ((page.diagnostic_fee ?? 0) > 0)
     cells.push({ value: `$${page.diagnostic_fee}`, caption: 'Diagnostic', self: true });
   if (hasRating)
@@ -927,6 +955,8 @@ export default function Storefront({
       value: ratingNum.toFixed(1),
       caption: `${reviewCount} review${reviewCount === 1 ? '' : 's'}`,
     });
+  else if (sampleRating > 0)
+    cells.push({ value: sampleRating.toFixed(1), caption: `${reviewCount} reviews · Sample` });
   if ((page.years_experience ?? 0) > 0)
     cells.push({
       value: String(page.years_experience),
@@ -1111,7 +1141,10 @@ export default function Storefront({
   // "Completed through Myku" on a page where every card is self-reported
   // implies a confirmed job is present somewhere, which is the exact blur
   // this block exists to prevent.
-  const sharedCount = wall.length - verifiedCount;
+  // Samples are neither kind: they carry their own "Sample" chip and are
+  // explained by the unclaimed paragraph below, never by the listing sentence.
+  const sampleCount = wall.filter((j) => j.sample).length;
+  const sharedCount = wall.length - verifiedCount - sampleCount;
   if (verifiedCount > 0 && sharedCount > 0)
     howParas.push(
       `Jobs marked Completed through Myku were done through the Myku platform. ${sharedDef}`
@@ -1143,7 +1176,9 @@ export default function Storefront({
   }
   if (unclaimed)
     howParas.push(
-      `${first} has not claimed this page. The details here came from public listings, and nothing on the page has been confirmed by ${first}.`
+      sampleCount > 0 || sampleReviews
+        ? `Anything marked Sample is an example of how ${first}’s page looks once it is full, not a real job or a real review. The rest came from public listings, and Myku has not confirmed it.`
+        : `${first} has not claimed this page. The details here came from public listings, and nothing on the page has been confirmed by ${first}.`
     );
 
   // Structured data, PUBLISHED pages only. Attaching business schema to a
@@ -1191,9 +1226,10 @@ export default function Storefront({
   const numReviews = reviews.length > 0 ? nextNum() : null;
   const numAsk = nextNum();
 
-  const claimMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-    `Claiming my Myku page (${page.slug})`
-  )}`;
+  // The claim mailto and the #claim anchor were removed on 2026-09-23 with the
+  // claim buttons and the claim panel they pointed at. The man an unclaimed
+  // page is built for gets his claim code in the conversation that sends him
+  // the link; the report door below is the one that must stay on every page.
   // On EVERY page, claimed or not. A visitor who thinks the page is wrong
   // about someone needs a door, and it is the one link here that is not
   // gated on the mechanic's data. This is now the CONVENIENCE path only: it
@@ -1203,11 +1239,6 @@ export default function Storefront({
   const reportMailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
     `Reporting a Myku page (${page.slug})`
   )}`;
-  // The claim BUTTONS scroll to the panel instead of firing the mailto
-  // directly: on a machine with no mail app a mailto click does visibly
-  // nothing, which reads as a dead button. The panel spells the address out
-  // so the action always works even when the link cannot.
-  const claimHref = '#claim';
 
   const jobCard = (j: WallJob) => (
     <article className={`mp-card${j.verified ? ' ver' : ''}${j.photo ? ' pic' : ''}`} key={j.key}>
@@ -1237,6 +1268,19 @@ export default function Storefront({
                 Completed through Myku
               </span>
             </>
+          ) : j.sample ? (
+            // A pitch sample (lib/samples.ts). Same chip, same slot, same tap
+            // as a real card's source line, so the wall reads live; the word
+            // in it is what keeps an example from passing as his work.
+            <details className="mp-provx">
+              <summary className="mp-badge">
+                <InfoMark />
+                Sample
+              </summary>
+              <span className="mp-notconf">
+                An example of how {first}’s jobs show here. Not a real job.
+              </span>
+            </details>
           ) : (
             // The provenance sentence is one tap away, not stamped on every
             // card: repeated across the wall it stopped being information and
@@ -1376,7 +1420,7 @@ export default function Storefront({
             nothing. */}
         {r.text ? <QuoteGlyph /> : null}
         {r.text ? <p>{r.text}</p> : null}
-        <div className="att">{`${r.rating} out of 5${ago ? ` · ${ago}` : ''}`}</div>
+        <div className="att">{`${r.rating} out of 5${ago ? ` · ${ago}` : ''}${isSampleId(r.id) ? ' · Sample' : ''}`}</div>
       </div>
     );
   };
@@ -1488,13 +1532,11 @@ export default function Storefront({
         {/* One slim line ABOVE everything. The full explanation lives in HOW
             MYKU WORKS and the eyebrow carries UNCONFIRMED, so three lines of
             preamble above the mechanic's own name buys nothing. */}
-        {unclaimed ? (
-          <div className="mp-claim">
-            <div className="mp-wrap">
-              Not claimed yet. Are you {first}? <a href={claimHref}>Claim this page</a>
-            </div>
-          </div>
-        ) : null}
+        {/* The "Not claimed yet. Are you X? Claim this page" strip that sat
+            here was removed on 2026-09-23 with the other claim prompts. An
+            unclaimed page is the pitch, sent by hand to the one man it is
+            for; he is handed his claim code in that conversation, and a page
+            that opens by asking a stranger to claim it reads as a stub. */}
 
         <header className="mp-hdr">
           <div className="mp-hdr-in">
@@ -1509,20 +1551,14 @@ export default function Storefront({
                 <img src="/logo.png" alt="Myku" width={30} height={30} />
               </span>
             </span>
-            {unclaimed ? (
-              <a className="mp-btn mp-btn-o mp-btn-sm mp-hdr-cta mp-mag" href={claimHref}>
-                <span className="lbl">Claim this page</span>
-              </a>
-            ) : (
-              <a className="mp-btn mp-btn-o mp-btn-sm mp-hdr-cta mp-mag" href="#quote">
-                <span className="lbl">
-                  Get a quote
-                  <span className="mp-arrow" aria-hidden="true">
-                    &#8594;
-                  </span>
+            <a className="mp-btn mp-btn-o mp-btn-sm mp-hdr-cta mp-mag" href="#quote">
+              <span className="lbl">
+                Get a quote
+                <span className="mp-arrow" aria-hidden="true">
+                  &#8594;
                 </span>
-              </a>
-            )}
+              </span>
+            </a>
           </div>
         </header>
 
@@ -1624,25 +1660,14 @@ export default function Storefront({
             ) : null}
 
             <div className="mp-hero-cta">
-              {unclaimed ? (
-                <a className="mp-btn mp-btn-o mp-mag" href={claimHref}>
-                  <span className="lbl">
-                    Claim this page
-                    <span className="mp-arrow" aria-hidden="true">
-                      &#8594;
-                    </span>
+              <a className="mp-btn mp-btn-o mp-mag" href="#quote">
+                <span className="lbl">
+                  Get a quote
+                  <span className="mp-arrow" aria-hidden="true">
+                    &#8594;
                   </span>
-                </a>
-              ) : (
-                <a className="mp-btn mp-btn-o mp-mag" href="#quote">
-                  <span className="lbl">
-                    Get a quote
-                    <span className="mp-arrow" aria-hidden="true">
-                      &#8594;
-                    </span>
-                  </span>
-                </a>
-              )}
+                </span>
+              </a>
               {wall.length > 0 ? (
                 <a className="mp-btn mp-btn-ghost mp-mag" href="#work">
                   <span className="lbl">See the work</span>
@@ -2300,6 +2325,10 @@ export default function Storefront({
                     {ratingNum.toFixed(1)} out of 5 · {reviewCount} review
                     {reviewCount === 1 ? '' : 's'}
                   </span>
+                ) : sampleRating > 0 ? (
+                  <span className="mp-sec-meta tnum">
+                    {sampleRating.toFixed(1)} out of 5 · {reviewCount} sample reviews
+                  </span>
                 ) : null}
               </div>
               <div className="mp-rev-list">
@@ -2337,25 +2366,16 @@ export default function Storefront({
           <span className="mp-anchor" id="quote" aria-hidden="true" />
           <div className="mp-glow" aria-hidden="true" />
           <div className="mp-wrap">
-            {/* An unclaimed page is a PREVIEW: it exists so the mechanic can
-                be shown his own page before he decides. He has not agreed to
-                be listed and does not know it exists, so it must not take
-                requests on his behalf. */}
-            {unclaimed ? (
-              <div className="mp-preview">
-                <span className="mp-sec-num">{numAsk} · Preview</span>
-                <h2 id="claim">This page is not live yet</h2>
-                <p>
-                  {first} has not claimed it, so it is not taking requests. The details here came
-                  from public listings and none of them have been confirmed by {first}.
-                </p>
-                <p>
-                  Are you {first}? Write to{' '}
-                  <a href={claimMailto}>{SUPPORT_EMAIL}</a> and we hand you the keys. You decide
-                  what the page says before anyone sees it.
-                </p>
-              </div>
-            ) : mode === 'preview' ? (
+            {/* An unclaimed page used to render a "This page is not live yet"
+                box here instead of the form. Removed 2026-09-23: the page is
+                the pitch and must read live. It takes requests the honest way
+                it was already built for: QuoteForm words every line for an
+                unclaimed page ("Myku passes the request to <first>"), and
+                notify-lead routes an unclaimed page's request to every admin
+                channel (push, email, in-app notice), so a customer who does
+                use it reaches a person, and that person can forward it to the
+                mechanic as the best pitch there is. */}
+            {mode === 'preview' ? (
               // The mechanic's own preview of a published-shaped page. Same
               // number, same heading, so he sees the shape of what visitors
               // get, but no live form: a preview takes no requests.
@@ -2438,7 +2458,7 @@ export default function Storefront({
               {cityShort ? ` · ${cityShort}` : ''}.{' '}
               {/* "His page" is an ownership claim, so a preview he has not
                   claimed cannot say it. */}
-              {unclaimed ? 'A preview, hosted by ' : `${first}’s page, hosted by `}
+              {unclaimed ? 'Hosted by ' : `${first}’s page, hosted by `}
               <Link href="/">Myku</Link>.
             </div>
             {/* No App Store badge on a mechanic's storefront. A customer's

@@ -350,20 +350,13 @@ export default async function Image({
                 kind of page Myku is explicitly vouching for nothing on.
                 The middot is carried by both font files; checked in their
                 cmap tables, not assumed. */}
-            {unclaimed ? (
-              <div
-                style={{
-                  display: 'flex',
-                  color: INK_2,
-                  fontSize: 30,
-                  fontWeight: 800,
-                  letterSpacing: 3,
-                  marginBottom: 14,
-                }}
-              >
-                PREVIEW · NOT CLAIMED
-              </div>
-            ) : null}
+            {/* The "PREVIEW · NOT CLAIMED" line that sat here was removed on
+                2026-09-23 with the page's own claim prompts. An unclaimed
+                card is what the ONE mechanic it was built for sees first when
+                his link lands in Messenger, and it now reads as his page. The
+                card still carries no numbers or credentials on an unclaimed
+                page (`credentials` is forced to [] below), and its bottom
+                line still says the details came from public listings. */}
             {/* The headline follows the PAGE's rule (decision 4): the business
                 name leads when he has set one, with his own name beneath it.
                 The card used to print full_name unconditionally, so a mechanic

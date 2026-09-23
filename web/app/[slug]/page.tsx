@@ -76,15 +76,19 @@ export async function generateMetadata({
   // titles truncate from the end. Fail CLOSED on the status, the same way the
   // page component does: anything that is not published is a preview Myku
   // built, and it says so.
-  const title = page.web_status === 'published' ? base : `Preview · ${base}`;
+  // 2026-09-23: the "Preview · " prefix is gone. An unclaimed page is now the
+  // pitch, sent by hand to the one mechanic it is for, and the first thing he
+  // sees is this title on the Messenger card. It is still noindex (see
+  // `robots` below), so it never reaches a search snippet.
+  const title = base;
   // States what the page is and what to do on it. Myku does not vouch,
   // including inside a search snippet or a Messenger preview. The unclaimed
-  // variant mirrors the composer's own promise: the mechanic has not agreed
-  // to reply, so the preview must not say they will.
+  // variant mirrors the composer's own promise for that state: Myku passes
+  // the request on; it never says the mechanic has agreed to reply.
   const description =
     page.web_status === 'published'
       ? `${spec}${city ? ` in ${city}` : ''}. Pick the job and get a price from ${first} through Myku.`
-      : `${spec}${city ? ` in ${city}` : ''}. A preview page. ${first} has not claimed it and it is not taking requests.`;
+      : `${spec}${city ? ` in ${city}` : ''}. Pick the job and leave your number. Myku passes it to ${first}.`;
 
   return {
     // `absolute` opts this route out of the root layout's "%s | Myku Auto"
