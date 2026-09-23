@@ -129,6 +129,30 @@ const REVIEWS: { rating: number; text: string; daysAgo: number }[] = [
 /** A sample labour rate, shown only while he has not stated one. */
 export const SAMPLE_RATE = 85;
 
+// Sample "from" prices for his listed services, by keyword, first match wins.
+// Ordinary mobile-mechanic starting prices, round on purpose. A service that
+// is really a description ("Foreign and domestic") matches nothing and stays
+// unpriced. DISPLAY ONLY: these never reach the quote form, so a customer who
+// sends a request is never quoted a number Myku made up.
+const SAMPLE_PRICES: [RegExp, number][] = [
+  [/alternator|starter/i, 280],
+  [/brake/i, 180],
+  [/batter|charging/i, 120],
+  [/diagnos|check.?engine/i, 60],
+  [/engine/i, 250],
+  [/body/i, 150],
+  [/roadside|jump|lockout/i, 75],
+  [/oil/i, 60],
+  [/tire|wheel/i, 40],
+  [/belt/i, 140],
+  [/a\/?c|air ?condition|heat/i, 130],
+];
+
+export function samplePrice(label: string): number | null {
+  for (const [re, price] of SAMPLE_PRICES) if (re.test(label)) return price;
+  return null;
+}
+
 export interface PitchSamples {
   shared: SharedJob[];
   reviews: Review[];

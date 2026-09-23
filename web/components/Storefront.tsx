@@ -10,7 +10,7 @@ import { socialLinks } from '@/lib/socials';
 import { appFixUrl, pageGaps, GAP_JOBS_MIN, GAP_SERVICES_MIN } from '@/lib/gaps';
 import type { PageGap, PageGapKey } from '@/lib/gaps';
 import type { PageData } from '@/lib/pageData';
-import { isSampleId, pitchSamples } from '@/lib/samples';
+import { isSampleId, pitchSamples, samplePrice } from '@/lib/samples';
 
 // The smallest confirmed-job count the fact strip will print. Mirrors
 // MIN_JOBS_SHOWN in the app (constants/config.ts) so the page and the app
@@ -658,6 +658,14 @@ export default function Storefront({
     seen.set(label, p);
   }
   const services = Array.from(seen, ([label, priceFrom]) => ({ label, priceFrom }));
+  // DISPLAY ONLY (lib/samples.ts): on a pitch page, a listed service with no
+  // price shows a sample "from" price, and the source line under the list says
+  // so. `services` itself stays real, because it is what the quote form offers
+  // a customer, and a request must never be priced by a number Myku invented.
+  const shownServices = pitch
+    ? services.map((s) => (s.priceFrom ? s : { ...s, priceFrom: samplePrice(s.label) }))
+    : services;
+  const samplePriced = pitch !== null && shownServices.some((s, i) => s.priceFrom && !services[i].priceFrom);
   // A review is a rating; the words are optional (the app lets a customer
   // submit stars alone). Every rated row is kept, so a star-only review gets a
   // card carrying its rating and date and no quote, and the number of cards on
@@ -938,7 +946,11 @@ export default function Storefront({
   // what Myku built for him. Only the sourcing changes, and it changes to the
   // sentence the fact strip, the job cards and the bio already carry, so the
   // page has ONE way of saying "Myku copied this from a listing".
-  const servicesSource = unclaimed ? 'From public listings. Myku has not confirmed them.' : null;
+  const servicesSource = unclaimed
+    ? samplePriced
+      ? 'Services from public listings, prices are samples. Myku has not confirmed them.'
+      : 'From public listings. Myku has not confirmed them.'
+    : null;
 
   // FACT STRIP, fixed priority order, maximum 4 cells. The panel always
   // renders: the money question is never silent. `self` marks the cells the
@@ -2260,7 +2272,7 @@ export default function Storefront({
                     means the listing Myku copied did not carry one. Neither
                     reading is printed, because the source line below the list
                     already says which page this is. */}
-                {services.map((s) => (
+                {shownServices.map((s) => (
                   <div className={s.priceFrom ? 'mp-srv mp-rv' : 'mp-srv np mp-rv'} key={s.label}>
                     <span className="n">{s.label}</span>
                     <span className="dots" aria-hidden="true" />
