@@ -42,6 +42,41 @@ export interface PageData {
   shared: SharedJob[];
   verified: VerifiedJob[];
   reviews: Review[];
+  /** His LIVE Google reviews (migration 152, edge function place-reviews), or
+   *  null. Fetched from Google on render and never stored by Myku. A failed
+   *  fetch is null, never an error: the page must render without them. */
+  google?: GoogleReviews | null;
+}
+
+export interface GoogleReviews {
+  rating: number;
+  count: number;
+  url: string | null;
+  reviews: { rating: number | null; text: string; when: string | null; author: string | null; authorUrl: string | null }[];
+}
+
+async function loadGoogleReviews(slug: string): Promise<GoogleReviews | null> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/place-reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ slug }),
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const g = (await res.json()) as Partial<GoogleReviews> & { reviews?: GoogleReviews['reviews'] };
+    const rating = Number(g.rating);
+    const count = Number(g.count);
+    if (!(rating > 0) || !(count > 0)) return null;
+    const reviews = (g.reviews ?? []).filter((r) => r && typeof r.text === 'string' && r.text.trim());
+    return { rating, count, url: typeof g.url === 'string' && g.url.startsWith('https://') ? g.url : null, reviews };
+  } catch {
+    return null;
+  }
 }
 
 export async function loadPublicPage(slug: string): Promise<PageData | null> {
@@ -67,7 +102,9 @@ export async function loadPublicPage(slug: string): Promise<PageData | null> {
     throw new Error(`storefront: upstream read failed for /${slug}`);
   }
 
-  return { page: cleanPageInPlace(page), services: rawServices, shared, verified, reviews: rawReviews };
+  const google = page.google_place_id ? await loadGoogleReviews(slug) : null;
+
+  return { page: cleanPageInPlace(page), services: rawServices, shared, verified, reviews: rawReviews, google };
 }
 
 /* ------------------------------------------------------------------

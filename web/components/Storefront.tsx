@@ -638,7 +638,29 @@ export default function Storefront({
   // data below, and a real row always wins over a sample.
   const pitch = page.web_status !== 'published' ? pitchSamples(data) : null;
   const shared = realShared.length === 0 && pitch ? pitch.shared : realShared;
-  const rawReviews = realReviews.length === 0 && pitch ? pitch.reviews : realReviews;
+  // HIS REAL PUBLIC RATING (migration 151, pitch pages only): the aggregate of
+  // his reviews on another site, plus up to three highlights Myku wrote as a
+  // summary. Real beats sample, so when it exists the sample reviews do not
+  // render. Validated here as well as by the column's CHECK.
+  const pr = page.web_status !== 'published' ? page.public_rating : null;
+  const publicRating =
+    pr && /^https:\/\//.test(pr.url) && Number(pr.rating) > 0 && Number(pr.count) > 0
+      ? {
+          source: String(pr.source),
+          rating: Number(pr.rating),
+          count: Number(pr.count),
+          url: pr.url,
+          highlights: (pr.highlights ?? []).filter((h) => typeof h === 'string' && h.trim()).slice(0, 3),
+        }
+      : null;
+  // HIS LIVE GOOGLE REVIEWS (migration 152): Google's own feed, shown as Google
+  // returns them (every review it returns, bad ones included, credited to
+  // Google and to their authors), never stored by Myku. The best evidence a
+  // page can carry short of reviews earned on Myku, so it outranks the rating
+  // summary above and the samples.
+  const google = data.google && data.google.reviews.length > 0 ? data.google : null;
+  const rawReviews =
+    realReviews.length === 0 && pitch && !publicRating && !google ? pitch.reviews : realReviews;
 
   // Non-empty services only. A blank service string renders an empty ruled
   // row, the "empty box with a heading" the brief forbids, reached through a
@@ -967,6 +989,13 @@ export default function Storefront({
       value: ratingNum.toFixed(1),
       caption: `${reviewCount} review${reviewCount === 1 ? '' : 's'}`,
     });
+  else if (google)
+    cells.push({ value: google.rating.toFixed(1), caption: `${google.count} reviews on Google` });
+  else if (publicRating)
+    cells.push({
+      value: publicRating.rating.toFixed(1),
+      caption: `${publicRating.count} reviews on ${publicRating.source}`,
+    });
   else if (sampleRating > 0)
     cells.push({ value: sampleRating.toFixed(1), caption: `${reviewCount} reviews · Sample` });
   if ((page.years_experience ?? 0) > 0)
@@ -1235,7 +1264,9 @@ export default function Storefront({
   const numWork = wall.length > 0 ? nextNum() : null;
   const numAbout = hasAbout ? nextNum() : null;
   const numServices = services.length > 0 ? nextNum() : null;
-  const numReviews = reviews.length > 0 ? nextNum() : null;
+  // Myku reviews first; otherwise his Google reviews; otherwise the rating summary.
+  const externalReviews = reviews.length === 0 && (google || publicRating);
+  const numReviews = reviews.length > 0 || externalReviews ? nextNum() : null;
   const numAsk = nextNum();
 
   // The claim mailto and the #claim anchor were removed on 2026-09-23 with the
@@ -2313,6 +2344,75 @@ export default function Storefront({
                     'None of your services shows a price yet. One is enough.'
                   )
                 : gapFix('services', 'Add what you do and what it starts at:')}
+            </div>
+          </section>
+        ) : null}
+
+        {/* ============ HIS REVIEWS ELSEWHERE (Google, or a rating summary) ============ */}
+        {externalReviews ? (
+          <section className="mp-reviews" id="reviews">
+            <div className="mp-wrap">
+              <div className="mp-sec-head mp-rv">
+                {numReviews ? <span className="mp-sec-num">{numReviews}</span> : null}
+                <h2>What people said</h2>
+                <span className="mp-rule" aria-hidden="true" />
+                <span className="mp-sec-meta tnum">
+                  {google
+                    ? `${google.rating.toFixed(1)} out of 5 · ${google.count} reviews on Google`
+                    : publicRating
+                      ? `${publicRating.rating.toFixed(1)} out of 5 · ${publicRating.count} reviews on ${publicRating.source}`
+                      : null}
+                </span>
+              </div>
+              {google ? (
+                <>
+                  <div className="mp-rev-list">
+                    {google.reviews.map((r, i) => (
+                      <div className="mp-rev mp-rv mp-grev" key={`g-${i}`}>
+                        <QuoteGlyph />
+                        <p className="mp-grev-text">{r.text}</p>
+                        <div className="att">
+                          {`${r.rating ?? '?'} out of 5${r.when ? ` · ${r.when}` : ''} · `}
+                          {r.author ? (
+                            r.authorUrl && /^https:\/\//.test(r.authorUrl) ? (
+                              <a href={r.authorUrl} target="_blank" rel="nofollow noopener noreferrer">{r.author}</a>
+                            ) : (
+                              r.author
+                            )
+                          ) : null}
+                          {' on Google'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mp-bio-src">
+                    Reviews from Google, shown as Google returns them.{' '}
+                    {google.url ? (
+                      <a href={google.url} target="_blank" rel="nofollow noopener noreferrer">
+                        See all {google.count} on Google
+                        <span className="mp-arrow" aria-hidden="true">&#8594;</span>
+                      </a>
+                    ) : null}
+                  </p>
+                </>
+              ) : publicRating ? (
+                <div className="mp-rev-list">
+                  <div className="mp-rev mp-rv">
+                    {publicRating.highlights.length ? (
+                      <ul className="mp-grev-highlights">
+                        {publicRating.highlights.map((h) => <li key={h}>{h}</li>)}
+                      </ul>
+                    ) : null}
+                    <div className="att">
+                      <a href={publicRating.url} target="_blank" rel="nofollow noopener noreferrer">
+                        Read his reviews on {publicRating.source}
+                        <span className="mp-arrow" aria-hidden="true">&#8594;</span>
+                      </a>
+                    </div>
+                  </div>
+                  <p className="mp-bio-src">A summary written by Myku from his public reviews, not quotes.</p>
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}

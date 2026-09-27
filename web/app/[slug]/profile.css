@@ -1338,6 +1338,13 @@ body[data-lead-sent='1'] .mp-dock { display: none; }
 .mp-rev .att:first-child { margin-top: 0; }
 .mp-reviews .mp-more > summary { background: #FFFFFF; }
 .mp-reviews .mp-more .mp-rev-list { margin-top: clamp(14px, 2.4vw, 20px); }
+/* Google reviews: shown in full as Google returns them, but a very long one is
+   clamped so it cannot swallow the section; "See all on Google" is the way to
+   the rest. Links inside the attribution line keep the page's link colour. */
+.mp-grev-text { display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
+.mp-grev .att a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.mp-reviews .mp-bio-src a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.mp-grev-highlights { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 
 /* ============================================================
    THE QUOTE COMPOSER

@@ -54,6 +54,18 @@ export interface MechanicPage {
   /** Unclaimed pitch pages only (the view returns null on any other status):
    *  a crop of his OWN public ad, same-origin path or our own storage. */
   ad_image_url?: string | null;
+  /** Unclaimed pitch pages only (the view returns null otherwise): the
+   *  aggregate of his public reviews elsewhere plus up to three highlights
+   *  Myku wrote as a summary. Never quotes. */
+  public_rating?: {
+    source: string;
+    rating: number | string;
+    count: number | string;
+    url: string;
+    highlights?: string[];
+  } | null;
+  /** Google place ID of his business; the page then shows his live Google reviews. */
+  google_place_id?: string | null;
 }
 
 export interface SharedJob {
@@ -183,6 +195,8 @@ const PAGE_COLUMNS = [
   'show_photo',
   'page_lang',
   'ad_image_url',
+  'public_rating',
+  'google_place_id',
 ].join(',');
 
 /** `ok: false` means the read never got an answer. It is NOT "no such page",
