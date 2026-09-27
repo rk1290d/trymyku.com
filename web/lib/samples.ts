@@ -45,12 +45,83 @@ interface JobTemplate {
   price: string;
   caption: string | null;
   daysAgo: number;
+  /** Specialist work: shown only when he lists it, never as filler on a
+   *  general mechanic's page (a brake man should not get a '69 Camaro). */
+  specialty?: boolean;
 }
+
+// How many sample cards a page gets, and the dates they carry, newest first.
+const MAX_JOBS = 6;
+const MAX_REVIEWS = 4;
+const JOB_DAYS = [5, 12, 19, 33, 47, 61];
+const REVIEW_DAYS = [6, 15, 27, 44];
+
+// Specialist samples (2026-09-27). The first real pitch page belongs to a
+// mechanic whose own listings lead with emissions, electrical, no-crank
+// diagnostics and custom muscle-car builds; generic brake-and-battery samples
+// made the page read like anybody's. A page leads with the samples that match
+// what he lists, and specialist ones never appear on a page that does not.
+const SPECIALTY_JOBS: JobTemplate[] = [
+  {
+    fits: /emission/i,
+    vehicle: '2013 Chevrolet Equinox',
+    service: 'Failed emissions: found the EVAP leak, passed the retest',
+    price: '$240',
+    caption: 'Smoke-tested it in the customer’s driveway and found a cracked purge line.',
+    daysAgo: 0,
+    specialty: true,
+  },
+  {
+    fits: /no.?crank|no.?start/i,
+    vehicle: '2011 Honda Civic',
+    service: 'No crank, no start: traced to a corroded ground',
+    price: '$150',
+    caption: 'The quote elsewhere was a new starter. It needed a clean ground.',
+    daysAgo: 0,
+    specialty: true,
+  },
+  {
+    fits: /electric|wiring/i,
+    vehicle: '2008 Ford F-250',
+    service: 'Electrical short: rebuilt a chafed wiring harness',
+    price: '$340',
+    caption: null,
+    daysAgo: 0,
+    specialty: true,
+  },
+  {
+    fits: /muscle|race|custom/i,
+    vehicle: '1969 Chevrolet Camaro',
+    service: 'Custom build: carburetor tune and ignition upgrade',
+    price: 'Quoted per build',
+    caption: null,
+    daysAgo: 0,
+    specialty: true,
+  },
+  {
+    fits: /transmission/i,
+    vehicle: '2012 Jeep Wrangler',
+    service: 'Transmission diagnosis and shift solenoid replacement',
+    price: '$390',
+    caption: null,
+    daysAgo: 0,
+    specialty: true,
+  },
+  {
+    fits: /tune/i,
+    vehicle: '2014 Toyota Tacoma',
+    service: 'Complete tune-up: spark plugs, coils and filters',
+    price: '$280',
+    caption: null,
+    daysAgo: 0,
+    specialty: true,
+  },
+];
 
 // Ordinary mobile-mechanic work at ordinary prices. The service wording is
 // chosen so each card draws a different plate illustration (brake, battery,
 // plug, belt, oil, ac) rather than six copies of the same drawing.
-const JOBS: JobTemplate[] = [
+const GENERIC_JOBS: JobTemplate[] = [
   {
     fits: /brake/i,
     vehicle: '2016 Honda Accord',
@@ -101,9 +172,32 @@ const JOBS: JobTemplate[] = [
   },
 ];
 
+const JOBS: JobTemplate[] = [...SPECIALTY_JOBS, ...GENERIC_JOBS];
+
+interface ReviewTemplate { rating: number; text: string; daysAgo: number; fits?: RegExp }
+
 // What a customer writes after a job that went fine. No names, no places,
-// nothing a real review would need to be believed as real.
-const REVIEWS: { rating: number; text: string; daysAgo: number }[] = [
+// nothing a real review would need to be believed as real. The ones with
+// `fits` speak to a specialty and appear only when he lists it.
+const REVIEWS: ReviewTemplate[] = [
+  {
+    rating: 5,
+    fits: /emission/i,
+    text: 'Failed emissions twice somewhere else. He found the leak in my driveway and I passed the next day.',
+    daysAgo: 0,
+  },
+  {
+    rating: 5,
+    fits: /no.?crank|no.?start|electric|wiring/i,
+    text: 'Truck wouldn’t crank and nobody could tell me why. He traced it to a bad ground in under an hour.',
+    daysAgo: 0,
+  },
+  {
+    rating: 5,
+    fits: /muscle|race|custom/i,
+    text: 'Tuned my old muscle car and it has never run better. He knows these cars inside out.',
+    daysAgo: 0,
+  },
   {
     rating: 5,
     text: 'Came to my work parking lot and had my brakes done before my shift ended. Price was what he said it would be.',
@@ -135,6 +229,14 @@ export const SAMPLE_RATE = 85;
 // unpriced. DISPLAY ONLY: these never reach the quote form, so a customer who
 // sends a request is never quoted a number Myku made up.
 const SAMPLE_PRICES: [RegExp, number][] = [
+  [/emission/i, 80],
+  [/no.?crank|no.?start/i, 95],
+  [/electric|wiring/i, 120],
+  [/transmission/i, 350],
+  [/tune/i, 180],
+  [/kill.?switch|gps/i, 150],
+  [/4x4|four.?wheel/i, 150],
+  [/tint/i, 150],
   [/alternator|starter/i, 280],
   [/brake/i, 180],
   [/batter|charging/i, 120],
@@ -164,11 +266,12 @@ export function pitchSamples(data: PageData, now = Date.now()): PitchSamples {
   const listed = services.map((s) => (s.service ?? '').toLowerCase()).join(' | ');
 
   // The samples that match what he actually lists go first, so a brake man's
-  // page leads with a brake job; the rest keep their order behind them.
+  // page leads with a brake job; generic filler follows; a specialist sample
+  // he does NOT list never appears at all.
   const ranked = [
     ...JOBS.filter((j) => j.fits.test(listed)),
-    ...JOBS.filter((j) => !j.fits.test(listed)),
-  ];
+    ...JOBS.filter((j) => !j.fits.test(listed) && !j.specialty),
+  ].slice(0, MAX_JOBS);
 
   // The wall sorts newest first, so the dates are handed out in RANK order:
   // the best-matching sample is the most recent card, not whichever template
@@ -179,18 +282,24 @@ export function pitchSamples(data: PageData, now = Date.now()): PitchSamples {
     vehicle: j.vehicle,
     service: j.service,
     price_label: j.price,
-    done_on: new Date(now - (JOBS[i]?.daysAgo ?? 60) * DAY).toISOString().slice(0, 10),
+    done_on: new Date(now - (JOB_DAYS[i] ?? 60) * DAY).toISOString().slice(0, 10),
     town: null,
     photo_url: null,
     caption: j.caption,
   }));
 
-  const reviews: Review[] = REVIEWS.map((r, i) => ({
+  // Same rule as the jobs: specialty reviews first when he lists the specialty,
+  // then the general ones, and a specialty review he does not list never shows.
+  const pickedReviews = [
+    ...REVIEWS.filter((r) => r.fits && r.fits.test(listed)),
+    ...REVIEWS.filter((r) => !r.fits),
+  ].slice(0, MAX_REVIEWS);
+  const reviews: Review[] = pickedReviews.map((r, i) => ({
     id: `${SAMPLE_PREFIX}review-${i}`,
     mechanic_id: page.id,
     rating: r.rating,
     text: r.text,
-    created_at: new Date(now - r.daysAgo * DAY).toISOString(),
+    created_at: new Date(now - (REVIEW_DAYS[i] ?? 45) * DAY).toISOString(),
   }));
 
   return { shared, reviews, rate: SAMPLE_RATE };
