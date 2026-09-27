@@ -193,9 +193,11 @@ const REVIEWS: ReviewTemplate[] = [
     daysAgo: 0,
   },
   {
-    rating: 5,
+    // Four stars on purpose: four straight fives averages a perfect 5.0, which
+    // reads as invented next to any real rating the mechanic has in public.
+    rating: 4,
     fits: /muscle|race|custom/i,
-    text: 'Tuned my old muscle car and it has never run better. He knows these cars inside out.',
+    text: 'Tuned my old muscle car and it has never run better. Took a little longer than planned, but worth it.',
     daysAgo: 0,
   },
   {
@@ -247,10 +249,16 @@ const SAMPLE_PRICES: [RegExp, number][] = [
   [/oil/i, 60],
   [/tire|wheel/i, 40],
   [/belt/i, 140],
-  [/a\/?c|air ?condition|heat/i, 130],
+  // Word-bounded: an unbounded /a\/?c/ matched the "ac" inside "race" and priced
+  // a custom race-car build as A/C work.
+  [/\ba\/?c\b|air ?condition|\bheat/i, 130],
 ];
 
+// Work that is always quoted per job and must never carry a "from" figure.
+const QUOTED_ONLY = /custom|build|restor|race|muscle/i;
+
 export function samplePrice(label: string): number | null {
+  if (QUOTED_ONLY.test(label)) return null;
   for (const [re, price] of SAMPLE_PRICES) if (re.test(label)) return price;
   return null;
 }
