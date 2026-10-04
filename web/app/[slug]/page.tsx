@@ -91,7 +91,9 @@ export async function generateMetadata({
   // carries the proof, so the line under it is his own words), then the one
   // thing to do. No "through Myku": the page says where things come from where
   // they are claimed, not in every sentence.
-  const description = `${spec}${city ? ` · ${city}` : ''}. Get a price from ${first}. Free, no account.`;
+  // The title already names his town, so the line is his headline, then the ask.
+  const specS = /[.!?]$/.test(spec.trim()) ? spec.trim() : `${spec.trim()}.`;
+  const description = `${specS} Get a price from ${first}. Free, no account.`;
 
   return {
     // `absolute` opts this route out of the root layout's "%s | Myku Auto"
