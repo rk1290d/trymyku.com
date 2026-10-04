@@ -1,129 +1,135 @@
 import { ImageResponse } from 'next/og';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { getMechanicPage, getReviews, SUPABASE_URL } from '@/lib/supabase';
-import { firstName, initials } from '@/lib/format';
+import {
+  getMechanicPage,
+  getReviews,
+  getSharedJobs,
+  getVerifiedJobs,
+  SUPABASE_URL,
+} from '@/lib/supabase';
+import type { SharedJob } from '@/lib/supabase';
+import { firstName, workTypeLabel } from '@/lib/format';
+import { OG_FACES } from '@/lib/ogMetrics';
 
-// THE LINK PREVIEW.
-// This is the first thing a stranger sees when the link lands in a WhatsApp,
-// Messenger or iMessage thread, so it is the mechanic's storefront and not a
-// Myku advertisement. Same paper, same ink, same rules as the page itself:
-// no orange, no teal, no badges, no pills, no wordmark lockup, and no
-// paperwork claim on a page the mechanic has never agreed to.
+// THE LINK CARD (the approved 2026-10-04 design, "screen zero").
+// This is the first thing a stranger sees when a mechanic drops his link in a
+// Facebook comment or a Messenger thread, and it is SEEN AT ABOUT 300px WIDE,
+// a quarter of this 1200px canvas. Every rule below follows from that:
 //
-// AN UNCLAIMED CARD MUST SAY SO, AND IT MUST SAY SO IN THE IMAGE.
-// An unclaimed page is one Myku built for a mechanic who has not signed up:
-// his real name, his trade, his town and his years, typed by Myku off a
-// public listing. The page body carries five separate signals of that state
-// (the claim strip, "Unconfirmed" in the eyebrow, the "From public listings"
-// chip, the softened How Myku Works paragraph, and no structured data). This
-// card used to carry NONE of them - it suppressed the paperwork line and
-// stopped there, so an unclaimed card and a claimed card for a mechanic with
-// no documents on file were byte-identical, and a real person's name went
-// into a group chat on a card that read as a live, agreed profile.
+//   * Nothing is set under 44px on the canvas (11px in the thread). A source
+//     label sits on the same line as its number, never in fine print below.
+//   * Only SOURCED proof: his Myku rating with its count "on Myku", the jobs
+//     done through Myku (3 or more, the page's own floor), or on an unclaimed
+//     page the listing rating Myku found, captioned as found. Never his own
+//     hourly rate or years in place of proof. Google is not on the card: its
+//     reviews come from a paid edge call with no timeout, and a slow card is a
+//     share with no card at all.
+//   * The ID chip only on a claimed page whose ID Myku checked, and it sits on
+//     HIS name (Myku checked the ID against his name, not the business). When
+//     his name has to go for room, the chip goes with it.
+//   * His best job photo leads, with "Shared by {first}" on it; his face sits
+//     on its corner. No job photo: his face takes the panel. No photo at all:
+//     the van door, his sign in big condensed caps and the lettering under it.
+//   * The orange M tile is the only Myku mark. The page is his; the tile says
+//     who hosts it.
 //
-// The route's og:description does carry the caveat, and WhatsApp, Slack,
-// Discord, Facebook, X and LinkedIn all render it. iMessage does not: it
-// shows the IMAGE, the title and the domain. So the state has to live in the
-// pixels, and it has to survive the scale a chat bubble renders them at.
+// AN UNCLAIMED CARD STILL SAYS SO, IN THE PIXELS. An unclaimed page is one
+// Myku built off a public listing for a mechanic who has not signed up, and
+// iMessage shows only the image, the title and the domain, so the state has
+// to survive the 300px scale in the image itself. An unclaimed card is always
+// the van door: no photo panel, no face, no ID chip, no "Shared by", nothing
+// credited to him. Its foot is the page's own disclosure, set at full size:
+// under a listing rating, "From public listings. Myku has not confirmed it."
+// (the page's caption for the same number); with no rating, "The details here
+// came from public listings." (the page's own How Myku Works sentence). Copied
+// rather than reworded, because two phrasings of one disclosure drift apart.
+// If the page and the card ever disagree, fix the page; do not weaken the card.
 //
-// That last part was measured, not guessed: this card was rendered and
-// downsampled to 300px wide, roughly an iMessage bubble. At that size the
-// uppercase letter-spaced eyebrow still reads; the 26/22px sourcing lines
-// beneath it are at or past the edge of legible. Hence BOTH placements, each
-// doing a different job - the eyebrow directly above the name for the
-// scaled-down case, the sourcing sentence in the slot the paperwork line
-// vacated for anyone who opens the card at size. The route's <title> carries
-// the same marker in real text, for the surfaces that shrink the image
-// hardest.
-//
-// The wording is the page body's own disclosure sentence, recased and
-// repunctuated to stand alone on a card: the page says "nothing on the page
-// has been confirmed by {first}", the card says "Nothing on this page has
-// been confirmed by {first}." Copied rather than reworded on purpose, because
-// two independently phrased versions of the same disclosure drift apart.
-//
-// WHAT THAT DOES AND DOES NOT GUARANTEE, because the difference matters and
-// an earlier version of this comment overstated it. It guarantees the card
-// repeats the page's own disclosure, so the card can never be the MORE
-// confident of the two surfaces. It does not by itself make the pair
-// consistent: that depends on what the PAGE says, and it has to be re-checked
-// whenever the page's attribution copy moves. As of 2026-09-01 the two do
-// agree, checked in the rendered page and not only in source: on an unclaimed
-// page the facts strip captions the Myku-typed numbers (hourly rate,
-// diagnostic fee, years) "From public listings. Myku has not confirmed them."
-// rather than as his own - see `factsNote` in components/Storefront.tsx. So
-// the card and the page now say the same thing one tap apart. If they ever
-// disagree again, fix the page. Do NOT resolve it by weakening the card.
-//
-// It is a disclosure, not a redaction. The card still leads with his name,
-// his trade and his town, and it should still look good - an unclaimed page
-// exists so a mechanic can be shown what Myku made for him. Nothing is
-// hidden; it is only correctly attributed.
+// WHY THE CARD MEASURES ITS OWN TEXT. Satori cannot be asked how wide a
+// string is, and a business name is CHECKed at up to 60 characters. So every
+// line is measured here with the advance widths of the exact font files it is
+// drawn with (lib/ogMetrics.ts, generated by scripts/og-metrics.mjs), broken
+// here at spaces or after a hyphen and never inside a word, and handed to
+// satori as finished lines that cannot re-wrap. The sign steps down until it
+// fits; when long data still cannot fit, things give way in a fixed order (the
+// same card a little tighter, then the lettering, then his full name under the
+// business name), never the proof and never the disclosure.
 
-const PAPER = '#FAF7F2';
-const PAPER_2 = '#F1EDE5';
-const RULE = '#CDC5B6';
-const INK = '#14120F';
-const INK_2 = '#57514A';
-const INK_3 = '#6F6A61';
+const BG = '#0E1012';
+const BG_GLOW = '#1C2024';
+const SIGN = '#F6F5F0';
+const TEXT = '#F3F3F0';
+const LETTER = '#C3C8CD';
+const MUTED = '#959BA2';
+const TEAL = '#6DD0C6';
+const VOICE = '#EEEBE3';
+const TILE = '#F97316';
+const TILE_INK = '#1B0E04';
+
+const W = 1200;
+const H = 630;
+const SAFE = 600; //      nothing on a photo card ends below this line
+const SAFE_DOOR = 574; // a van-door card: 24px clear of the bottom pinstripe
+const TOP = 44;
+const TOP_DOOR = 46;
+const GAP = 18; //        air between the stack and the proof at the card's foot
+const LEAD_GAP = 8; //    px of air between two lines of the sign, ink to ink
+const LEAD_GAP_EM = 0.08;
+const JOBS_FLOOR = 3; //  the page's own MIN_JOBS_SHOWN: fewer is withheld
 
 export const alt = 'Mechanic profile page';
-export const size = { width: 1200, height: 630 };
+export const size = { width: W, height: H };
 export const contentType = 'image/png';
 
 // HOW LONG THE CARD IS ALLOWED TO BE WRONG.
 //
-// This card used to be frozen. next/og's ImageResponse constructor sets
-// `cache-control: public, immutable, no-transform, max-age=31536000` on
-// every response it builds (next/dist/server/og/image-response.js), and
-// nothing downstream touched it, so the first CDN node, browser or crawler
-// to fetch a mechanic's card pinned that PNG for a year. The og:image URL
-// cannot rescue it either: the query token Next appends is a hash of THIS
-// FILE, not of his data. It is byte-identical for every mechanic and never
-// moves when his photo, business name or city does.
+// next/og's ImageResponse constructor sets `cache-control: public, immutable,
+// no-transform, max-age=31536000` on every response it builds, so the first
+// CDN node, browser or crawler to fetch a mechanic's card used to pin that PNG
+// for a year. The og:image URL cannot rescue it either: the query token Next
+// appends is a hash of THIS FILE, not of his data.
 //
-// TWO exports, and they do DIFFERENT jobs. Verified by building the site and
-// reading the served headers, not assumed:
+// TWO exports, and they do DIFFERENT jobs (verified by building the site and
+// reading the served headers). `revalidate` declares this segment's freshness
+// window; on its own it changes nothing about the header, because the header
+// is written inside the ImageResponse constructor. CARD_CACHE_CONTROL is the
+// fix: `options.headers` overrides what the constructor set.
 //
-//   `revalidate` below declares this segment's freshness window, which is
-//   what a route handler is supposed to carry. On its own it changes
-//   NOTHING about the header: a local production build with only this export
-//   added still served `immutable, max-age=31536000`, because the header is
-//   written inside the ImageResponse constructor.
-//
-//   CARD_CACHE_CONTROL is the fix. The constructor lets `options.headers`
-//   override what it set, and that is the only thing that does.
-//
-// Sixty seconds is the same window the page's own data already runs on
-// (lib/supabase.ts rest(), next: { revalidate: 60 }), so the card and the
-// page it advertises can never disagree by more than the page already
-// disagrees with itself. A profile changes rarely, but it changes in bursts:
-// in the minutes after he publishes, while he is fixing his photo and his
-// business name, which is exactly when a frozen card does the damage. The
-// cost of the short window is one render per minute per slug, and only when
-// somebody actually asks for the card.
+// Sixty seconds is the window the page's own data runs on (lib/supabase.ts
+// rest()), so the card and the page can never disagree by more than the page
+// already disagrees with itself. A profile changes in bursts, in the minutes
+// after he publishes, which is exactly when a frozen card does the damage.
 export const revalidate = 60;
 
 // public, so shared caches may hold it; max-age=0, so a browser or a scraper
 // never treats its own copy as fresh; s-maxage=60 for the CDN; and a short
-// stale-while-revalidate so a crawler on a cold edge gets an instant card
-// rather than waiting on a re-render. No `immutable`, and no year.
+// stale-while-revalidate so a crawler on a cold edge gets an instant card.
 const CARD_CACHE_CONTROL = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300';
 
-// Read once per lambda instance, not once per card: a first-ever share of
-// a slug already pays cold start plus the photo fetch, and WhatsApp's
-// crawler timeout is short.
+// ---------------------------------------------------------------- fonts
+
+// Read once per lambda instance, not once per card: a first-ever share of a
+// slug already pays cold start plus the photo fetches, and the crawlers'
+// timeouts are short. WOFF, because satori takes TTF, OTF and WOFF, never
+// WOFF2; next.config.mjs traces assets/fonts/*.woff into the bundle.
 let fontsPromise: ReturnType<typeof loadFonts> | null = null;
 
 async function loadFonts() {
-  const [extraBold, medium] = await Promise.all([
-    readFile(join(process.cwd(), 'assets/fonts/Jakarta-ExtraBold.ttf')),
-    readFile(join(process.cwd(), 'assets/fonts/Jakarta-Medium.ttf')),
+  const dir = join(process.cwd(), 'assets/fonts');
+  const [sign700, sign800, text500, text600, voice] = await Promise.all([
+    readFile(join(dir, 'BigShoulders-700.woff')),
+    readFile(join(dir, 'BigShoulders-800.woff')),
+    readFile(join(dir, 'Geist-500.woff')),
+    readFile(join(dir, 'Geist-600.woff')),
+    readFile(join(dir, 'Newsreader-Italic-400.woff')),
   ]);
   return [
-    { name: 'Jakarta', data: extraBold, weight: 800 as const, style: 'normal' as const },
-    { name: 'Jakarta', data: medium, weight: 500 as const, style: 'normal' as const },
+    { name: 'Sign', data: sign700, weight: 700 as const, style: 'normal' as const },
+    { name: 'Sign', data: sign800, weight: 800 as const, style: 'normal' as const },
+    { name: 'Text', data: text500, weight: 500 as const, style: 'normal' as const },
+    { name: 'Text', data: text600, weight: 600 as const, style: 'normal' as const },
+    { name: 'Voice', data: voice, weight: 400 as const, style: 'italic' as const },
   ];
 }
 
@@ -132,16 +138,237 @@ function fonts() {
   return fontsPromise;
 }
 
+// ---------------------------------------------------------------- measuring
+
+type FaceName = keyof typeof OG_FACES;
+interface Measured {
+  upm: number;
+  adv: Map<number, number>;
+  fallback: number;
+}
+const measured = new Map<FaceName, Measured>();
+
+function face(f: FaceName): Measured {
+  let m = measured.get(f);
+  if (!m) {
+    const src = OG_FACES[f];
+    const adv = new Map<number, number>();
+    for (const run of src.adv) for (let i = 1; i < run.length; i++) adv.set(run[0] + i - 1, run[i]);
+    // A glyph the face lacks is drawn from another face by satori. Measure it
+    // as this face's widest capital, so the estimate errs wide, never narrow.
+    const fallback = Math.max(adv.get(0x4d) ?? src.upm, adv.get(0x57) ?? src.upm);
+    m = { upm: src.upm, adv, fallback };
+    measured.set(f, m);
+  }
+  return m;
+}
+
+function width(s: string, f: FaceName, px: number, trackEm = 0): number {
+  const m = face(f);
+  let units = 0;
+  let n = 0;
+  for (const ch of s) {
+    units += m.adv.get(ch.codePointAt(0) ?? 0) ?? m.fallback;
+    n++;
+  }
+  return (units / m.upm) * px + trackEm * px * n;
+}
+
+let inkMap: Map<number, [number, number]> | null = null;
+
+// [ascent, descent] of a signage glyph's ink, in em.
+function ink(ch: string): [number, number] {
+  if (!inkMap) {
+    inkMap = new Map();
+    const src = OG_FACES.sign800;
+    for (const run of src.ink ?? []) {
+      for (let i = 1; i + 1 < run.length; i += 2) {
+        inkMap.set(run[0] + (i - 1) / 2, [run[i] / src.upm, -run[i + 1] / src.upm]);
+      }
+    }
+  }
+  return inkMap.get(ch.codePointAt(0) ?? 0) ?? [1, 0.25];
+}
+
+// A word, or the part of a hyphenated word up to and including its hyphen.
+// Only U+0020 separates words: a no-break space keeps "on Myku" together.
+interface Piece {
+  t: string;
+  sp: boolean; // a space separates it from the piece before it
+}
+
+function pieces(s: string, hyphens = true): Piece[] {
+  const out: Piece[] = [];
+  for (const word of s.trim().split(/ +/)) {
+    if (!word) continue;
+    let rest = word;
+    let first = true;
+    while (rest) {
+      const cut = hyphens ? rest.indexOf('-', 1) : -1;
+      const part = cut > 0 && cut < rest.length - 1 ? rest.slice(0, cut + 1) : rest;
+      out.push({ t: part, sp: first && out.length > 0 });
+      rest = rest.slice(part.length);
+      first = false;
+    }
+  }
+  return out;
+}
+
+function joinPieces(ps: Piece[]): string {
+  return ps.map((p, i) => (i > 0 && p.sp ? ' ' : '') + p.t).join('');
+}
+
+type Measure = (s: string) => number;
+
+// Greedy wrap. `ok` is false when a single piece is wider than its line.
+// `firstCol` narrows the first line only (the sign's first line runs at the
+// height of the M tile and must end before it).
+function wrap(ps: Piece[], measure: Measure, col: number, firstCol = col): { lines: string[]; ok: boolean } {
+  const lines: string[] = [];
+  let cur: Piece[] = [];
+  let ok = true;
+  const limit = () => (lines.length === 0 ? firstCol : col);
+  for (const p of ps) {
+    if (cur.length && measure(joinPieces([...cur, p])) > limit()) {
+      lines.push(joinPieces(cur));
+      cur = [{ t: p.t, sp: false }];
+    } else cur.push(cur.length ? p : { t: p.t, sp: false });
+    if (measure(p.t) > limit()) ok = false;
+  }
+  if (cur.length) lines.push(joinPieces(cur));
+  return { lines, ok };
+}
+
+// The same number of lines as the greedy wrap, with the longest line as short
+// as it can be (CSS text-wrap: balance): "VASQUEZ / MOBILE AUTO", never
+// "VASQUEZ MOBILE / AUTO".
+function balance(ps: Piece[], n: number, measure: Measure, col: number, firstCol = col): string[] | null {
+  if (n <= 1) return measure(joinPieces(ps)) <= firstCol ? [joinPieces(ps)] : null;
+  let best: string[] | null = null;
+  let bestW = Infinity;
+  const line = (a: number, b: number) =>
+    joinPieces(ps.slice(a, b).map((p, i) => (i === 0 ? { t: p.t, sp: false } : p)));
+  const walk = (start: number, left: number, acc: string[], accMax: number) => {
+    if (accMax >= bestW) return;
+    const limit = acc.length === 0 ? firstCol : col;
+    if (left === 1) {
+      const l = line(start, ps.length);
+      const w = measure(l);
+      if (w <= limit && Math.max(accMax, w) < bestW) {
+        bestW = Math.max(accMax, w);
+        best = [...acc, l];
+      }
+      return;
+    }
+    for (let end = start + 1; end <= ps.length - (left - 1); end++) {
+      const l = line(start, end);
+      const w = measure(l);
+      if (w > limit) break;
+      walk(end, left - 1, [...acc, l], Math.max(accMax, w));
+    }
+  };
+  walk(0, n, [], 0);
+  return best;
+}
+
+const nb = (s: string) => s.replace(/\u00a0/g, ' ');
+
+// ---------------------------------------------------------------- the sign
+
+interface NameFit {
+  px: number;
+  upper: boolean;
+  lines: string[];
+  lh: number;
+  h: number;
+}
+
+// The leading his sign needs so the ink hanging below one line (a Q's tail, a
+// comma, a g) clears the ink rising on the next (a capital, an accent) by 8px
+// on this canvas, 2px in a 300px thread. At 2 canvas px a Q's tail over an I
+// read as an accent, "MOBİLE", in the design review. Never tighter than the
+// house leading.
+function leading(lines: string[], px: number, upper: boolean): number {
+  const base = upper ? 0.92 : 1;
+  if (lines.length < 2) return base;
+  let desc = 0;
+  let asc = 0;
+  lines.forEach((l, i) => {
+    for (const ch of l) {
+      if (ch === ' ') continue;
+      const [a, d] = ink(ch);
+      if (i < lines.length - 1) desc = Math.max(desc, d);
+      if (i > 0) asc = Math.max(asc, a);
+    }
+  });
+  const need = asc + desc + Math.max(LEAD_GAP / px, LEAD_GAP_EM);
+  return Math.max(base, Math.ceil(need * 1000) / 1000);
+}
+
+function setSign(text: string, px: number, col: number, firstCol: number, maxLines: number, upper: boolean): NameFit | null {
+  const s = upper ? text.toUpperCase() : text;
+  const measure: Measure = (x) => width(x, 'sign800', px, 0.004);
+  const ps = pieces(s, false);
+  const greedy = wrap(ps, measure, col, firstCol);
+  if (!greedy.ok || greedy.lines.length > maxLines) return null;
+  const lines = balance(ps, greedy.lines.length, measure, col, firstCol) ?? greedy.lines;
+  const lh = leading(lines, px, upper);
+  return { px, upper, lines, lh, h: lines.length * px * lh };
+}
+
+// The largest sign that fits the room: caps first (as on his page), then the
+// name as he typed it, stepping down 2px at a time. A name that cannot fit at
+// the smallest step (one enormous word) drops to an emergency size that holds
+// its longest word on one line, rather than breaking inside the word.
+function fitName(
+  text: string,
+  col: number,
+  firstCol: number,
+  maxPx: number,
+  minPx: number,
+  room: number,
+  capsMin: number
+): NameFit | null {
+  const cap = text.length > 28 ? 3 : 2;
+  if (text.length <= 28) {
+    for (let px = maxPx; px >= capsMin; px -= 2) {
+      const f = setSign(text, px, col, firstCol, cap, true);
+      if (f && f.h <= room) return f;
+    }
+  }
+  for (let px = maxPx; px >= minPx; px -= 2) {
+    const f = setSign(text, px, col, firstCol, cap, false);
+    if (f && f.h <= room) return f;
+  }
+  return null;
+}
+
+function emergencySign(text: string, col: number, firstCol: number, minPx: number, room: number): NameFit {
+  const widest = Math.max(...pieces(text, false).map((p) => width(p.t, 'sign800', 1, 0.004)), 1);
+  let px = Math.max(20, Math.min(minPx, Math.floor(Math.min(col, firstCol) / widest)));
+  for (; px > 20; px -= 2) {
+    const f = setSign(text, px, col, firstCol, 6, false);
+    if (f && f.h <= room) return f;
+  }
+  return setSign(text, px, col, firstCol, 99, false) ?? { px, upper: false, lines: [text], lh: 1, h: px };
+}
+
+// Where the M tile begins, less a margin: the first line of the sign runs at
+// the tile's height and must end before it.
+const TILE_CLEAR_X = W - 30 - 62 - 24;
+
+// ---------------------------------------------------------------- photos
+
 // The photo is fetched here, defended, and inlined as a data URI. Left as a
 // raw URL, a slow bucket, a dead link or a HEIC upload makes satori throw,
 // and the crawler gets a 500: the share lands with no card at all. On any
-// failure the card degrades to the initials plate instead of vanishing.
+// failure the card picks the layout that does not need that photo.
 // Only these hosts are ever fetched. photo_url is a database value a
 // mechanic can influence, and this code runs server-side on Vercel: without
 // an allowlist, "https://x" pointing at a private address turns card
 // rendering into a server-side request forgery primitive. Scheme and host
-// are checked BEFORE the request, because the existing content-type and
-// size checks only inspect the response, which is far too late.
+// are checked BEFORE the request, because the content-type and size checks
+// only inspect the response, which is far too late.
 function fetchableImage(raw: string): string | null {
   let u: URL;
   try {
@@ -160,8 +387,45 @@ function fetchableImage(raw: string): string | null {
   return allowed ? u.toString() : null;
 }
 
-async function safePhoto(rawUrl: string): Promise<string | null> {
-  const url = fetchableImage(rawUrl);
+interface Photo {
+  uri: string;
+  w: number; // pixel size from the file header, 0 when unknown
+  h: number;
+}
+
+// Pixel size from the header, so the card can crop to a focal point itself:
+// satori's object-fit: cover always centres, and a portrait centred in a short
+// box cuts his face off at the eyes.
+function pixelSize(buf: Buffer, ct: string): [number, number] {
+  try {
+    if (ct === 'image/png' && buf.length > 24) return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
+    let i = 2;
+    while (i + 9 < buf.length) {
+      if (buf[i] !== 0xff) {
+        i++;
+        continue;
+      }
+      const m = buf[i + 1];
+      if (m === 0xff) {
+        i++;
+        continue;
+      }
+      if (m === 0xd8 || m === 0x01 || (m >= 0xd0 && m <= 0xd7)) {
+        i += 2;
+        continue;
+      }
+      const sof = (m >= 0xc0 && m <= 0xc3) || (m >= 0xc5 && m <= 0xc7) || (m >= 0xc9 && m <= 0xcb) || (m >= 0xcd && m <= 0xcf);
+      if (sof) return [buf.readUInt16BE(i + 7), buf.readUInt16BE(i + 5)];
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+  } catch {
+    // fall through: unknown size, centred cover
+  }
+  return [0, 0];
+}
+
+async function safePhoto(rawUrl: string | null | undefined): Promise<Photo | null> {
+  const url = rawUrl ? fetchableImage(rawUrl) : null;
   if (!url) return null;
   try {
     // redirect: 'error' closes the bypass where an allowlisted host 302s to
@@ -170,13 +434,198 @@ async function safePhoto(rawUrl: string): Promise<string | null> {
     if (!res.ok) return null;
     const ct = (res.headers.get('content-type') ?? '').split(';')[0].trim();
     if (ct !== 'image/png' && ct !== 'image/jpeg') return null;
-    const buf = await res.arrayBuffer();
+    const buf = Buffer.from(await res.arrayBuffer());
     // 0-byte legacy uploads exist; a >8MB original would bloat the render.
     if (buf.byteLength === 0 || buf.byteLength > 8_000_000) return null;
-    return `data:${ct};base64,${Buffer.from(buf).toString('base64')}`;
+    const [w, h] = pixelSize(buf, ct);
+    return { uri: `data:${ct};base64,${buf.toString('base64')}`, w, h };
   } catch {
     return null;
   }
+}
+
+// His newest job photos, two at most and fetched together, and the first that
+// arrives intact leads. Shared jobs come back newest first (getSharedJobs).
+async function jobPhoto(rows: SharedJob[]): Promise<Photo | null> {
+  const urls = rows.map((j) => j.photo_url?.trim()).filter((u): u is string => Boolean(u)).slice(0, 2);
+  const got = await Promise.all(urls.map((u) => safePhoto(u)));
+  return got.find((p): p is Photo => p !== null) ?? null;
+}
+
+// An <img> covering a box with the point (fx, fy) of the photo kept in frame,
+// then zoomed about (ox, oy): what CSS object-position and a scale transform
+// would do, done by hand.
+function Cropped({
+  photo,
+  w,
+  h,
+  fx = 0.5,
+  fy = 0.5,
+  zoom = 1,
+  ox = 0.5,
+  oy = 0.5,
+}: {
+  photo: Photo;
+  w: number;
+  h: number;
+  fx?: number;
+  fy?: number;
+  zoom?: number;
+  ox?: number;
+  oy?: number;
+}) {
+  if (!photo.w || !photo.h) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={photo.uri} alt="" width={w} height={h} style={{ objectFit: 'cover', width: w, height: h }} />;
+  }
+  const s = Math.max(w / photo.w, h / photo.h);
+  const dw = photo.w * s;
+  const dh = photo.h * s;
+  const left0 = (w - dw) * fx;
+  const top0 = (h - dh) * fy;
+  const left = ox * w + (left0 - ox * w) * zoom;
+  const top = oy * h + (top0 - oy * h) * zoom;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={photo.uri}
+      alt=""
+      width={Math.round(dw * zoom)}
+      height={Math.round(dh * zoom)}
+      style={{ position: 'absolute', left: Math.round(left), top: Math.round(top), width: Math.round(dw * zoom), height: Math.round(dh * zoom) }}
+    />
+  );
+}
+
+// ---------------------------------------------------------------- pieces
+
+// Phosphor glyphs (fill style), as the design draws them.
+const ICON = {
+  van: 'M254.07,106.79,208.53,53.73A16,16,0,0,0,196.26,48H32A16,16,0,0,0,16,64V176a16,16,0,0,0,16,16H49a32,32,0,0,0,62,0h50a32,32,0,0,0,62,0h17a16,16,0,0,0,16-16V112A8,8,0,0,0,254.07,106.79ZM230.59,104H176V64h20.26ZM104,104V64h56v40ZM88,64v40H32V64ZM80,200a16,16,0,1,1,16-16A16,16,0,0,1,80,200Zm112,0a16,16,0,1,1,16-16A16,16,0,0,1,192,200Zm31-24a32,32,0,0,0-62,0H111a32,32,0,0,0-62,0H32V120H240v56Z',
+  storefront: 'M232,96a7.89,7.89,0,0,0-.3-2.2L217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.8A7.89,7.89,0,0,0,24,96h0v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96ZM54,48H202l11.42,40H42.61Zm50,56h48v8a24,24,0,0,1-48,0Zm-16,0v8a24,24,0,0,1-35.12,21.26,7.88,7.88,0,0,0-1.82-1.06A24,24,0,0,1,40,112v-8ZM200,208H56V151.2a40.57,40.57,0,0,0,8,.8,40,40,0,0,0,32-16,40,40,0,0,0,64,0,40,40,0,0,0,32,16,40.57,40.57,0,0,0,8-.8Zm4.93-75.8a8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48v8A24,24,0,0,1,204.93,132.2Z',
+  pin: 'M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z',
+  id: 'M200,112a8,8,0,0,1-8,8H152a8,8,0,0,1,0-16h40A8,8,0,0,1,200,112Zm-8,24H152a8,8,0,0,0,0,16h40a8,8,0,0,0,0-16Zm40-80V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Zm-80.26-34a8,8,0,1,1-15.5,4c-2.63-10.26-13.06-18-24.25-18s-21.61,7.74-24.25,18a8,8,0,1,1-15.5-4,39.84,39.84,0,0,1,17.19-23.34,32,32,0,1,1,45.12,0A39.76,39.76,0,0,1,135.75,166ZM96,136a16,16,0,1,0-16-16A16,16,0,0,0,96,136Z',
+  star: 'M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z',
+  receipt: 'M216,40H40A16,16,0,0,0,24,56V208a8,8,0,0,0,11.58,7.15L64,200.94l28.42,14.21a8,8,0,0,0,7.16,0L128,200.94l28.42,14.21a8,8,0,0,0,7.16,0L192,200.94l28.42,14.21A8,8,0,0,0,232,208V56A16,16,0,0,0,216,40ZM176,144H80a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Zm0-32H80a8,8,0,0,1,0-16h96a8,8,0,0,1,0,16Z',
+  camera: 'M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z',
+};
+
+function Icon({ d, px, color }: { d: string; px: number; color: string }) {
+  return (
+    <svg width={px} height={px} viewBox="0 0 256 256" style={{ flexShrink: 0 }}>
+      <path d={d} fill={color} />
+    </svg>
+  );
+}
+
+// The Myku mark: the small orange M tile, top right, on every card.
+function Tile() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        right: 30,
+        top: 30,
+        width: 62,
+        height: 62,
+        borderRadius: 16,
+        background: TILE,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <svg width={36} height={36} viewBox="0 0 24 24">
+        <path fill={TILE_INK} d="M4.2 19V5h3.1l4.7 6.9L16.7 5h3.1v14h-3.2v-8.7l-4 5.8h-1.2l-4-5.8V19z" />
+      </svg>
+    </div>
+  );
+}
+
+function Lines({
+  lines,
+  family,
+  weight,
+  px,
+  lh,
+  color,
+  track = 0,
+  italic = false,
+  align = 'flex-start',
+  shadow,
+}: {
+  lines: string[];
+  family: string;
+  weight: number;
+  px: number;
+  lh: number;
+  color: string;
+  track?: number;
+  italic?: boolean;
+  align?: 'flex-start' | 'center';
+  shadow?: string;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: align }}>
+      {lines.map((l, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex',
+            whiteSpace: 'nowrap',
+            fontFamily: family,
+            fontWeight: weight,
+            fontStyle: italic ? 'italic' : 'normal',
+            fontSize: px,
+            lineHeight: lh,
+            height: Math.round(px * lh * 100) / 100,
+            letterSpacing: track ? Math.round(px * track * 100) / 100 : 0,
+            color,
+            // satori throws on a style key whose value is undefined
+            ...(shadow ? { textShadow: shadow } : {}),
+          }}
+        >
+          {nb(l)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------- the data
+
+type Door = 'mobile' | 'both' | 'shop' | null;
+
+// work_type arrives in the app's vocabulary (mobile, hybrid, independent...),
+// which lib/format already maps; the label forms are accepted too.
+function doorKind(wt: string | null | undefined): Door {
+  const label = workTypeLabel(wt);
+  if (label === 'Mobile, comes to you') return 'mobile';
+  if (label === 'Mobile or drop-off') return 'both';
+  if (label === 'Has their own shop') return 'shop';
+  const v = (wt ?? '').trim().toLowerCase();
+  if (v === 'mobile or drop-off') return 'both';
+  return null;
+}
+
+// "Oak Brook, XX, USA" reads as "OAK BROOK, XX" on the door: the country is
+// noise in a thread where everyone is local.
+function cleanCity(raw: string | null | undefined): string | null {
+  const c = (raw ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/,\s*(usa|us|united states( of america)?)\s*$/i, '')
+    .trim();
+  return c || null;
+}
+
+const sameName = (a: string, b: string) =>
+  a.trim().replace(/\s+/g, ' ').toLowerCase() === b.trim().replace(/\s+/g, ' ').toLowerCase();
+
+interface Cell {
+  num: string;
+  icon: string;
+  label: string;
+  color: string;
 }
 
 export default async function Image({
@@ -198,14 +647,15 @@ export default async function Image({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: PAPER,
-            color: INK_3,
-            fontFamily: 'Jakarta',
-            fontSize: 48,
-            fontWeight: 500,
+            background: BG,
+            color: MUTED,
+            fontFamily: 'Text',
+            fontSize: 56,
+            fontWeight: 600,
           }}
         >
-          myku
+          trymyku.com
+          <Tile />
         </div>
       ),
       // The placeholder card gets the short window too. A slug with no page
@@ -215,344 +665,508 @@ export default async function Image({
     );
   }
 
-  const unclaimed = page.web_status !== 'published';
-  // The portrait honours his "show my photo on the page" switch here too:
-  // the link preview IS the page to everyone who never taps it, so a photo
-  // he hid from the page must not keep riding on every share of the link.
-  // Missing (older rows) reads as shown, the same default the page uses.
-  // The review rows are fetched alongside the photo, not read off the
-  // page row. page.review_count is a trigger-maintained counter that
-  // survives deleted rows and seeded profiles, so the card could print
-  // "4.8 out of 5 (94)" for a mechanic whose page shows no review at all.
-  // The page body (components/Storefront.tsx) now counts the rows it fetched
-  // through the same getReviews call, keeping every rated row, so the card
-  // counts the same rows the same way and the two cannot disagree. A failed
-  // fetch comes back as [] and the rating line simply stays off the card.
-  const [photo, reviewRows] = await Promise.all([
-    page.photo_url && page.show_photo !== false ? safePhoto(page.photo_url) : null,
-    getReviews(page.id).then((r) => r ?? []),
+  // Fail CLOSED: anything that is not published is a page Myku built.
+  const claimed = page.web_status === 'published';
+  const name = page.full_name.trim();
+  const first = firstName(name);
+  // A business name equal to his own name is no business name: the sign is
+  // his name and nothing repeats under it.
+  const bizRaw = page.business_name?.trim() || null;
+  const biz = bizRaw && !sameName(bizRaw, name) ? bizRaw.replace(/\s+/g, ' ') : null;
+  const sign = biz ?? name;
+
+  // Counted from the rows actually fetched, NOT from page.review_count: the
+  // stored counter is trigger-maintained and survives deleted rows and seeded
+  // profiles. The page body (components/Storefront.tsx) counts the same rows
+  // the same way, so the two cannot disagree. Jobs through Myku are the
+  // verified rows the page shows (its record), with the page's floor of three.
+  // A failed read is [] and the line simply stays off the card. None of it is
+  // read on an unclaimed page, which carries no Myku proof at all.
+  const wantFace = claimed && Boolean(page.photo_url) && page.show_photo === true;
+  const [reviewRows, verifiedRows, facePhoto, workPhoto] = await Promise.all([
+    claimed ? getReviews(page.id).then((r) => r ?? []) : Promise.resolve([]),
+    claimed ? getVerifiedJobs(page.id).then((r) => r ?? []) : Promise.resolve([]),
+    wantFace ? safePhoto(page.photo_url) : Promise.resolve(null),
+    claimed ? getSharedJobs(page.id).then((r) => jobPhoto(r ?? [])) : Promise.resolve(null),
   ]);
 
-  const ratingNum =
-    typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
+  const ratingNum = typeof page.rating === 'string' ? parseFloat(page.rating) : page.rating ?? 0;
   const reviewCount = reviewRows.filter((r) => r.rating > 0).length;
-  const hasRating = reviewCount > 0 && ratingNum > 0;
-  const city = page.service_city?.split(',')[0]?.trim();
-  const years = page.years_experience ?? 0;
+  const jobsDone = verifiedRows.length;
 
-  // Same rule the page body uses, so the card cannot contradict the page.
-  const bizName = page.business_name?.trim() || null;
-  const bizLeads = Boolean(bizName);
-  const headline = bizName ?? page.full_name;
-  // Same literal fallback the page body uses, so the card can never print an
-  // empty trade line and never disagrees with the page about what it says.
-  const specLine = page.specialization || 'Independent mechanic';
-  const headlineSize =
-    headline.length > 40 ? 38 : headline.length > 28 ? 48 : headline.length > 18 ? 62 : 76;
+  // Same validation the page applies to the listing rating.
+  const pr = claimed ? null : page.public_rating;
+  const listing =
+    pr && /^https:\/\//.test(pr.url) && Number(pr.rating) > 0 && Number(pr.count) > 0 && String(pr.source).trim()
+      ? { source: String(pr.source).trim(), rating: Number(pr.rating), count: Math.round(Number(pr.count)) }
+      : null;
 
-  // The town, the years and the rating. These are on the page for claimed and
-  // unclaimed pages alike, so they travel with the card either way - but WHO
-  // said them differs, and the card must not be silent about that. On a
-  // published page the mechanic typed them. On an unclaimed page Myku typed
-  // them off a public listing, and the block below the meta line says exactly
-  // that rather than letting them read as his.
-  const meta = [
-    city || null,
-    years > 0 ? `${years} yrs working` : null,
-    hasRating ? `${ratingNum.toFixed(1)} out of 5 (${reviewCount})` : null,
-  ].filter(Boolean) as string[];
+  const cells: Cell[] = [];
+  if (claimed && reviewCount > 0 && ratingNum > 0)
+    cells.push({
+      num: ratingNum.toFixed(1),
+      icon: ICON.star,
+      label: `${reviewCount} review${reviewCount === 1 ? '' : 's'} on\u00a0Myku`,
+      color: TEAL,
+    });
+  if (claimed && jobsDone >= JOBS_FLOOR)
+    cells.push({ num: String(jobsDone), icon: ICON.receipt, label: 'jobs done through\u00a0Myku', color: TEAL });
+  if (listing)
+    cells.push({
+      num: listing.rating.toFixed(1),
+      icon: ICON.star,
+      label: `${listing.count} review${listing.count === 1 ? '' : 's'} on\u00a0${listing.source}`,
+      color: MUTED,
+    });
+  const disclosure = claimed
+    ? null
+    : listing
+      ? 'From public listings. Myku has not confirmed it.'
+      : 'The details here came from public listings.';
 
-  // Myku's document checks. SUPPRESSED ENTIRELY on unclaimed pages, exactly
-  // as the page body suppresses them, and rendered as one plain line with the
-  // qualification directly beneath it rather than as badges.
-  const credentials = unclaimed
-    ? []
-    : ([
-        page.id_verified ? 'ID verified' : null,
-        page.has_insurance ? 'Insurance on file' : null,
-        page.has_certifications ? 'Certifications on file' : null,
-      ].filter(Boolean) as string[]);
+  const chipOn = claimed && page.id_verified === true;
+  const door = doorKind(page.work_type);
+  const city = cleanCity(page.service_city);
+  const headline = page.specialization?.trim().replace(/\s+/g, ' ') || null;
 
-  return new ImageResponse(
-    (
+  // ---- measured blocks, shared by both layouts
+
+  const CHIP = 'ID checked by Myku';
+  const chipW = width(CHIP, 'text600', 44) + 18 + 46 + 12 + 24 + 4;
+
+  function person(col: number, withName: boolean, withChip: boolean, tight: boolean) {
+    const lineH = tight ? 47.5 : 51;
+    const chipH = tight ? 62 : 68;
+    const m: Measure = (s) => width(s, 'text600', 44);
+    const lines = withName ? wrap(pieces(name), m, col).lines : [];
+    if (!lines.length && !withChip) return { h: 0, lines, inline: false, chip: false, lineH, chipH };
+    const inline = lines.length === 1 && withChip && m(lines[0]) + 18 + chipW <= col;
+    const h = inline
+      ? 18 + chipH
+      : 18 + lines.length * lineH + (withChip ? (lines.length ? 12 : 0) + chipH : 0);
+    return { h, lines, inline, chip: withChip, lineH, chipH };
+  }
+
+  // "COMES TO YOU · AURORA, ST" in van-door lettering: the literal answer to
+  // the thread's question. Too long for the column, the town alone stays.
+  const prefix = door === 'mobile' ? 'COMES TO YOU' : door === 'both' ? 'COMES TO YOU OR DROP OFF' : door === 'shop' ? 'SHOP' : null;
+  const letterIcon = door === 'shop' ? ICON.storefront : door ? ICON.van : ICON.pin;
+  function lettering(col: number): { text: string; px: number } | null {
+    const town = city ? city.toUpperCase() : null;
+    const full = [prefix, town].filter(Boolean).join(' · ');
+    if (!full) return null;
+    const fits = (s: string, px: number) => width(s, 'sign700', px, 0.06) + px * 1.087 + 14 <= col;
+    if (fits(full, 46)) return { text: full, px: 46 };
+    const short = town ?? full;
+    for (let px = 46; px >= 36; px -= 2) if (fits(short, px)) return { text: short, px };
+    return { text: short, px: 36 };
+  }
+
+  function foot(col: number, tight: boolean, centred: boolean) {
+    const numW = Math.max(0, ...cells.map((c) => width(c.num, 'sign800', 76)));
+    const labelCol = col - numW - 50 - 28;
+    const lineH = tight ? 48.4 : 52.8;
+    const rows = cells.map((c) => {
+      const lines = wrap(pieces(c.label), (s) => width(s, 'text600', 44), labelCol).lines;
+      return { c, lines, h: Math.max(76, lines.length * lineH) };
+    });
+    const labelW = Math.max(0, ...rows.flatMap((r) => r.lines.map((l) => width(l, 'text600', 44))));
+    const dLines = disclosure ? wrap(pieces(disclosure), (s) => width(s, 'text500', 44), col).lines : [];
+    let h = rows.reduce((t, r, i) => t + r.h + (i ? 6 : 0), 0);
+    if (dLines.length) h += dLines.length * 52.8 + (rows.length ? 6 : 0);
+    return { rows, numW, labelW: centred ? Math.ceil(labelW) + 2 : labelCol, lineH, dLines, h };
+  }
+
+  function head(col: number, maxLines: number, room: number) {
+    if (!headline) return null;
+    const m: Measure = (s) => width(s, 'voice', 48);
+    const ps = pieces(headline);
+    const r = wrap(ps, m, col);
+    const h = 20 + r.lines.length * 55.2;
+    if (!r.ok || r.lines.length > maxLines || h > room) return null;
+    // Balanced, so a centred headline never leaves one word on its last line.
+    return { lines: balance(ps, r.lines.length, m, col) ?? r.lines, h };
+  }
+
+  type Person = ReturnType<typeof person>;
+  type Foot = ReturnType<typeof foot>;
+  type Letter = ReturnType<typeof lettering>;
+
+  function Proof({ f, centred }: { f: Foot; centred: boolean }) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: centred ? 'center' : 'flex-start' }}>
+        {f.rows.map((r, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', marginTop: i ? 6 : 0, height: r.h }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                width: Math.ceil(f.numW) + 2,
+                fontFamily: 'Sign',
+                fontWeight: 800,
+                fontSize: 76,
+                lineHeight: 1,
+                color: SIGN,
+              }}
+            >
+              {r.c.num}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', width: 50, marginLeft: 14 }}>
+              <Icon d={r.c.icon} px={46} color={r.c.color} />
+            </div>
+            <div style={{ display: 'flex', width: f.labelW, marginLeft: 14 }}>
+              <Lines lines={r.lines} family="Text" weight={600} px={44} lh={f.lineH / 44} color={r.c.color} />
+            </div>
+          </div>
+        ))}
+        {f.dLines.length ? (
+          <div style={{ display: 'flex', marginTop: f.rows.length ? 6 : 0 }}>
+            <Lines lines={f.dLines} family="Text" weight={500} px={44} lh={1.2} color={LETTER} align={centred ? 'center' : 'flex-start'} />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  function PersonRow({ p, centred }: { p: Person; centred: boolean }) {
+    if (!p.h) return null;
+    const chip = p.chip ? (
       <div
         style={{
-          width: '100%',
-          height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          background: PAPER,
-          fontFamily: 'Jakarta',
-          padding: '64px 72px',
+          alignItems: 'center',
+          height: p.chipH,
+          padding: '0 24px 0 18px',
+          borderRadius: 999,
+          border: '2px solid rgba(109,208,198,0.5)',
+          background: 'rgba(109,208,198,0.12)',
+          color: TEAL,
+          fontFamily: 'Text',
+          fontWeight: 600,
+          fontSize: 44,
+          whiteSpace: 'nowrap',
+          marginLeft: p.inline ? 18 : 0,
+          marginTop: !p.inline && p.lines.length ? 12 : 0,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: 56 }}>
-          {photo ? (
-            <div
-              style={{
-                display: 'flex',
-                width: 240,
-                height: 240,
-                borderRadius: 12,
-                overflow: 'hidden',
-                border: `2px solid ${RULE}`,
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo}
-                alt=""
-                width={240}
-                height={240}
-                style={{ objectFit: 'cover', width: 240, height: 240 }}
-              />
-            </div>
-          ) : (
-            // Square plate, flat fill, no gradient and no ring. A circle reads
-            // social profile; a square reads business.
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 240,
-                height: 240,
-                borderRadius: 12,
-                background: PAPER_2,
-                border: `2px solid ${RULE}`,
-                color: INK_3,
-                fontSize: 88,
-                fontWeight: 800,
-              }}
-            >
-              {initials(page.full_name)}
-            </div>
-          )}
+        <Icon d={ICON.id} px={46} color={TEAL} />
+        <div style={{ display: 'flex', marginLeft: 12 }}>{CHIP}</div>
+      </div>
+    ) : null;
+    const nameLines = p.lines.length ? (
+      <Lines lines={p.lines} family="Text" weight={600} px={44} lh={p.lineH / 44} color={TEXT} align={centred ? 'center' : 'flex-start'} />
+    ) : null;
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: p.inline ? 'row' : 'column',
+          alignItems: p.inline ? 'center' : centred ? 'center' : 'flex-start',
+          marginTop: 18,
+        }}
+      >
+        {nameLines}
+        {chip}
+      </div>
+    );
+  }
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            {/* THE STATE, ABOVE THE NAME. The page body puts "Unconfirmed" in
-                its eyebrow so the signal survives the claim strip scrolling
-                away; the card puts it in the same place for the same reason,
-                and because this is the one line of qualifying text that was
-                still readable when the rendered card was downsampled to a
-                chat-bubble 300px. So it is set as display type, not fine
-                print: uppercase and letter-spaced like the page's own
-                eyebrow, at the full extra-bold weight, in ink rather than a
-                badge or a pill. The file's rules at the top forbid a badge
-                anyway, and a badge would read as a Myku stamp on the one
-                kind of page Myku is explicitly vouching for nothing on.
-                The middot is carried by both font files; checked in their
-                cmap tables, not assumed. */}
-            {/* The "PREVIEW · NOT CLAIMED" line that sat here was removed on
-                2026-09-23 with the page's own claim prompts. An unclaimed
-                card is what the ONE mechanic it was built for sees first when
-                his link lands in Messenger, and it now reads as his page. The
-                card still carries no numbers or credentials on an unclaimed
-                page (`credentials` is forced to [] below), and its bottom
-                line still says the details came from public listings. */}
-            {/* The headline follows the PAGE's rule (decision 4): the business
-                name leads when he has set one, with his own name beneath it.
-                The card used to print full_name unconditionally, so a mechanic
-                trading as "Reed Auto Repair" set the name, watched his page
-                body obey, then pasted the link into a group chat and saw a card
-                headed with his personal name instead.
-
-                Attribution never moves to the business: the person's name stays
-                on the card whenever the business name displaces it, because a
-                company cannot share a job and Myku confirms nothing about a
-                trading name.
-
-                The size ramp is wider than the old two-step because these are
-                different lengths of thing: a full name is short, while
-                business_name is CHECKed at up to 60 characters, which at the
-                old 62px would have run straight off the card.
-
-                The tracking scales with the step. It used to be a fixed -3px,
-                which is a tight display setting at 76px and, at 38px, eight
-                percent of the em: a long business name on the smallest step
-                rendered with its word gaps closed, one run-on word across
-                the card. -0.04em keeps the 76px step exactly where it was
-                (-3px) and eases the 38px step to -1.5px. Satori takes
-                letterSpacing as pixels only, so the em value is applied by
-                hand. */}
-            <div
-              style={{
-                display: 'flex',
-                color: INK,
-                fontSize: headlineSize,
-                fontWeight: 800,
-                letterSpacing: Math.round(headlineSize * -0.04 * 10) / 10,
-                lineHeight: 1.05,
-              }}
-            >
-              {headline}
-            </div>
-            {bizLeads ? (
-              <div
-                style={{
-                  display: 'flex',
-                  color: INK_2,
-                  fontSize: 30,
-                  fontWeight: 500,
-                  marginTop: 10,
-                }}
-              >
-                {page.full_name}
-              </div>
-            ) : null}
-            {/* THE ONE FIELD ON THIS CARD THAT CAN GROW WITHOUT LIMIT.
-                `specialization` is plain `text` in the database with no
-                length CHECK and no cap in the app, and this column has a
-                fixed height. A size ramp alone only moves the breaking point
-                and never removes it, which is what was here before and what
-                was measured on 2026-09-01 by rendering this exact layout with
-                the real font files at a range of lengths:
-
-                  * 160 characters: the last line of the block below sat ON
-                    the footer rule, the rule running through its descenders.
-                  * 219 characters: the rule struck clean THROUGH the middle
-                    of that line.
-
-                Which line that is decides how bad it is, and it is the worst
-                one either way. On an unclaimed card it is "Nothing on this
-                page has been confirmed by {first}." On a published card with
-                three documents on file it is "Myku checked these documents.
-                That is not a recommendation." - rendered and confirmed struck
-                through at 300 characters. So an unbounded field the mechanic
-                types was able to deface, on the first thing anyone sees, the
-                one sentence that stops a document check reading as a Myku
-                endorsement. That is the trust line, not a layout nit.
-
-                So the block is BOUNDED rather than merely shrunk. `lineClamp`
-                is a hard three-line budget satori honours (verified: at 300
-                and at 400 characters the rendered PNGs are byte-identical, so
-                nothing below can move again however long the field gets), and
-                the ellipsis says plainly that there is more. The extra 20px
-                step is not a fix on its own; it exists so more of his own
-                words survive inside those three lines before the clamp bites.
-
-                Truncating here reverses an earlier decision in this file, on
-                purpose. The words are still all on the page one tap away; the
-                disclosure has nowhere else to go. When the two compete for
-                the last line of a share card, the disclosure wins.
-
-                Neither live card moves: rendered old and new for marcus-reed
-                (40 characters) and fort-nite (35), both byte-identical. */}
-            <div
-              style={{
-                display: 'block',
-                lineClamp: 3,
-                textOverflow: 'ellipsis',
-                color: INK_2,
-                fontSize:
-                  specLine.length > 150 ? 20 : specLine.length > 100 ? 24 : specLine.length > 48 ? 28 : 32,
-                fontWeight: 500,
-                marginTop: 16,
-              }}
-            >
-              {specLine}
-            </div>
-            {meta.length > 0 ? (
-              <div
-                style={{
-                  display: 'flex',
-                  color: INK_3,
-                  fontSize: 28,
-                  fontWeight: 500,
-                  marginTop: 18,
-                }}
-              >
-                {meta.join(' · ')}
-              </div>
-            ) : null}
-            {credentials.length > 0 ? (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  marginTop: 26,
-                }}
-              >
-                <div style={{ display: 'flex', color: INK_2, fontSize: 26, fontWeight: 500 }}>
-                  {credentials.join(' · ')}
-                </div>
-                {/* The qualification sits in the same breath as the claim. */}
-                <div
-                  style={{
-                    display: 'flex',
-                    color: INK_3,
-                    fontSize: 22,
-                    fontWeight: 500,
-                    marginTop: 8,
-                  }}
-                >
-                  Myku checked these documents. That is not a recommendation.
-                </div>
-              </div>
-            ) : unclaimed ? (
-              // WHERE THE NUMBERS CAME FROM, in the slot the paperwork line
-              // vacated. Same two-line shape as the block above - a statement
-              // with its qualification in the same breath - so the card never
-              // has an empty space where its state should be. The two branches
-              // are mutually exclusive by construction: `credentials` is forced
-              // to [] whenever `unclaimed` is true.
-              //
-              // Both sentences are the page body's own words (its How Myku
-              // Works block reads "{first} has not claimed this page. The
-              // details here came from public listings, and nothing on the page
-              // has been confirmed by {first}."), split across the two lines.
-              // Copied rather than reworded on purpose: the card and the page
-              // are one tap apart, and the moment they are phrased
-              // independently they start to drift.
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  marginTop: 20,
-                }}
-              >
-                <div style={{ display: 'flex', color: INK_2, fontSize: 26, fontWeight: 500 }}>
-                  The details here came from public listings.
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    color: INK_3,
-                    fontSize: 22,
-                    fontWeight: 500,
-                    marginTop: 8,
-                  }}
-                >
-                  Nothing on this page has been confirmed by {firstName(page.full_name)}.
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-
+  function LetterRow({ l, tight, centred }: { l: NonNullable<Letter>; tight: boolean; centred: boolean }) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: centred ? 'center' : 'flex-start',
+          marginTop: tight ? 14 : 18,
+          height: 48,
+        }}
+      >
+        <Icon d={letterIcon} px={Math.round(l.px * 1.087)} color={TEXT} />
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderTop: `2px solid ${RULE}`,
-            paddingTop: 28,
+            marginLeft: 14,
+            whiteSpace: 'nowrap',
+            fontFamily: 'Sign',
+            fontWeight: 700,
+            fontSize: l.px,
+            lineHeight: 1.05,
+            letterSpacing: Math.round(l.px * 0.06 * 100) / 100,
+            color: LETTER,
           }}
         >
-          <div style={{ display: 'flex', color: INK_3, fontSize: 24, fontWeight: 500 }}>
-            myku
-          </div>
-          <div style={{ display: 'flex', color: INK_3, fontSize: 28, fontWeight: 500 }}>
-            trymyku.com/{page.slug}
-          </div>
+          {l.text}
         </div>
+      </div>
+    );
+  }
+
+  const background = `radial-gradient(90% 120% at 100% 0%, ${BG_GLOW} 0%, rgba(28,32,36,0) 60%)`;
+
+  // ================================================================ photo card
+  // A claimed page with a job photo or his face that actually arrived.
+  if (claimed && (workPhoto || facePhoto)) {
+    const both = Boolean(workPhoto && facePhoto);
+    const padl = both ? 124 : 48;
+
+    // "Shared by Andre" on the photo panel, whole and never cut through his
+    // name. Beside the camera in two lines; else the camera above, two lines,
+    // then three; the narrowest panel that holds every word. The option that
+    // costs the card least wins (see below).
+    const shared = `Shared by ${first}`;
+    const srcM: Measure = (s) => width(s, 'text600', 44);
+    type Opt = { phw: number; stacked: boolean; lines: string[]; px: number };
+    const opts: Opt[] = [];
+    if (workPhoto) {
+      for (const [stacked, cap] of [
+        [false, 2],
+        [true, 2],
+        [true, 3],
+      ] as const) {
+        for (let phw = 330; phw <= 420; phw += 2) {
+          const col = phw - 24 - 20 - (stacked ? 0 : 56) - 4;
+          const r = wrap(pieces(shared), srcM, col);
+          if (r.ok && r.lines.length <= cap) {
+            opts.push({ phw, stacked, lines: r.lines, px: 44 });
+            break;
+          }
+        }
+      }
+      if (!opts.length) {
+        // A first name wider than the widest panel: the label steps down
+        // rather than clipping.
+        const col = 420 - 24 - 20 - 4;
+        const widest = Math.max(...pieces(shared).map((p) => width(p.t, 'text600', 1)));
+        const px = Math.max(24, Math.min(44, Math.floor(col / widest)));
+        opts.push({ phw: 420, stacked: true, lines: wrap(pieces(shared), (s) => width(s, 'text600', px), col).lines, px });
+      }
+    } else opts.push({ phw: 360, stacked: false, lines: [], px: 44 });
+
+    const levels = [
+      { let: true, person: true, tight: false },
+      { let: true, person: true, tight: true },
+      { let: false, person: true, tight: false },
+      { let: false, person: false, tight: false },
+    ];
+
+    const fitFor = (phw: number) => {
+      const x0 = phw + padl;
+      const col = W - 44 - x0;
+      // A business name of up to 28 characters stays inside the centre 630px
+      // square that a square-thumbnail preview keeps.
+      const nameCol = sign.length > 28 ? col : Math.min(col, 915 - x0);
+      const firstCol = Math.min(nameCol, TILE_CLEAR_X - x0);
+      const letter = lettering(col);
+      let last = null as null | {
+        level: number;
+        fit: NameFit | null;
+        p: Person;
+        l: Letter;
+        f: Foot;
+        gap: number;
+        tight: boolean;
+        room: number;
+        x0: number;
+        col: number;
+        nameCol: number;
+        firstCol: number;
+      };
+      for (let level = 0; level < levels.length; level++) {
+        const L = levels[level];
+        const f = foot(col, L.tight, false);
+        const gap = f.h ? (L.tight ? 12 : GAP) : 0;
+        const p = person(col, Boolean(biz) && L.person, chipOn && (L.person || !biz), L.tight);
+        const l = L.let ? letter : null;
+        const letH = l ? (L.tight ? 62 : 66) : 0;
+        const room = SAFE - TOP - p.h - letH - (f.h ? f.h + gap : 0);
+        const fit = fitName(sign, nameCol, firstCol, 104, 52, room, 60);
+        last = { level, fit, p, l, f, gap, tight: L.tight, room, x0, col, nameCol, firstCol };
+        if (fit) return last;
+      }
+      return { ...last!, level: levels.length };
+    };
+
+    const tried = opts.map((o) => ({ o, P: fitFor(o.phw) }));
+    tried.sort(
+      (a, b) =>
+        a.P.level - b.P.level ||
+        a.o.lines.length - b.o.lines.length ||
+        a.o.phw - b.o.phw ||
+        Number(a.o.stacked) - Number(b.o.stacked)
+    );
+    const { o, P } = tried[0];
+    const fit = P.fit ?? emergencySign(sign, P.nameCol, P.firstCol, 52, P.room);
+    // Nothing proven yet: his own headline earns the space.
+    const hd = P.f.h ? null : head(P.col, 3, P.room - fit.h);
+    const stackH = fit.h + P.p.h + (P.l ? (P.tight ? 62 : 66) : 0) + (hd ? hd.h : 0);
+    // A short stack with nothing at its foot is centred, not left hanging over
+    // a dark band a fifth of the card tall.
+    const mid = !P.f.h && SAFE - (TOP + stackH) > 80;
+    const phw = o.phw;
+
+    return new ImageResponse(
+      (
+        <div style={{ position: 'relative', display: 'flex', width: W, height: H, background: BG, backgroundImage: background }}>
+          <div style={{ position: 'absolute', left: 0, top: 0, width: phw, height: H, display: 'flex', overflow: 'hidden', background: '#2A2F34' }}>
+            {workPhoto ? (
+              <Cropped photo={workPhoto} w={phw} h={H} />
+            ) : facePhoto ? (
+              <Cropped photo={facePhoto} w={phw} h={H} fx={0.5} fy={0.12} />
+            ) : null}
+            <div style={{ position: 'absolute', left: 0, top: 0, width: phw, height: H, display: 'flex', backgroundImage: 'linear-gradient(90deg, rgba(14,16,18,0) 55%, rgba(14,16,18,0.9) 100%)' }} />
+            <div style={{ position: 'absolute', left: 0, top: 0, width: phw, height: H, display: 'flex', backgroundImage: 'linear-gradient(180deg, rgba(14,16,18,0) 52%, rgba(14,16,18,0.85) 100%)' }} />
+            {workPhoto ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 24,
+                  right: 20,
+                  bottom: 34,
+                  display: 'flex',
+                  flexDirection: o.stacked ? 'column' : 'row',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <div style={{ display: 'flex', marginTop: o.stacked ? 0 : 2 }}>
+                  <Icon d={ICON.camera} px={44} color={TEXT} />
+                </div>
+                <div style={{ display: 'flex', marginLeft: o.stacked ? 0 : 12, marginTop: o.stacked ? 6 : 0 }}>
+                  <Lines lines={o.lines} family="Text" weight={600} px={o.px} lh={1.08} color={TEXT} shadow="0 2px 12px rgba(0,0,0,0.6)" />
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {workPhoto && facePhoto ? (
+            <div
+              style={{
+                position: 'absolute',
+                left: phw - 90 - 7,
+                top: TOP - 7,
+                display: 'flex',
+                padding: 7,
+                borderRadius: 33,
+                background: BG,
+                boxShadow: '0 22px 44px rgba(0,0,0,0.55)',
+              }}
+            >
+              <div style={{ position: 'relative', display: 'flex', width: 180, height: 225, borderRadius: 26, overflow: 'hidden', background: '#2E3338' }}>
+                <Cropped photo={facePhoto} w={180} h={225} fx={0.5} fy={0.12} zoom={1.12} ox={0.5} oy={0.08} />
+              </div>
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              position: 'absolute',
+              left: P.x0,
+              top: mid ? TOP + Math.round((SAFE - TOP - stackH) / 2) : TOP,
+              width: P.col,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+            }}
+          >
+            <Lines lines={fit.lines} family="Sign" weight={800} px={fit.px} lh={fit.lh} color={SIGN} track={0.004} />
+            <PersonRow p={P.p} centred={false} />
+            {P.l ? <LetterRow l={P.l} tight={P.tight} centred={false} /> : null}
+            {hd ? (
+              <div style={{ display: 'flex', marginTop: 20 }}>
+                <Lines lines={hd.lines} family="Voice" weight={400} italic px={48} lh={1.15} color={VOICE} />
+              </div>
+            ) : null}
+          </div>
+
+          {P.f.h ? (
+            <div style={{ position: 'absolute', left: P.x0, bottom: H - SAFE, width: P.col, display: 'flex' }}>
+              <Proof f={P.f} centred={false} />
+            </div>
+          ) : null}
+
+          <Tile />
+        </div>
+      ),
+      { ...size, fonts: fontList, headers: { 'cache-control': CARD_CACHE_CONTROL } }
+    );
+  }
+
+  // ================================================================ van door
+  // No photo (day one, show_photo off, every photo failed), or an unclaimed
+  // page. His sign in big condensed caps between two pinstripes, the lettering
+  // under it, and the proof or the disclosure at its foot. The stack is
+  // centred between the pinstripes.
+  const col = W - 2 * 78;
+  const nameCol = sign.length > 28 ? col : 600;
+  // Centred, so the first line's right end is its half-width past the middle.
+  const firstCol = Math.min(nameCol, 2 * (TILE_CLEAR_X - W / 2));
+  const f = foot(col, false, true);
+  const letter = lettering(col);
+  const layouts = [
+    { let: true, person: true },
+    { let: false, person: true },
+    { let: false, person: false },
+  ].map((L) => {
+    const p = person(col, Boolean(biz) && L.person, chipOn && (L.person || !biz), false);
+    const l = L.let ? letter : null;
+    const letH = l ? 66 : 0;
+    const room = SAFE_DOOR - TOP_DOOR - p.h - letH - (f.h ? f.h + GAP : 0);
+    return { fit: fitName(sign, nameCol, firstCol, 150, 56, room, 64), p, l, room, keepsName: L.person };
+  });
+  // His full name (and the ID chip that belongs to it) outranks the size of
+  // the sign: a big sign first, then any size that keeps his name, and only
+  // then the card without it (which then carries no chip either).
+  const keep = layouts.filter((x) => x.keepsName);
+  const pick =
+    keep.find((x) => x.fit && x.fit.px >= 84) ?? keep.find((x) => x.fit) ?? layouts.find((x) => x.fit) ?? layouts[layouts.length - 1];
+  let fit = pick.fit ?? emergencySign(sign, nameCol, firstCol, 56, pick.room);
+  // No proof yet: his headline earns the space, as long as his sign stays big.
+  let hd: { lines: string[]; h: number } | null = null;
+  if (!cells.length && headline) {
+    const want = head(col, 2, Infinity);
+    if (want) {
+      const fit2 = fitName(sign, nameCol, firstCol, 150, 56, pick.room - want.h, 64);
+      if (fit2 && fit2.px >= 96) {
+        fit = fit2;
+        hd = want;
+      } else if (pick.room - fit.h >= want.h) hd = want;
+    }
+  }
+
+  return new ImageResponse(
+    (
+      <div style={{ position: 'relative', display: 'flex', width: W, height: H, background: BG, backgroundImage: background }}>
+        {/* The van door's two pinstripes; the top one stops short of the tile. */}
+        <div style={{ position: 'absolute', left: 44, right: 116, top: 28, height: 8, display: 'flex', borderTop: '1.5px solid rgba(232,236,239,0.17)', borderBottom: '1.5px solid rgba(232,236,239,0.17)' }} />
+        <div style={{ position: 'absolute', left: 44, right: 44, bottom: 24, height: 8, display: 'flex', borderTop: '1.5px solid rgba(232,236,239,0.17)', borderBottom: '1.5px solid rgba(232,236,239,0.17)' }} />
+        <div
+          style={{
+            position: 'absolute',
+            left: 78,
+            right: 78,
+            top: TOP_DOOR,
+            bottom: H - SAFE_DOOR,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Lines lines={fit.lines} family="Sign" weight={800} px={fit.px} lh={fit.lh} color={SIGN} track={0.004} align="center" />
+          <PersonRow p={pick.p} centred />
+          {pick.l ? <LetterRow l={pick.l} tight={false} centred /> : null}
+          {hd ? (
+            <div style={{ display: 'flex', marginTop: 20 }}>
+              <Lines lines={hd.lines} family="Voice" weight={400} italic px={48} lh={1.15} color={VOICE} align="center" />
+            </div>
+          ) : null}
+          {f.h ? (
+            <div style={{ display: 'flex', marginTop: GAP }}>
+              <Proof f={f} centred />
+            </div>
+          ) : null}
+        </div>
+        <Tile />
       </div>
     ),
     { ...size, fonts: fontList, headers: { 'cache-control': CARD_CACHE_CONTROL } }

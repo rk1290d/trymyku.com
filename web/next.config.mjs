@@ -51,12 +51,14 @@ const nextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: 'fioiaoxaozqfwdqukoho.supabase.co' }],
   },
   // The OG-image routes read display fonts from disk at runtime; make sure
-  // the TTFs ship inside the serverless bundle on Vercel.
+  // the font files ship inside the serverless bundle on Vercel. The site card
+  // reads the Jakarta TTFs; the per-mechanic card reads the WOFFs (satori
+  // takes TTF, OTF and WOFF, never WOFF2).
   outputFileTracingIncludes: {
     // Note: keys are globs, so [slug] would parse as a character class.
     // The ** pattern covers both the root and per-profile OG routes.
-    '/opengraph-image': ['./assets/fonts/*.ttf'],
-    '/**/opengraph-image': ['./assets/fonts/*.ttf'],
+    '/opengraph-image': ['./assets/fonts/*.ttf', './assets/fonts/*.woff'],
+    '/**/opengraph-image': ['./assets/fonts/*.ttf', './assets/fonts/*.woff'],
   },
   async rewrites() {
     // The analytics dashboard stays a self-contained static page,
