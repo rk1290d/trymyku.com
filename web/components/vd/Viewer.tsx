@@ -12,6 +12,17 @@ import { Icon } from './icons';
 
 type Story = { photo: string; veh: string; job: string; cap: string; when: string; ask: string; first: string };
 
+function sized(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'https:' && u.hostname === 'fioiaoxaozqfwdqukoho.supabase.co')
+      return `/_next/image?url=${encodeURIComponent(url)}&w=1080&q=75`;
+  } catch {
+    /* not a URL we can size */
+  }
+  return url;
+}
+
 export default function Viewer() {
   const [s, setS] = useState<Story | null>(null);
   const pushed = useRef(false);
@@ -88,8 +99,10 @@ export default function Viewer() {
         </button>
       </div>
       <div className="vw-ph">
+        {/* His photos live in Myku's storage at phone-camera size (several MB); the site's own image optimizer
+            serves a screen-sized copy, the way next/image does on the tickets. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={s.photo} alt="" />
+        <img src={sized(s.photo)} alt="" />
       </div>
       <div className="vw-b">
         <h3 className="vw-veh">{s.veh}</h3>
