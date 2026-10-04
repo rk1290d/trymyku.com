@@ -7,6 +7,7 @@ import { firstName } from '@/lib/format';
 import './profile.css';
 import './vandoor.css';
 import './vandoor-body.css';
+import './vandoor-request.css';
 
 export const revalidate = 60;
 

@@ -2,7 +2,6 @@ import Image from 'next/image';
 import { resolveCity, townsWithin } from '@/lib/geo';
 import { formatHours, parseHours } from '@/lib/hours';
 import Link from 'next/link';
-import QuoteForm from '@/components/QuoteForm';
 import StorefrontFx from '@/components/StorefrontFx';
 import { timeAgo, money, firstName, workTypeLabel } from '@/lib/format';
 import { SUPPORT_EMAIL, SITE_URL } from '@/lib/site';
@@ -14,6 +13,8 @@ import { isSampleId, pitchSamples, samplePrice } from '@/lib/samples';
 import Hero from '@/components/vd/Hero';
 import { BodySections, Footer, SampleNotice } from '@/components/vd/Body';
 import Viewer from '@/components/vd/Viewer';
+import Request from '@/components/vd/Request';
+import Dock from '@/components/vd/Dock';
 import { vdSign, vdText, vdVoice } from '@/components/vd/fonts';
 import { MONTHS, month as vdMonth, moneyOrNull, type BodyInput } from '@/lib/vd/body';
 import { planHero, T as VD, type HeroInput, type ProofCell, type WorkType } from '@/lib/vd/hero';
@@ -1773,30 +1774,24 @@ export default function Storefront({
               <BodySections b={bodyInput} />
             </div>
             <aside className="vd-rail" aria-label={`Get a price from ${first}`}>
-              <span className="vd-anchor" id="quote" aria-hidden="true" />
               {mode === 'preview' ? (
                 <div className="vd-inert">
+                  <span className="vd-anchor" id="quote" aria-hidden="true" />
                   <h2>{`Get a price from ${first}`}</h2>
                   <p>Requests turn on when you publish. Visitors pick the job and leave a number here, and it lands in your Myku inbox.</p>
                   {requestNote ? <p className="vd-inert-note">{requestNote}</p> : null}
                 </div>
               ) : (
-                <div className="mp vd-legacy-ask">
-                  <section className="mp-ink mp-quote" id="ask">
-                    <div className="mp-wrap">
-                      <div className="mp-composer">
-                        <QuoteForm
-                          mechanicId={page.id}
-                          slug={page.slug}
-                          mechanicFirstName={first}
-                          unclaimed={unclaimed}
-                          sectionNum={numAsk}
-                          services={services.map((x) => ({ name: x.label, priceFrom: x.priceFrom }))}
-                        />
-                      </div>
-                    </div>
-                  </section>
-                </div>
+                <Request
+                  mechanicId={page.id}
+                  slug={page.slug}
+                  first={first}
+                  face={heroInput.face}
+                  services={services}
+                  requestNote={requestNote}
+                  workType={vdWorkType}
+                  unclaimed={unclaimed}
+                />
               )}
             </aside>
           </div>
@@ -1811,6 +1806,7 @@ export default function Storefront({
             </details>
           </Footer>
           <Viewer />
+          {mode === 'live' ? <Dock first={first} face={heroInput.face} /> : null}
         </div>
       </main>
     </>

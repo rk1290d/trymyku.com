@@ -369,9 +369,11 @@ export default function Request({
     if (toRail.current) {
       toRail.current = false;
       if (desk) {
-        // a rail that has scrolled away (a short page, or a click near the end of it) comes back into view first
+        // a rail that has scrolled away (a short page, or a click near the end of it) comes back into view first. The
+        // rail starts under the hero band (Storefront.tsx), so on the first screen only its top edge shows: anything
+        // lower than a third of the window down is brought up, or the hero's button would pick a tile she cannot see.
         const r = wo.getBoundingClientRect();
-        if (r.top < 0 || r.top > window.innerHeight - 160) {
+        if (r.top < 0 || r.top > window.innerHeight * 0.34) {
           window.scrollTo({ top: r.top + window.scrollY - 16, behavior: smooth() });
         }
         wo.classList.remove('rq-flash');

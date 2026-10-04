@@ -19,6 +19,7 @@
   --shadow-card: 0 1px 1px rgba(20, 23, 26, .04), 0 10px 24px -16px rgba(20, 23, 26, .28);
 }
 .vd.vd-body { background: var(--paper); color: var(--tx); color-scheme: light; }
+.vd .vd-rail { --rq-ground: var(--paper); }
 .vd-body h2, .vd-body h3, .vd-body p, .vd-body ul, .vd-body figure, .vd-body blockquote { margin: 0; padding: 0; }
 .vd-body ul { list-style: none; }
 
@@ -287,7 +288,9 @@
     max-width: 1232px; margin: 0 auto; padding: 0 44px 32px;
     display: grid; grid-template-columns: minmax(0, 1fr) 424px; column-gap: 56px; align-items: start;
   }
-  .vd .vd-rail { position: sticky; top: 16px; padding-top: 32px; }
+  /* the rail runs the full height of the page column; the request card is sticky inside it (Request.tsx) */
+  .vd .vd-rail { align-self: stretch; display: flex; flex-direction: column; padding-top: 32px; }
+  .vd .vd-rail > .rq { flex: 1; }
   .vd .sec { padding-top: 56px; }
   .vd .sec-h h2, .vd .h2 { font-size: 40px; }
   .vd .h3 { font-size: 30px; }
