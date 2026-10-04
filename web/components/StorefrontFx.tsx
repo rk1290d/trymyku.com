@@ -15,7 +15,11 @@ import { useEffect, useRef } from 'react';
 // Under prefers-reduced-motion the mesh paints ONE frame and the function
 // returns. No rAF loop is ever scheduled, no pointer handler is attached: the
 // loops actually stop rather than merely losing their transitions.
-export default function StorefrontFx({ prefix = 'mp' }: { prefix?: string } = {}) {
+// `bare` (2026-10-04, the van door hero): no canvases and no hero animation. The
+// new hero marks itself with data-fx-hero, and everything below the animation
+// (the scroll reveal, the magnetic buttons, the card light, the sticky dock)
+// keeps working for the rest of the page.
+export default function StorefrontFx({ prefix = 'mp', bare = false }: { prefix?: string; bare?: boolean } = {}) {
   const meshRef = useRef<HTMLCanvasElement | null>(null);
   const sparkRef = useRef<HTMLCanvasElement | null>(null);
   const bloomRef = useRef<HTMLDivElement | null>(null);
@@ -24,7 +28,8 @@ export default function StorefrontFx({ prefix = 'mp' }: { prefix?: string } = {}
     const mesh = meshRef.current;
     const spark = sparkRef.current;
     const bloom = bloomRef.current;
-    const hero = mesh?.closest<HTMLElement>(`.${prefix}-hero`) ?? null;
+    const hero =
+      mesh?.closest<HTMLElement>(`.${prefix}-hero`) ?? document.querySelector<HTMLElement>('[data-fx-hero]') ?? null;
     if (!hero) return;
 
     const mm = window.matchMedia;
@@ -143,9 +148,9 @@ export default function StorefrontFx({ prefix = 'mp' }: { prefix?: string } = {}
       sx.globalCompositeOperation = 'source-over';
     }
 
-    if (RM) {
+    if (RM || bare) {
       // One static frame. Nothing is scheduled, nothing is listened to.
-      drawMesh(6400);
+      if (!bare) drawMesh(6400);
     } else {
       sizeSpark();
       let rz: ReturnType<typeof setTimeout> | undefined;
@@ -410,8 +415,9 @@ export default function StorefrontFx({ prefix = 'mp' }: { prefix?: string } = {}
     }
 
     return () => cleanups.forEach((fn) => fn());
-  }, [prefix]);
+  }, [prefix, bare]);
 
+  if (bare) return null;
   return (
     <>
       <canvas className={`${prefix}-mesh`} ref={meshRef} aria-hidden="true" />

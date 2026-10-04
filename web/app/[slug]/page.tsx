@@ -5,6 +5,7 @@ import { readMechanicPage, resolveRetiredSlug, normalizeSlug } from '@/lib/supab
 import { loadPublicPage } from '@/lib/pageData';
 import { firstName } from '@/lib/format';
 import './profile.css';
+import './vandoor.css';
 
 export const revalidate = 60;
 
@@ -28,7 +29,8 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 export const viewport: Viewport = {
   // Keep in sync with --mp-ink in profile.css. The header band runs to the
   // very top of the page, so the Android status bar merges into it.
-  themeColor: '#08090B',
+  // the van door band's ink (vandoor.css --ink), so the status bar merges into it
+  themeColor: '#0E1012',
   colorScheme: 'dark',
 };
 
@@ -85,10 +87,11 @@ export async function generateMetadata({
   // including inside a search snippet or a Messenger preview. The unclaimed
   // variant mirrors the composer's own promise for that state: Myku passes
   // the request on; it never says the mechanic has agreed to reply.
-  const description =
-    page.web_status === 'published'
-      ? `${spec}${city ? ` in ${city}` : ''}. Pick the job and get a price from ${first} through Myku.`
-      : `${spec}${city ? ` in ${city}` : ''}. Pick the job and leave your number. Myku passes it to ${first}.`;
+  // HIS HEADLINE LEADS (Rohaan, 2026-10-04: the link card's picture already
+  // carries the proof, so the line under it is his own words), then the one
+  // thing to do. No "through Myku": the page says where things come from where
+  // they are claimed, not in every sentence.
+  const description = `${spec}${city ? ` · ${city}` : ''}. Get a price from ${first}. Free, no account.`;
 
   return {
     // `absolute` opts this route out of the root layout's "%s | Myku Auto"

@@ -11,6 +11,8 @@ import { appFixUrl, pageGaps, GAP_JOBS_MIN, GAP_SERVICES_MIN } from '@/lib/gaps'
 import type { PageGap, PageGapKey } from '@/lib/gaps';
 import type { PageData } from '@/lib/pageData';
 import { isSampleId, pitchSamples, samplePrice } from '@/lib/samples';
+import Hero from '@/components/vd/Hero';
+import { planHero, T as VD, type HeroInput, type ProofCell, type WorkType } from '@/lib/vd/hero';
 
 // The smallest confirmed-job count the fact strip will print. Mirrors
 // MIN_JOBS_SHOWN in the app (constants/config.ts) so the page and the app
@@ -1519,6 +1521,78 @@ export default function Storefront({
     cityUpper
   );
 
+  /* ── THE VAN DOOR HERO (2026-10-04, stage 1 of the approved redesign) ──────
+     Fed only from values derived above, so every honesty rule this file already
+     enforces carries over: counts come from rows actually rendered, the jobs
+     count needs MIN_JOBS_SHOWN, samples never count as proof, paperwork claims
+     never appear on a page he has not claimed, and nothing reads availability. */
+  const vdWorkType: WorkType = (() => {
+    const w = (page.work_type ?? '').trim().toLowerCase();
+    if (w === 'mobile') return 'Mobile';
+    if (w === 'hybrid') return 'Mobile or drop-off';
+    if (w && workTypeLabel(w)) return 'Shop';
+    return null;
+  })();
+  const vdCells: ProofCell[] = [];
+  if (hasRating)
+    vdCells.push({ kind: 'myku', num: ratingNum, label: VD.pfMyku(reviewCount), href: '#reviews', count: reviewCount });
+  if (google)
+    vdCells.push({ kind: 'google', num: google.rating, label: VD.pfGoogle(google.count), href: '#reviews', count: google.count });
+  if (!unclaimed && verifiedCount >= MIN_JOBS_SHOWN)
+    vdCells.push({ kind: 'jobs', num: verifiedCount, label: VD.pfJobs(verifiedCount), href: '#work', count: verifiedCount });
+  if (unclaimed && publicRating && !google)
+    vdCells.push({
+      kind: 'public',
+      num: publicRating.rating,
+      label: VD.pfPublic(publicRating.count, publicRating.source),
+      href: null,
+      count: publicRating.count,
+    });
+  const sameAsName = (a: string | null, b: string) =>
+    Boolean(a) && (a ?? '').toLowerCase().replace(/[\W_]+/g, ' ').trim() === b.toLowerCase().replace(/[\W_]+/g, ' ').trim();
+  const vdCover = unclaimed
+    ? []
+    : realShared
+        .filter((j) => j.photo_url)
+        .slice(0, 5)
+        .map((j) => ({
+          src: j.photo_url as string,
+          href: '#work',
+          label: j.service?.trim()
+            ? `${j.vehicle?.trim() || 'Vehicle'}: ${j.service.trim()}`
+            : j.vehicle?.trim() || 'His work',
+        }));
+  const heroInput: HeroInput = {
+    name: page.full_name,
+    first,
+    biz: bizName && !sameAsName(bizName, page.full_name) ? bizName : null,
+    claimed: !unclaimed,
+    face: !unclaimed && showPortrait && page.photo_url ? page.photo_url : null,
+    cover: vdCover,
+    chip: !unclaimed && page.id_verified,
+    docs: unclaimed
+      ? null
+      : page.has_insurance && certs.length
+        ? 'both'
+        : page.has_insurance
+          ? 'ins'
+          : certs.length
+            ? 'cert'
+            : null,
+    workType: vdWorkType,
+    city,
+    radius: typeof page.service_radius_mi === 'number' && page.service_radius_mi > 0 ? page.service_radius_mi : null,
+    hoursJson: page.hours_json,
+    hoursNote: page.hours_note?.trim() || null,
+    headline: page.specialization?.trim() || null,
+    cells: vdCells,
+    years: page.years_experience ?? null,
+    rate: page.hourly_rate ?? null,
+    fee: page.diagnostic_fee ?? null,
+  };
+  const heroPlan = planHero(heroInput);
+  const heroTitle = `${heroInput.biz ?? page.full_name}${cityShort ? ` | Mechanic in ${cityShort}` : ''}`;
+
   return (
     <>
       {/* Live only. A preview is not a public business listing, so it
@@ -1581,154 +1655,12 @@ export default function Storefront({
             for; he is handed his claim code in that conversation, and a page
             that opens by asking a stranger to claim it reads as a stub. */}
 
-        <header className="mp-hdr">
-          <div className="mp-hdr-in">
-            {/* The mark does NOT navigate. It is the one thread tying this
-                storefront back to the platform, but the Myku homepage
-                recruits customers into a multi-quote flow that lists his
-                competitors, and a visitor who arrived on a link HE shared
-                must never be one tap from that. */}
-            <span className="mp-brand">
-              <span className="mp-tile">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Myku" width={30} height={30} />
-              </span>
-            </span>
-            <a className="mp-btn mp-btn-o mp-btn-sm mp-hdr-cta mp-mag" href="#quote">
-              <span className="lbl">
-                Get a quote
-                <span className="mp-arrow" aria-hidden="true">
-                  &#8594;
-                </span>
-              </span>
-            </a>
-          </div>
-        </header>
+        <Hero input={heroInput} plan={heroPlan} pageUrl={`${SITE_URL}/${page.slug}`} pageTitle={heroTitle} />
+        <StorefrontFx bare />
 
-        {/* ============ HERO ============ */}
-        <section className="mp-ink mp-hero">
-          <StorefrontFx />
-          <svg className="mp-hero-mark" viewBox="0 0 400 400" aria-hidden="true">
-            <g fill="none" stroke="#F97316" strokeWidth="1.2">
-              <circle cx="200" cy="200" r="198" />
-              <circle cx="200" cy="200" r="162" />
-              <circle cx="200" cy="200" r="112" />
-              <circle cx="200" cy="200" r="64" />
-              <circle cx="200" cy="200" r="22" />
-              <g strokeWidth="2.4">
-                <path d="M200 2v26M200 372v26M2 200h26M372 200h26" />
-              </g>
-              <g strokeWidth="1.4" opacity=".85">
-                <path d="M200 38v16M200 346v16M38 200h16M346 200h16M92 92l12 12M296 296l-12-12M92 308l12-12M296 104l-12 12" />
-              </g>
-            </g>
-          </svg>
-
-          <div className="mp-wrap mp-hero-in">
-            <div className="mp-hero-eyebrow">
-              <p className="mp-eyebrow">
-                {eyebrowBits.map((b, i) => (
-                  <span key={b}>
-                    {i > 0 ? <span className="sep"> · </span> : null}
-                    {b}
-                  </span>
-                ))}
-              </p>
-              <span className="mp-ln" aria-hidden="true" />
-            </div>
-
-            {/* alt="" on purpose: the name is set directly beneath, and a
-                screen reader must not hear it twice. */}
-            {showPortrait && page.photo_url ? (
-              <div className="mp-portrait">
-                <Image
-                  className="mp-portrait-img"
-                  src={page.photo_url}
-                  alt=""
-                  width={96}
-                  height={96}
-                  unoptimized={!isSupabaseImage(page.photo_url)}
-                  priority
-                />
-              </div>
-            ) : gap('photo') ? (
-              // Only when there is no photo at all. A photo he has switched
-              // off with "Show my photo" is a decision he made, and the page
-              // must not second-guess it with an empty circle.
-              <div className="mp-portrait mp-gap-only">
-                <span className="mp-gap mp-gap-portrait" aria-hidden="true">
-                  <PersonGlyph />
-                </span>
-                {gapTag()}
-                {gapFix('photo', 'Add a photo of yourself:')}
-              </div>
-            ) : null}
-
-            <h1 className={nameClass}>
-              <span>{nameLine1}</span>
-              {nameLine2 ? <span className="r2">{nameLine2}</span> : null}
-            </h1>
-
-            {/* Only when the headline is the business: the person then gets
-                his own line so the page still says who you are talking to. */}
-            {bizName ? <p className="mp-person">{page.full_name}</p> : null}
-
-            <svg className="mp-underink" viewBox="0 0 560 16" preserveAspectRatio="none" aria-hidden="true">
-              <path pathLength="100" d="M4 11 C 90 4, 168 14, 252 8 S 420 3, 556 9" />
-            </svg>
-
-            <p className="mp-spec">{specLine}</p>
-
-            {/* The fallback above stays exactly as it is. The example sits
-                UNDER it, so he can see the difference between the sentence the
-                page writes when he says nothing and the one he could write
-                himself. Third person, no trade he has not claimed as his. */}
-            {gap('headline') ? (
-              <div className="mp-gap-only">
-                <p className="mp-spec mp-gap mp-gap-block">
-                  {gapTag()}
-                  <span>Brakes, suspension and check-engine diagnostics. Mobile.</span>
-                </p>
-                {gapFix('headline', 'Write your headline:')}
-              </div>
-            ) : null}
-
-            {/* One pill, and it is how he works. The row is gated on that
-                pill alone, so with no work type there is no empty band
-                between the specialization line and the CTAs. */}
-            {work ? (
-              <div className="mp-meta">
-                <span className="mp-pill">{work}</span>
-              </div>
-            ) : null}
-
-            <div className="mp-hero-cta">
-              <a className="mp-btn mp-btn-o mp-mag" href="#quote">
-                <span className="lbl">
-                  Get a quote
-                  <span className="mp-arrow" aria-hidden="true">
-                    &#8594;
-                  </span>
-                </span>
-              </a>
-              {wall.length > 0 ? (
-                <a className="mp-btn mp-btn-ghost mp-mag" href="#work">
-                  <span className="lbl">See the work</span>
-                </a>
-              ) : null}
-            </div>
-          </div>
-
-          {/* HIS OWN AD, on an unclaimed pitch page only (2026-09-22). A cold
-              prospect has no photo, no work and no reviews, so his page was
-              three short sections and two disclaimers. The one thing he DID
-              publish is his flyer, and showing it back to him, captioned as
-              his, is the only honest way to make the page look like him. The
-              view returns null on any status but 'unclaimed', so the moment
-              he claims the page this band is gone and his own content fills
-              it. Same-origin path or our own storage only (the column's CHECK
-              enforces it too): a third-party URL here would make every visit
-              to his page a request to someone else's server. */}
+        {/* HIS OWN AD, on an unclaimed pitch page only (2026-09-22). Kept from the earlier hero: the view
+            returns ad_image_url only while the page is unclaimed, and only from our own storage. */}
+        <div className="mp-ink">
           {unclaimed && page.ad_image_url && /^(\/|https:\/\/[a-z0-9.-]+\.supabase\.co\/storage\/)/.test(page.ad_image_url) ? (
             <figure className="mp-wrap mp-ad">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1736,77 +1668,7 @@ export default function Storefront({
               <figcaption className="mp-bio-src">From {first}’s own ad. Myku has not confirmed it.</figcaption>
             </figure>
           ) : null}
-
-          {/* The panel ALWAYS renders. The money question is never silent. */}
-          <div className="mp-facts">
-            <div className="mp-wrap">
-              {/* TWO counts, and the second one is what makes "show the page as
-                  visitors see it" honest. `n` is every cell in the DOM and sets
-                  the grid while the examples are showing. `v` is the REAL cells
-                  alone: hiding the ghosts with display:none does not change a
-                  grid's column count or re-run :last-child, so without it the
-                  band that claims to be the live page stood in a 3-column grid
-                  holding 2 cells, with a trailing hairline the live page does
-                  not have. */}
-              <div className={`mp-facts-in n${strip.length + ghostStrip.length || 1} v${strip.length || 1}`}>
-                {strip.length > 0 ? (
-                  strip.map((c, i) => (
-                    <div className={`mp-fact${i === strip.length - 1 ? ' mp-fact-lastreal' : ''}`} key={c.caption}>
-                      <span className="v">
-                        <span className="mp-msk">
-                          <i>{c.value}</i>
-                        </span>
-                        {c.unit ? <span className="u">{c.unit}</span> : null}
-                      </span>
-                      <span className="k">{c.caption}</span>
-                    </div>
-                  ))
-                ) : ghostStrip.length === 0 ? (
-                  // Zero cells: a positive statement about how the business
-                  // prices, never a blank state.
-                  //
-                  // It must not promise he will answer: Myku cannot compel an
-                  // independent business to reply. Built above, because the
-                  // published and unclaimed versions of this sentence say
-                  // different things (see stripFallback).
-                  <div className="mp-fact fb">{stripFallback}</div>
-                ) : null}
-                {/* Ghost cells LAST in the DOM, always. The strip's hairlines
-                    are :nth-child rules, so a cell inserted ahead of the real
-                    ones would take their borders as well as their slots. */}
-                {ghostStrip.map((c) => (
-                  <div className="mp-fact mp-gap" key={`g-${c.caption}`}>
-                    <span className="v">
-                      {c.value}
-                      {c.unit ? <span className="u">{c.unit}</span> : null}
-                    </span>
-                    <span className="k">
-                      {c.caption} {gapTag()}
-                    </span>
-                  </div>
-                ))}
-                {/* The examples took the band, so the fallback sentence does
-                    NOT co-render beside them: the two say opposite things
-                    about the same strip and would read as a page arguing with
-                    itself. It is still emitted, hidden, and CSS brings it back
-                    the moment he ticks "show the page as visitors see it",
-                    which is the moment it becomes true again and the moment
-                    the band would otherwise go empty. */}
-                {strip.length === 0 && ghostStrip.length > 0 ? (
-                  <div className="mp-fact fb mp-gap-fb">{stripFallback}</div>
-                ) : null}
-              </div>
-              {factsNote ? <p className="mp-facts-note">{factsNote}</p> : null}
-              {ghostStrip.length > 0
-                ? gapFix(
-                    'numbers',
-                    'Confirm your numbers in the app:',
-                    strip.length === 0 ? `Visitors currently see: “${stripFallback}”.` : undefined
-                  )
-                : null}
-            </div>
-          </div>
-        </section>
+        </div>
 
         {/* ============ WORK ============ */}
         {/* THE SECTION THE SPARSE PAGE USED TO SWALLOW WHOLE. With no jobs the

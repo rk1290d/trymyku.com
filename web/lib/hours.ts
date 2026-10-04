@@ -60,6 +60,9 @@ export function isEmptyHours(h: Hours | null): boolean {
 
 /** 570 -> "9:30am". `locale` only decides 24-hour vs 12-hour presentation. */
 export function formatTime(min: number, use24: boolean): string {
+  // 24:00 is how the picker stores a day that closes at midnight; "12am" read as
+  // the start of the day, not its end
+  if (!use24 && min === 1440) return 'midnight';
   const h = Math.floor(min / 60) % 24;
   const m = min % 60;
   if (use24) return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
@@ -111,7 +114,10 @@ export function formatHours(h: Hours | null, L: Labels): string | null {
   return runs
     .map((r) => {
       const days = r.from === r.to ? L.day[r.from] : L.range(L.day[r.from], L.day[r.to]);
-      const times = L.span(formatTime(r.hours[0], L.use24), formatTime(r.hours[1], L.use24));
+      const times =
+        r.hours[0] === 0 && r.hours[1] >= 1439
+          ? 'open 24 hours'
+          : L.span(formatTime(r.hours[0], L.use24), formatTime(r.hours[1], L.use24));
       return `${days} ${times}`;
     })
     .join(', ');

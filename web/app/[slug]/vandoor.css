@@ -1,0 +1,472 @@
+/* ==========================================================================
+   VAN DOOR: the first screen of the mechanic's page (2026-10-04, stage 1).
+   Ported from the approved design mock (design-mocks/mechanic-page-2026-10-04
+   in the app repo, src/page.css). Everything is scoped to .vd, so the rest of
+   the page (still the earlier design until stage 2) is untouched.
+
+   RULES THE CSS ENFORCES
+   - Colour has one job each. Orange = act (the button). Teal = Myku is the
+     source (the ID check, Myku reviews, jobs completed through Myku). His own
+     facts are neutral and say so in words.
+   - Type is provenance. Big Shoulders = signage. Geist = facts. Newsreader
+     italic = HIS words only (his headline).
+   - Phones: sentences are 16px or more; tap targets are 44px or more.
+   - Names wrap at word boundaries; sizes come from length classes the server
+     computes from real glyph widths (lib/vd/hero.ts). No anywhere-breaks.
+   - The phone geometry is a set of variables; their values per width bucket
+     and tier are at the end of this file and must match GEO in lib/vd/hero.ts.
+   ========================================================================== */
+
+.vd {
+  --ink: #0E1012;
+  --ink-line: rgba(232, 236, 239, .13);
+  --on-ink: #F3F3F0;
+  --on-ink-2: #C3C8CD;
+  --on-ink-3: #959BA2;
+  --tx: #14171A;
+  --tx-2: #474D54;
+  --orange: #F97316;
+  --orange-2: #EB6A0E;
+  --on-orange: #1B0E04;
+  --teal-ink: #6DD0C6;
+  --sign: var(--vd-sign), 'Avenir Next Condensed', 'Bahnschrift Condensed', 'Roboto Condensed', sans-serif-condensed, 'Arial Narrow', sans-serif;
+  --text: var(--vd-text), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --voice: var(--vd-voice), 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --gut: 16px;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  position: relative;
+  z-index: 2;
+  font: 400 16px/1.5 var(--text);
+  color: var(--on-ink);
+  -webkit-font-smoothing: antialiased;
+}
+html:has(.vd), body:has(.vd) { background: #0E1012; }
+.vd *, .vd *::before, .vd *::after { box-sizing: border-box; }
+.vd h1, .vd p, .vd ul, .vd figure { margin: 0; padding: 0; }
+.vd ul { list-style: none; }
+.vd img { display: block; max-width: 100%; color: transparent; }
+.vd a { color: inherit; }
+.vd button { font: inherit; color: inherit; cursor: pointer; }
+.vd summary { list-style: none; cursor: pointer; }
+.vd summary::-webkit-details-marker { display: none; }
+.vd [hidden] { display: none !important; }
+.vd .ic { width: 1em; height: 1em; flex: none; fill: currentColor; display: inline-block; }
+.vd .nw { white-space: nowrap; }
+.vd :focus-visible { outline: 2.5px solid var(--orange); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- band */
+.vd .band {
+  /* phone hero geometry: defaults are the 390 tier-0 values; the buckets are at the end */
+  --cov: 166px; --ov: 54px; --fw: 96px; --fh: 120px; --cg: 14px; --np: 52px; --who: 10px; --fm: 12px; --fg: 3px;
+  --hm: 10px; --hs: 20px; --pm: 15px; --nm: 10px; --am: 12px; --ah: 54px; --cm: 6px;
+  --ddp: 22px; --dlm: 12px; --dhm: 14px; --dam: 18px; --dcm: 8px;
+  position: relative;
+  isolation: isolate;
+  color: var(--on-ink);
+  background:
+    radial-gradient(120% 70% at 0% 0%, #1B1F23 0%, rgba(27, 31, 35, 0) 60%),
+    var(--ink);
+  padding: 0 var(--gut) 34px;
+}
+/* van-door pinstripes on the band's lower edge */
+.vd .band::after {
+  content: "";
+  position: absolute;
+  left: var(--gut); right: var(--gut); bottom: 12px;
+  height: 5px;
+  border-top: 1px solid rgba(232, 236, 239, .16);
+  border-bottom: 1px solid rgba(232, 236, 239, .16);
+  pointer-events: none;
+}
+.vd .topbar {
+  position: absolute; z-index: 3;
+  top: 10px; left: var(--gut); right: var(--gut);
+  display: flex; align-items: center; gap: 10px;
+  pointer-events: none;
+}
+.vd .topbar > * { pointer-events: auto; }
+.vd .topbar > .mk { pointer-events: none; }
+/* the Myku tile is a mark, not a control, and on his band it is a ghost: the only orange on screen one is the button */
+.vd .mk {
+  width: 30px; height: 30px; border-radius: 9px; flex: none;
+  display: grid; place-items: center;
+  background: transparent; border: 1px solid rgba(243, 243, 240, .28); color: var(--on-ink-2);
+}
+.vd .mk svg { width: 17px; height: 17px; display: block; }
+.vd .share-wrap { position: relative; margin-left: auto; }
+.vd .share {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 36px; padding: 0 13px 0 11px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  background: rgba(14, 16, 18, .62);
+  color: var(--on-ink);
+  font: 600 14px/1 var(--text);
+}
+.vd .share::before { content: ""; position: absolute; inset: -5px -3px; }
+.vd .share .ic { font-size: 17px; }
+.vd .share:active { transform: scale(.97); }
+.vd .share-panel {
+  position: absolute; z-index: 7; right: 0; top: calc(100% + 8px);
+  width: min(330px, calc(100vw - 2 * var(--gut)));
+  padding: 12px 14px 14px; border-radius: 14px;
+  background: #F7F8F5; color: var(--tx);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .55);
+}
+.vd .share-panel label { display: block; font: 650 15px/1.3 var(--text); }
+.vd .share-panel input {
+  margin-top: 8px; width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid rgba(20, 23, 26, .24); background: #FFF; font: 400 16px/1.3 var(--text); color: var(--tx);
+}
+
+/* the cover strip: his work, full-bleed, fading into the paint */
+.vd .cover {
+  position: relative;
+  margin: 0 calc(var(--gut) * -1);
+  height: var(--cov);
+  display: grid;
+  gap: 2px;
+  background: #22262A;
+  overflow: hidden;
+}
+.vd .cover--1 { grid-template-columns: 1fr; }
+.vd .cover--2 { grid-template-columns: 1.5fr 1fr; }
+.vd .cover--3, .vd .cover--4 { grid-template-columns: 1.55fr 1fr; grid-template-rows: 1fr 1fr; }
+.vd .cover--3 .cv:first-child, .vd .cover--4 .cv:first-child { grid-row: span 2; }
+.vd .cover--4 .cv:nth-child(n+4) { display: none; }
+.vd .cv { position: relative; display: block; background: #2A2F34; overflow: hidden; }
+.vd .cv img { width: 100%; height: 100%; object-fit: cover; }
+.vd .cover::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(14, 16, 18, .62) 0%, rgba(14, 16, 18, 0) 34%, rgba(14, 16, 18, 0) 50%, rgba(14, 16, 18, .72) 84%, var(--ink) 100%);
+}
+/* "Shared by Andre" sits on his photos, at the corner the face does not cover */
+.vd .cover-src {
+  position: absolute; z-index: 2; right: var(--gut); bottom: 10px;
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 500 13px/1.2 var(--text); color: #E9EBEC;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .7);
+  pointer-events: none;
+}
+.vd .cover-src .ic { font-size: 15px; opacity: .9; }
+
+/* identity: face overlapping the strip, business name lettered beside it */
+.vd .ident {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: var(--fw) minmax(0, 1fr);
+  column-gap: var(--cg);
+  margin-top: calc(-1 * var(--ov));
+  align-items: start;
+  pointer-events: none;
+}
+.vd .ident .face, .vd .ident .biz { pointer-events: auto; }
+.vd .ident.noface { grid-template-columns: minmax(0, 1fr); }
+.vd .face {
+  width: var(--fw); height: var(--fh);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #2E3338;
+  box-shadow: 0 0 0 3px var(--ink), 0 14px 30px -10px rgba(0, 0, 0, .7);
+}
+.vd .face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; transform: scale(1.12); transform-origin: 50% 8%; }
+.vd .biz {
+  font-family: var(--sign);
+  font-weight: 800;
+  color: #F6F5F0;
+  letter-spacing: .004em;
+  overflow-wrap: break-word; /* emergency net only; sizes are chosen so it never fires */
+  hyphens: manual;
+  text-wrap: balance;
+}
+.vd .ident .biz { margin-top: var(--np); }
+.vd .biz.u { text-transform: uppercase; line-height: var(--lh, .96); }
+.vd .biz.t { line-height: var(--lh, 1.04); }
+.vd .biz.n-xl { font-size: 38px; }
+.vd .biz.n-l { font-size: 33px; }
+.vd .biz.n-m { font-size: 28px; }
+.vd .biz.n-s { font-size: 25px; }
+.vd .biz.n-xs { font-size: 22px; }
+.vd .biz.n-xxs { font-size: 19px; }
+.vd .biz.n-xxxs { font-size: 16px; }
+
+/* no job photos yet, but his face: the same identity block, no strip */
+.vd .band--nocover { padding-top: 54px; }
+.vd .band--nocover::before {
+  content: ""; position: absolute; left: var(--gut); right: var(--gut); top: 54px; height: 5px;
+  border-top: 1px solid rgba(232, 236, 239, .17); border-bottom: 1px solid rgba(232, 236, 239, .17);
+}
+.vd .band--nocover .ident { margin-top: 0; padding-top: 18px; align-items: end; }
+.vd .band--nocover .ident .biz { margin-top: 0; }
+
+.vd .who {
+  position: relative;
+  margin-top: var(--who);
+  display: flex; flex-wrap: wrap; align-items: center;
+  column-gap: 10px; row-gap: 6px;
+}
+.vd .person { font: 600 16px/1.25 var(--text); color: var(--on-ink); }
+
+/* the ID chip: a fact about identity only, attached to the NAME */
+.vd .idc { position: static; }
+.vd .idc > summary {
+  position: relative; z-index: 3;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 11px 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(109, 208, 198, .4);
+  background: rgba(109, 208, 198, .09);
+  color: var(--teal-ink);
+  font: 600 13px/1 var(--text);
+  white-space: nowrap;
+}
+/* 28px padding box + 2 x 8 = 44px of hit area */
+.vd .idc > summary::after { content: ""; position: absolute; inset: -8px -4px; }
+.vd .idc > summary .ic { font-size: 17px; }
+.vd .idc > summary .cv-d { font-size: 12px; opacity: .8; transition: transform .25s var(--ease); }
+.vd .idc[open] > summary .cv-d { transform: rotate(180deg); }
+.vd .idc-panel {
+  position: absolute; z-index: 6;
+  left: 0; right: 0; top: calc(100% + 10px);
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #F7F8F5; color: var(--tx);
+  font: 400 16px/1.45 var(--text);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, .55);
+}
+
+.vd .facts { margin-top: var(--fm); display: grid; gap: var(--fg); }
+.vd .facts li { display: flex; align-items: flex-start; gap: 9px; font: 400 16px/1.4 var(--text); color: var(--on-ink-2); }
+.vd .facts .ic { font-size: 18px; color: var(--on-ink-3); margin-top: 2px; }
+.vd .area-s { display: none; }
+.vd .ds-a, .vd .ds-sep { display: inline; }
+
+.vd .headline {
+  margin-top: var(--hm);
+  font: italic 400 var(--hs)/1.3 var(--voice);
+  color: #EEEBE3;
+  max-width: 34ch;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+/* proof rail: third-party numbers only, count-aware, no boxes */
+.vd .proof { margin-top: var(--pm); display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+.vd .pf {
+  position: relative;
+  display: block; text-decoration: none; min-width: 0;
+  padding: 0 10px 0 12px;
+  border-left: 1px solid var(--ink-line);
+}
+.vd .pf::after { content: ""; position: absolute; inset: -8px 0; }
+.vd .pf:first-child { padding-left: 0; border-left: 0; }
+.vd .pf-n {
+  display: flex; align-items: center; gap: 4px;
+  font: 800 30px/1 var(--sign); color: var(--on-ink);
+  letter-spacing: .005em;
+}
+.vd .pf-n .ic { font-size: 16px; color: #E8E6DE; }
+.vd .pf-l { display: block; margin-top: 5px; font: 500 13px/1.3 var(--text); color: var(--on-ink-3); }
+.vd .pf--myku .pf-l, .vd .pf--jobs .pf-l { color: var(--teal-ink); }
+.vd .pf--jobs .pf-n .ic { color: var(--teal-ink); font-size: 21px; margin-left: 2px; }
+.vd .proof--3.has-jobs { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.34fr); }
+.vd .proof--2.has-jobs { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) minmax(0, 1.34fr); }
+.vd .proof--1 { grid-auto-flow: row; }
+.vd .proof--1 .pf { display: flex; align-items: center; gap: 10px; }
+.vd .proof--1 .pf-l { margin-top: 0; font-size: 14px; }
+/* a small honest count: a line of text, never a display numeral */
+.vd .pf-lines { margin-top: 10px; display: grid; gap: 14px; }
+.vd .pfl {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 30px;
+  font: 500 16px/1.3 var(--text); color: var(--on-ink-2); text-decoration: none;
+}
+.vd .pfl::after { content: ""; position: absolute; inset: -7px 0; }
+.vd .pfl .ic { font-size: 18px; color: #E8E6DE; }
+.vd .pfl b { font-weight: 650; color: var(--on-ink); }
+.vd .pfl--jobs, .vd .pfl--myku { color: var(--teal-ink); }
+.vd .pfl--jobs .ic { color: var(--teal-ink); }
+
+/* his own numbers: years, rate, diagnostic fee. Attributed, and kept apart from the proof */
+.vd .nums { margin-top: var(--nm); font: 400 16px/1.4 var(--text); color: var(--on-ink-2); }
+.vd .nums-v { display: block; }
+.vd .nums .nb { white-space: nowrap; }
+.vd .nums b { font-weight: 650; color: var(--on-ink); }
+.vd .nums .sep { color: var(--on-ink-3); }
+.vd .nums .attr { display: flex; align-items: center; gap: 6px; margin-top: 1px; font: 500 14px/1.35 var(--text); color: var(--on-ink-3); }
+.vd .nums .attr .ic { font-size: 15px; }
+
+/* the one action */
+.vd .cta {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  padding: 7px 7px 7px 22px;
+  border: 0; border-radius: 999px;
+  background: var(--orange); color: var(--on-orange);
+  font: 650 17px/1.2 var(--text);
+  text-decoration: none; text-align: left;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .28) inset, 0 12px 26px -12px rgba(249, 115, 22, .65);
+  transition: transform .2s var(--ease), background-color .2s var(--ease);
+}
+.vd .cta:active { transform: scale(.985); background: var(--orange-2); }
+.vd .cta-ic {
+  width: 40px; height: 40px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  background: rgba(27, 14, 4, .12);
+  transition: transform .3s var(--ease);
+}
+.vd .cta-ic .ic { font-size: 19px; }
+.vd .cta:hover .cta-ic { transform: translateX(2px); }
+.vd .hero-ask { margin-top: var(--am); min-height: var(--ah); }
+.vd .cta-long { font-size: 16px; padding-left: 18px; gap: 8px; }
+.vd .cta-xlong { font-size: 15px; padding-left: 16px; gap: 6px; }
+.vd .cta-note { margin-top: var(--cm); text-align: center; font: 400 16px/1.35 var(--text); color: var(--on-ink-3); }
+
+/* ---------------------------------------------------------- van door (no photos) */
+.vd .band--door { padding-top: 54px; }
+.vd .band--door .topbar { top: 12px; }
+.vd .door { position: relative; padding: var(--ddp) 0; }
+.vd .door::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px;
+  border-top: 1px solid rgba(232, 236, 239, .17);
+  border-bottom: 1px solid rgba(232, 236, 239, .17);
+}
+.vd .door .biz { margin-top: 2px; }
+.vd .biz.d-xl { font-size: calc(54px * var(--dnz, 1)); }
+.vd .biz.d-l { font-size: calc(46px * var(--dnz, 1)); }
+.vd .biz.d-m { font-size: calc(39px * var(--dnz, 1)); }
+.vd .biz.d-s { font-size: calc(32px * var(--dnz, 1)); }
+.vd .biz.d-xs { font-size: calc(27px * var(--dnz, 1)); }
+.vd .biz.d-xxs { font-size: calc(23px * var(--dnz, 1)); }
+.vd .biz.d-xxxs { font-size: calc(19px * var(--dnz, 1)); }
+.vd .door .person { display: block; margin-top: 8px; font-size: 17px; color: var(--on-ink-2); }
+.vd .lettering {
+  margin-top: var(--dlm);
+  display: flex; align-items: center; gap: 9px;
+  font: 700 18px/1.15 var(--sign);
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--on-ink-2);
+}
+.vd .lettering .ic { font-size: 22px; color: var(--on-ink); flex: none; }
+.vd .door-sub { margin-top: 10px; display: grid; gap: 3px; }
+.vd .door-sub li { display: flex; align-items: flex-start; gap: 9px; font: 400 16px/1.4 var(--text); color: var(--on-ink-2); }
+.vd .door-sub .ic { font-size: 18px; margin-top: 2px; color: var(--on-ink-3); }
+.vd .band--door .headline { margin-top: var(--dhm); font-size: 20px; }
+.vd .band--door .proof { margin-top: 16px; }
+.vd .band--door .hero-ask { margin-top: var(--dam); min-height: 54px; }
+.vd .band--door .cta-note { margin-top: var(--dcm); }
+.vd .band--door .who { margin-top: 10px; }
+.vd .listing-note { margin-top: 10px; display: flex; gap: 8px; align-items: flex-start; font: 400 16px/1.4 var(--text); color: var(--on-ink-3); }
+.vd .listing-note .ic { font-size: 16px; margin-top: 3px; }
+
+/* the signage is the Display cut of Big Shoulders (see components/vd/fonts.ts) */
+.vd .biz, .vd .pf-n, .vd .lettering { font-optical-sizing: none; font-variation-settings: 'opsz' 72; }
+
+/* ------------------------------------------------------------ tablet */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .vd { --gut: 28px; --side: max(28px, calc(50vw - 312px)); }
+  .vd .band { padding-left: var(--side); padding-right: var(--side); --cov: 260px; --ov: 66px; --fw: 116px; --fh: 145px; --cg: 18px; --np: 76px; --who: 12px; --fm: 14px; --pm: 18px; --nm: 14px; --am: 18px; --cm: 9px; }
+  .vd .band .topbar { left: var(--side); right: var(--side); }
+  .vd .cover { margin: 0 calc(var(--side) * -1); }
+  .vd .cover-src { right: var(--side); }
+  .vd .biz.n-xl { font-size: 50px; } .vd .biz.n-l { font-size: 44px; } .vd .biz.n-m { font-size: 38px; }
+  .vd .biz.n-s { font-size: 32px; } .vd .biz.n-xs { font-size: 28px; } .vd .biz.n-xxs { font-size: 24px; } .vd .biz.n-xxxs { font-size: 20px; }
+  .vd .hero-ask { max-width: 520px; margin-left: auto; margin-right: auto; }
+}
+
+/* ------------------------------------------------------------ laptop */
+/* Stage 1: the request still lives at the end of the page, so the band keeps its own button and runs as one centred
+   column. Stage 2 moves the request into a column beside the page and drops this button, as the mock does. */
+@media (min-width: 1024px) {
+  .vd { --gut: 0px; --side: max(44px, calc(50vw - 560px)); }
+  .vd .band { padding: 24px var(--side) 46px;
+    --cov: clamp(200px, calc(100vh - 450px), 344px); --ov: clamp(52px, calc((100vh - 450px) * .227), 78px);
+    --fw: 140px; --fh: 175px; --cg: 26px; --np: calc(var(--ov) + 14px); --who: 18px; --fm: 18px; --fg: 6px;
+    --hm: 16px; --hs: 27px; --pm: 26px; --nm: 18px; --am: 26px; --cm: 10px;
+    background:
+      radial-gradient(60% 90% at 20% 0%, #1B1F23 0%, rgba(27, 31, 35, 0) 70%),
+      var(--ink); }
+  .vd .band::after { left: var(--side); right: var(--side); bottom: 16px; }
+  .vd .topbar { position: relative; top: auto; left: auto; right: auto; margin-bottom: 16px; }
+  .vd .cover { margin: 0; border-radius: 18px; }
+  .vd .cover--3, .vd .cover--4 { grid-template-columns: 1.6fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+  .vd .cover--3 .cv:first-child, .vd .cover--4 .cv:first-child { grid-row: span 2; }
+  .vd .cover--3 .cv:nth-child(2) { grid-row: span 2; }
+  .vd .cover--4 .cv:nth-child(n+4) { display: block; }
+  .vd .cover--4 .cv:nth-child(n+6) { display: none; }
+  .vd .cover::after { background: linear-gradient(180deg, rgba(14, 16, 18, 0) 55%, rgba(14, 16, 18, .65) 100%); border-radius: 18px; }
+  .vd .cover-src { right: 16px; bottom: 14px; font-size: 14px; }
+  .vd .ident { padding-left: 24px; }
+  .vd .face { border-radius: 20px; box-shadow: 0 0 0 4px var(--ink), 0 18px 40px -12px rgba(0, 0, 0, .7); }
+  .vd .biz.n-xl { font-size: 66px; } .vd .biz.n-l { font-size: 58px; } .vd .biz.n-m { font-size: 50px; }
+  .vd .biz.n-s { font-size: 42px; } .vd .biz.n-xs { font-size: 36px; } .vd .biz.n-xxs { font-size: 31px; } .vd .biz.n-xxxs { font-size: 26px; }
+  .vd .band--nocover { padding-top: 24px; }
+  .vd .band--nocover::before { display: none; }
+  .vd .band--nocover .ident { padding-top: 30px; padding-left: 0; }
+  .vd .person { font-size: 18px; }
+  .vd .idc-panel { right: auto; width: 400px; }
+  .vd .facts { display: flex; flex-wrap: wrap; gap: 6px 30px; }
+  .vd .headline { max-width: 30ch; }
+  .vd .proof { max-width: 640px; }
+  .vd .pf { padding: 0 18px 0 20px; }
+  .vd .pf-n { font-size: 44px; }
+  .vd .pf-n .ic { font-size: 21px; }
+  .vd .pf-l { font-size: 14px; }
+  .vd .nums-v { display: inline; }
+  .vd .nums .attr { display: inline-flex; margin: 0 0 0 14px; vertical-align: 1px; }
+  .vd .hero-ask { max-width: 440px; min-height: 58px; }
+  .vd .cta-note { max-width: 440px; }
+
+  .vd .band--door { padding-top: 24px; }
+  .vd .band--door .topbar { position: relative; top: auto; }
+  .vd .door { padding: 40px 0 38px; margin-top: 6px; }
+  .vd .biz.d-xl { font-size: 104px; } .vd .biz.d-l { font-size: 88px; } .vd .biz.d-m { font-size: 74px; }
+  .vd .biz.d-s { font-size: 58px; } .vd .biz.d-xs { font-size: 50px; } .vd .biz.d-xxs { font-size: 42px; } .vd .biz.d-xxxs { font-size: 34px; }
+  .vd .lettering { font-size: 25px; margin-top: 16px; }
+  .vd .lettering .ic { font-size: 28px; }
+  .vd .band--door .headline { font-size: 28px; margin-top: 24px; }
+  .vd .band--door .hero-ask { max-width: 440px; }
+}
+@media (min-width: 1024px) and (max-height: 860px) {
+  .vd .band { --cov: clamp(180px, calc(100vh - 470px), 300px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vd .cta, .vd .cta-ic, .vd .idc > summary .cv-d { transition: none; }
+}
+
+/* ------------------------------------------------------------ phone geometry per width bucket and tier
+   (must match GEO and DOOR_GEO in lib/vd/hero.ts; generated from the same tables) */
+@media (max-width: 359.98px) {
+  .vd .band { --cov: 158px; --ov: 50px; --fw: 86px; --fh: 108px; --cg: 12px; --np: 51px; --who: 10px; --fm: 12px; --fg: 3px; --hm: 10px; --hs: 20px; --pm: 15px; --nm: 10px; --am: 12px; --ah: 54px; --cm: 6px; }
+  .vd .band.txs1 { --cov: 124px; --ov: 44px; --fw: 80px; --fh: 100px; --cg: 12px; --np: 50px; --who: 8px; --fm: 8px; --fg: 1px; --hm: 8px; --hs: 19px; --pm: 12px; --nm: 8px; --am: 12px; --ah: 52px; --cm: 5px; }
+  .vd .band.txs2 { --cov: 100px; --ov: 40px; --fw: 72px; --fh: 90px; --cg: 12px; --np: 46px; --who: 8px; --fm: 6px; --fg: 0px; --hm: 6px; --hs: 18px; --pm: 10px; --nm: 6px; --am: 10px; --ah: 50px; --cm: 4px; }
+  .vd .band--door.txs1 { --ddp: 16px; --dlm: 8px; --dhm: 10px; --dam: 14px; --dcm: 6px; --dnz: 1; }
+  .vd .band--door.txs2 { --ddp: 10px; --dlm: 6px; --dhm: 8px; --dam: 12px; --dcm: 4px; --dnz: 1; }
+  .vd .band--door.txs3 { --ddp: 10px; --dlm: 6px; --dhm: 8px; --dam: 12px; --dcm: 4px; --dnz: 0.86; }
+  .vd .band.txs2 .fact-hours { display: none; } .vd .band.txs2 .area-l { display: none; } .vd .band.txs2 .area-s { display: block; }
+  .vd .band.dsxs .area-s .ds-sep, .vd .band.lsxs .lettering .ds-sep { display: none; } .vd .band.dsxs .area-s .ds-a, .vd .band.lsxs .lettering .ds-a { display: block; }
+}
+@media (min-width: 360px) and (max-width: 374.98px) {
+  .vd .band { --cov: 158px; --ov: 50px; --fw: 86px; --fh: 108px; --cg: 12px; --np: 51px; --who: 10px; --fm: 12px; --fg: 3px; --hm: 10px; --hs: 20px; --pm: 15px; --nm: 10px; --am: 12px; --ah: 54px; --cm: 6px; }
+  .vd .band.tsm1 { --cov: 124px; --ov: 44px; --fw: 80px; --fh: 100px; --cg: 12px; --np: 50px; --who: 8px; --fm: 8px; --fg: 1px; --hm: 8px; --hs: 19px; --pm: 12px; --nm: 8px; --am: 12px; --ah: 52px; --cm: 5px; }
+  .vd .band.tsm2 { --cov: 100px; --ov: 40px; --fw: 72px; --fh: 90px; --cg: 12px; --np: 46px; --who: 8px; --fm: 6px; --fg: 0px; --hm: 6px; --hs: 18px; --pm: 10px; --nm: 6px; --am: 10px; --ah: 50px; --cm: 4px; }
+  .vd .band--door.tsm1 { --ddp: 16px; --dlm: 8px; --dhm: 10px; --dam: 14px; --dcm: 6px; --dnz: 1; }
+  .vd .band--door.tsm2 { --ddp: 10px; --dlm: 6px; --dhm: 8px; --dam: 12px; --dcm: 4px; --dnz: 1; }
+  .vd .band--door.tsm3 { --ddp: 10px; --dlm: 6px; --dhm: 8px; --dam: 12px; --dcm: 4px; --dnz: 0.86; }
+  .vd .band.tsm2 .fact-hours { display: none; } .vd .band.tsm2 .area-l { display: none; } .vd .band.tsm2 .area-s { display: block; }
+  .vd .band.dssm .area-s .ds-sep, .vd .band.lssm .lettering .ds-sep { display: none; } .vd .band.dssm .area-s .ds-a, .vd .band.lssm .lettering .ds-a { display: block; }
+}
+@media (min-width: 375px) and (max-width: 639.98px) {
+  .vd .band { --cov: 166px; --ov: 54px; --fw: 96px; --fh: 120px; --cg: 14px; --np: 52px; --who: 10px; --fm: 12px; --fg: 3px; --hm: 10px; --hs: 20px; --pm: 15px; --nm: 10px; --am: 12px; --ah: 54px; --cm: 6px; }
+  .vd .band.tmd1 { --cov: 132px; --ov: 48px; --fw: 88px; --fh: 110px; --cg: 12px; --np: 52px; --who: 8px; --fm: 8px; --fg: 1px; --hm: 8px; --hs: 19px; --pm: 12px; --nm: 8px; --am: 12px; --ah: 52px; --cm: 5px; }
+  .vd .band.tmd2 { --cov: 108px; --ov: 42px; --fw: 80px; --fh: 100px; --cg: 12px; --np: 48px; --who: 8px; --fm: 6px; --fg: 0px; --hm: 6px; --hs: 18px; --pm: 10px; --nm: 6px; --am: 10px; --ah: 50px; --cm: 4px; }
+  .vd .band--door.tmd1 { --ddp: 16px; --dlm: 8px; --dhm: 10px; --dam: 14px; --dcm: 6px; --dnz: 1; }
+  .vd .band--door.tmd2 { --ddp: 10px; --dlm: 6px; --dhm: 8px; --dam: 12px; --dcm: 4px; --dnz: 1; }
+  .vd .band--door.tmd3 { --ddp: 10px; --dlm: 6px; --dhm: 8px; --dam: 12px; --dcm: 4px; --dnz: 0.86; }
+  .vd .band.tmd2 .fact-hours { display: none; } .vd .band.tmd2 .area-l { display: none; } .vd .band.tmd2 .area-s { display: block; }
+  .vd .band.dsmd .area-s .ds-sep, .vd .band.lsmd .lettering .ds-sep { display: none; } .vd .band.dsmd .area-s .ds-a, .vd .band.lsmd .lettering .ds-a { display: block; }
+}

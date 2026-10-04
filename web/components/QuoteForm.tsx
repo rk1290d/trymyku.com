@@ -99,11 +99,14 @@ async function refusalMessage(
       : `${first} already has your last few requests. Please give it an hour before sending another.`;
   }
   if (scope === 'mechanic') {
-    return 'This page is taking a lot of requests right now. Please try again later, or email support@trymyku.com.';
+    // Says nothing about him. "Taking a lot of requests right now" read as a
+    // statement about how busy he is, and whether he is taking work never
+    // renders on his page in any form (Rohaan, 2026-10-04).
+    return 'Myku could not take this request. Please try again in an hour, or email support@trymyku.com.';
   }
   // 'ip', and anything unrecognised: the per-IP burst bucket is a double tap
   // on submit, and a minute is literally its window.
-  return 'This page is busy right now. Please wait a minute and try again.';
+  return 'That went through too fast. Please wait a minute and try again.';
 }
 
 const TIMING_OPTIONS: { value: string; label: string }[] = [
