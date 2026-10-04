@@ -1,0 +1,466 @@
+/* ==========================================================================
+   THE WORK ORDER: the price request on the mechanic's page (2026-10-04, the van door redesign).
+   Describes components/vd/Request.tsx and components/vd/Dock.tsx as built on 2026-10-04.
+   Ported from the approved mock (design-mocks/mechanic-page-2026-10-04 in the app repo, src/page.css: "the
+   request: a work order", "the sheet", "the dock", and the laptop rail). Scoped to .vd like vandoor.css, and every
+   class is rq- prefixed because the site's own globals.css already styles bare .inp and .err.
+
+   ONE CARD, THREE PLACES
+   - Inline (no script, or a phone before it is opened): a canary "customer copy" work order.
+   - The phone sheet: the same card, lifted into a layer at the end of <body> (requestBus.ts says why), over a scrim.
+   - The laptop rail (1024px and up): sticky, compact, scrolling inside itself under a pinned Send.
+
+   RULES
+   - Orange is the one action (Send, the dock's button). Everything else on the card is ink on paper.
+   - Phones: sentences 16px or more; tap targets 44px or more (some through an invisible ::after zone).
+   - Free text (his service names, his note, what she typed) wraps inside its box; nothing widens the card.
+   ========================================================================== */
+
+.vd {
+  --wo: #FBF4D8;
+  --wo-2: #F4EAC4;
+  --wo-line: rgba(83, 64, 12, .2);
+  --wo-field: #FFFDF5;
+  --err: #B42318;
+  --tx-3: #5D636A;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  /* the colour of whatever the card sits on: the perforation's two notches are bites out of the card in that tone */
+  --rq-ground: #E4E4DC;
+}
+
+/* the layer at the end of <body>: it carries .vd for the tokens and the faces, but no box and no stacking context of
+   its own, so the sheet and the dock are fixed to the screen and stack against the page itself */
+.vd.rq-layer { position: static; z-index: auto; }
+
+.vd.rq { position: relative; z-index: auto; color: var(--tx); }
+.vd .rq-anchor { display: block; height: 0; overflow: hidden; scroll-margin-top: 16px; }
+
+.vd :where(.rq-wo, .rq-dock) :where(h2, p, ol, dl, dd, figure, blockquote, fieldset, legend) { margin: 0; padding: 0; }
+.vd :where(.rq-wo) ol { list-style: none; }
+.vd :where(.rq-wo) fieldset { border: 0; min-width: 0; }
+.vd :where(.rq-wo) summary { list-style: none; cursor: pointer; }
+.vd :where(.rq-wo) summary::-webkit-details-marker { display: none; }
+.vd :where(.rq-wo) :where(input, textarea, button) { font: inherit; color: inherit; margin: 0; }
+
+/* ------------------------------------------------- the card */
+.vd .rq-wo {
+  position: relative;
+  background: var(--wo);
+  color: var(--tx);
+  border-radius: 20px;
+  padding: 22px 18px 20px;
+  text-align: left;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 2px 6px rgba(70, 54, 8, .07), 0 22px 44px -22px rgba(70, 54, 8, .42);
+}
+.vd .rq-wo:focus { outline: none; }
+/* the site's own selection (globals.css) is white text on pale orange, unreadable on paper */
+.vd .rq-wo ::selection { background: rgba(249, 115, 22, .3); color: var(--tx); }
+.vd .rq-bar { display: none; }
+.vd .rq-h { display: flex; align-items: center; gap: 12px; }
+.vd .rq-face { width: 42px; height: 42px; border-radius: 12px; overflow: hidden; flex: none; background: #CFC6A6; }
+/* small face frames crop toward the face, so a knee-up photo still reads at 30 to 46px */
+.vd .rq-face img, .vd .rq-note-face img, .vd .rq-dock-face img {
+  width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 50% 6%;
+  transform: scale(1.7); transform-origin: 50% 4%;
+}
+.vd .rq-h h2 {
+  min-width: 0;
+  font: 800 29px/1 var(--sign);
+  letter-spacing: .004em;
+  color: var(--tx);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  font-optical-sizing: none; font-variation-settings: 'opsz' 72;
+}
+.vd .rq-h h2:focus { outline: none; }
+
+/* the three steps: what happens to her request, before she types anything */
+.vd .rq-steps { position: relative; margin-top: 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; }
+.vd .rq-steps::before { content: ""; position: absolute; left: 13px; top: 14px; bottom: 14px; border-left: 1.5px dashed var(--wo-line); }
+.vd .rq-steps li { position: relative; display: flex; align-items: flex-start; gap: 10px; font: 500 16px/1.3 var(--text); color: var(--tx-2); text-wrap: pretty; }
+/* centred on the first line, so a step that wraps keeps the same rhythm as one that does not */
+.vd .rq-st {
+  position: relative; flex: none;
+  width: 27px; height: 27px; margin-top: -3px;
+  display: grid; place-items: center;
+  border-radius: 999px; background: var(--wo-field); border: 1px solid var(--wo-line); color: var(--tx);
+}
+.vd .rq-st .ic { font-size: 14px; }
+.vd .rq-perf { position: relative; margin: 18px -18px 16px; border-top: 1.5px dashed var(--wo-line); }
+.vd .rq-perf::before, .vd .rq-perf::after { content: ""; position: absolute; top: -9px; width: 8px; height: 16px; background: var(--rq-ground); }
+.vd .rq-perf::before { left: 0; border-radius: 0 8px 8px 0; box-shadow: inset -1.5px 0 1.5px rgba(70, 54, 8, .16); }
+.vd .rq-perf::after { right: 0; border-radius: 8px 0 0 8px; box-shadow: inset 1.5px 0 1.5px rgba(70, 54, 8, .16); }
+
+/* the honeypot: off screen, out of the tab order, out of the accessibility tree */
+.vd .rq-hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* ------------------------------------------------- step 1: the job */
+.vd .rq-step1 > legend { display: block; font: 650 16px/1.3 var(--text); color: var(--tx); }
+.vd .rq-tiles { margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.vd .rq-tile { position: relative; display: flex; min-width: 0; cursor: pointer; }
+.vd .rq-tile input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.vd .rq-tile > span {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  min-height: 58px; padding: 10px 12px;
+  border-radius: 12px; background: var(--wo-field); border: 1px solid var(--wo-line);
+  transition: background-color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+}
+/* a long service name wraps inside its own tile: at its spaces first, mid-word only for one long token */
+.vd .rq-tile b { min-width: 0; font: 600 16px/1.28 var(--text); color: var(--tx); text-wrap: balance; overflow-wrap: anywhere; }
+.vd .rq-tile small { font: 500 14px/1.2 var(--text); color: var(--tx-3); }
+.vd .rq-tile input:checked + span { background: var(--tx); border-color: var(--tx); }
+.vd .rq-tile input:checked + span b { color: #FFF; }
+.vd .rq-tile input:checked + span small { color: #C7CCD1; }
+.vd .rq-tile input:focus-visible + span, .vd .rq-chip input:focus-visible + span { outline: 2.5px solid var(--orange); outline-offset: 2px; }
+.vd .rq-tile > span:active { transform: scale(.985); }
+.vd .rq-tile--ns.p2 { grid-column: 1 / -1; }
+.vd .rq-tile--ns > span { min-height: 52px; }
+.vd .rq-wo:not(.is-sheet) .rq-tile > span { min-height: 50px; padding: 8px 11px; }
+.vd .rq-more { margin-top: 4px; }
+.vd .rq-more > summary {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 44px; padding: 0 2px;
+  font: 600 16px/1.2 var(--text); color: var(--tx);
+}
+.vd .rq-more > summary .ic { font-size: 16px; }
+.vd .rq-more[open] > summary { display: none; }
+.vd .rq-more .rq-tiles { margin-top: 8px; }
+
+/* ------------------------------------------------- step 2: the details */
+.vd .rq-step2 { margin-top: 22px; display: grid; gap: 18px; min-width: 0; }
+.vd .rq-picked { display: none; }
+.vd .rq-picked:focus { outline: none; }
+.vd .rq-picked b { flex: 1 1 auto; min-width: 0; font-weight: 650; color: var(--tx); overflow-wrap: anywhere; }
+.vd .rq-pk-for { flex: none; }
+.vd .rq-change {
+  position: relative; flex: none; margin-left: auto;
+  min-height: 44px; padding: 0 14px;
+  border-radius: 999px; border: 1px solid var(--wo-line); background: var(--wo-field);
+  font: 600 16px/1 var(--text); color: var(--tx);
+}
+.vd .rq-change::after { content: ""; position: absolute; inset: -3px -2px; }
+
+/* his note: his own words, in his voice face, as a message from him */
+.vd .rq-note { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 10px; align-items: end; }
+.vd .rq-note.noface { grid-template-columns: minmax(0, 1fr); }
+.vd .rq-note-face { width: 34px; height: 34px; border-radius: 10px; overflow: hidden; background: #CFC6A6; }
+.vd .rq-note blockquote {
+  min-width: 0;
+  padding: 11px 14px;
+  border-radius: 16px 16px 16px 5px;
+  background: var(--wo-field); border: 1px solid var(--wo-line);
+  font: italic 400 17px/1.4 var(--voice); color: var(--tx);
+  overflow-wrap: anywhere;
+}
+.vd .rq-note.noface blockquote { border-radius: 16px; }
+.vd .rq-note figcaption { grid-column: 2; margin-top: 5px; font: 500 14px/1.2 var(--text); color: var(--tx-3); }
+.vd .rq-note.noface figcaption { grid-column: 1; }
+
+.vd .rq-fld { display: grid; gap: 7px; min-width: 0; align-content: start; }
+.vd .rq-fld > label, .vd .rq-fld > legend { display: block; font: 650 16px/1.3 var(--text); color: var(--tx); }
+.vd fieldset.rq-fld > legend { padding-bottom: 7px; } /* a legend gets no grid gap: the same 7px as every label */
+.vd .rq-inp {
+  display: block;
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 23, 26, .24);
+  background: var(--wo-field);
+  font: 400 16px/1.4 var(--text); color: var(--tx);
+  box-shadow: none;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.vd textarea.rq-inp { min-height: 96px; resize: vertical; }
+.vd .rq-inp::placeholder { color: #6E726F; opacity: 1; }
+.vd .rq-inp:focus { outline: none; border-color: var(--tx); box-shadow: 0 0 0 3px rgba(20, 23, 26, .13); }
+.vd .rq-help { font: 400 16px/1.45 var(--text); color: var(--tx-3); text-wrap: pretty; }
+.vd .rq-err { display: none; font: 500 16px/1.4 var(--text); color: var(--err); }
+.vd .rq-fld.bad .rq-inp { border-color: var(--err); }
+.vd .rq-fld.bad .rq-inp:focus { box-shadow: 0 0 0 3px rgba(180, 35, 24, .14); }
+.vd .rq-fld.bad > .rq-err { display: block; }
+
+/* When: one tap, optional. A phone shows the first choice full width and the other two side by side */
+.vd .rq-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.vd .rq-chip { position: relative; display: flex; min-width: 0; cursor: pointer; }
+.vd .rq-chip:first-child { grid-column: 1 / -1; }
+.vd .rq-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.vd .rq-chip span {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 46px; padding: 4px 8px;
+  border-radius: 12px; border: 1px solid var(--wo-line); background: var(--wo-field);
+  font: 500 16px/1.2 var(--text); color: var(--tx);
+}
+.vd .rq-chip input:checked + span { background: var(--tx); border-color: var(--tx); color: #FFF; }
+.vd .rq-pair { display: grid; gap: 18px; min-width: 0; }
+.vd .rq-pair > :only-child { grid-column: 1 / -1; } /* no "Where's the car?" (a shop): "Your car" takes the row */
+
+.vd .rq-email > summary {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 44px;
+  font: 600 16px/1.2 var(--text); color: var(--tx);
+}
+.vd .rq-email > summary .ic { font-size: 16px; }
+.vd .rq-email[open] > summary { display: none; }
+
+.vd .rq-send-bar { display: grid; gap: 10px; }
+/* always in the DOM (a live region that exists before it speaks), but takes no room while it has nothing to say */
+.vd .rq-send-err {
+  padding: 11px 13px; border-radius: 12px;
+  background: #FBE9E6; border: 1px solid rgba(180, 35, 24, .25);
+  font: 500 16px/1.4 var(--text); color: var(--err);
+}
+.vd .rq-send-err:empty { padding: 0; border: 0; background: none; margin-bottom: -10px; }
+.vd .rq-noscript { padding: 11px 13px; border-radius: 12px; background: var(--wo-2); font: 500 16px/1.4 var(--text); color: var(--tx); }
+.vd .rq-fix-note { padding: 8px 11px; border-radius: 10px; background: var(--wo-2); font: 500 16px/1.4 var(--text); color: var(--tx); }
+.vd .rq-send { margin-top: 2px; }
+.vd .rq-send[disabled] { cursor: progress; background: #F9A15C; }
+.vd .rq-foot { text-align: center; font: 500 16px/1.4 var(--text); color: var(--tx-2); }
+
+/* ------------------------------------------------- sent */
+.vd .rq-sent { margin-top: 14px; }
+.vd .rq-sent-p { font: 400 16px/1.5 var(--text); color: var(--tx); }
+.vd .rq-recap { margin-top: 14px; padding: 4px 14px; border-radius: 14px; background: var(--wo-field); border: 1px solid var(--wo-line); }
+.vd .rq-recap > div { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 10px; padding: 9px 0; border-top: 1px solid var(--wo-line); }
+.vd .rq-recap > div:first-child { border-top: 0; }
+.vd .rq-recap dt { font: 500 16px/1.4 var(--text); color: var(--tx-3); }
+.vd .rq-recap dd { min-width: 0; font: 600 16px/1.4 var(--text); color: var(--tx); overflow-wrap: anywhere; }
+.vd .rq-acts { margin-top: 12px; display: grid; justify-items: start; gap: 2px; }
+.vd .rq-fix, .vd .rq-back {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 44px; padding: 0;
+  background: none; border: 0; text-align: left;
+  font: 600 16px/1.2 var(--text); color: var(--tx);
+}
+.vd .rq-fix .ic { font-size: 16px; flex: none; }
+.vd .rq-back { text-decoration: underline; text-underline-offset: 3px; }
+.vd .rq-another {
+  margin: 6px 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 46px; padding: 0 18px 0 14px;
+  border-radius: 999px; border: 1.5px solid var(--tx); background: transparent;
+  font: 650 16px/1.2 var(--text); color: var(--tx);
+}
+.vd .rq-another .ic { font-size: 16px; }
+
+/* ------------------------------------------------- the steps, with the script (no script: one plain form) */
+.vd .rq-wo.rq-js[data-step="1"] .rq-step2 { display: none; }
+.vd .rq-wo.rq-js[data-step="2"] .rq-step1 { display: none; }
+.vd .rq-wo.rq-js[data-step="2"] .rq-step2 { margin-top: 0; }
+/* a job picked: "For:", the job and "Change" stay on one row; a long job name wraps inside its own box */
+.vd .rq-wo.rq-js[data-step="2"] .rq-picked {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 8px 8px 14px; border-radius: 14px;
+  background: var(--wo-2);
+  font: 400 16px/1.3 var(--text); color: var(--tx-2);
+}
+
+/* ------------------------------------------------- the sheet (a phone or a tablet, with the script) */
+.vd .rq-scrim {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(9, 10, 11, .52);
+  touch-action: none;
+  animation: rq-fade .3s var(--ease);
+}
+.vd .rq-wo.is-sheet {
+  position: fixed; z-index: 1001;
+  left: 0; right: 0; bottom: 0;
+  max-height: calc(100vh - 14px);
+  max-height: calc(100dvh - 14px);
+  overflow-y: auto; overscroll-behavior: contain;
+  border-radius: 22px 22px 0 0;
+  padding: 8px 18px calc(22px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .3);
+  animation: rq-sheet-in .42s var(--ease);
+}
+.vd .rq-wo.is-sheet.settle { transition: transform .25s var(--ease); }
+@keyframes rq-sheet-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes rq-fade { from { opacity: 0; } to { opacity: 1; } }
+.vd .rq-wo.is-sheet .rq-bar { display: flex; justify-content: center; position: relative; height: 34px; margin-bottom: 4px; touch-action: none; }
+.vd .rq-grab { width: 40px; height: 5px; margin-top: 6px; border-radius: 999px; background: rgba(20, 23, 26, .2); }
+.vd .rq-x {
+  position: absolute; right: -8px; top: 0;
+  width: 44px; height: 44px; padding: 0;
+  display: grid; place-items: center;
+  border-radius: 999px; border: 0; background: transparent; color: var(--tx);
+}
+/* a round button's corners are tappable too: a 44px circle holds only a 31px square */
+.vd .rq-x::after { content: ""; position: absolute; inset: 0; }
+.vd .rq-x .ic { font-size: 22px; }
+.vd .rq-wo.is-sheet .rq-perf::before, .vd .rq-wo.is-sheet .rq-perf::after { display: none; }
+.vd .rq-wo.is-sheet[data-step="2"]:not(.done) .rq-steps, .vd .rq-wo.is-sheet[data-step="2"]:not(.done) .rq-perf { display: none; }
+.vd .rq-wo.is-sheet[data-step="2"]:not(.done) .rq-h { margin-bottom: 16px; }
+.vd .rq-wo.is-sheet[data-step="2"]:not(.done) .rq-h h2 { font-size: 25px; }
+
+/* a laptop opened it: the rail rings once, so the eye finds it */
+.vd .rq-wo.rq-flash { animation: rq-flash 1s var(--ease-out); }
+@keyframes rq-flash { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, .55); } 100% { box-shadow: 0 0 0 16px rgba(249, 115, 22, 0); } }
+
+/* ------------------------------------------------- the dock (a phone, with the script) */
+.vd .rq-dock {
+  position: fixed; z-index: 990;
+  left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom));
+  transform: translateY(150%); opacity: 0; pointer-events: none;
+  transition: transform .42s var(--ease), opacity .3s var(--ease);
+}
+.vd .rq-dock.on { transform: none; opacity: 1; pointer-events: auto; }
+.vd .rq-dock-in {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px;
+  border-radius: 22px;
+  background: rgba(14, 16, 18, .9);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .07) inset, 0 16px 40px -10px rgba(0, 0, 0, .55);
+}
+.vd .rq-dock-face { width: 46px; height: 46px; border-radius: 13px; overflow: hidden; flex: none; background: #2E3338; }
+.vd .rq-dock-req { min-width: 0; flex: 1 1 0; padding-left: 7px; }
+.vd .rq-dock-req small { display: block; font: 500 13px/1.2 var(--text); color: var(--on-ink-3); }
+.vd .rq-dock-req b { display: block; font: 600 16px/1.25 var(--text); color: var(--on-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vd .rq-dock .cta { flex: 1 1 auto; width: auto; min-width: 0; min-height: 48px; padding: 4px 5px 4px 18px; font-size: 16px; box-shadow: none; }
+.vd .rq-dock .cta-ic { width: 38px; height: 38px; }
+/* first name only, one line: an ellipsis rather than a second line when even that does not fit */
+.vd .rq-dock .cta-t { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* a chosen job: the dock names it and the button shrinks to "Finish" */
+.vd .rq-dock.has-job .cta { flex: none; padding-left: 16px; }
+@media (max-width: 359.98px) {
+  .vd .rq-dock .rq-dock-face { display: none; }
+}
+
+/* ------------------------------------------------------------ tablet */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  /* the sheet and the dock are a phone's width, centred: a 1000px sheet stretched its pills */
+  .vd .rq-wo.is-sheet { max-width: 600px; margin-inline: auto; }
+  .vd .rq-dock-in { max-width: 520px; margin-inline: auto; }
+  .vd .rq-pair { grid-template-columns: 1fr 1fr; column-gap: 12px; }
+}
+
+/* ------------------------------------------------------------ laptop: the rail */
+@media (min-width: 1024px) {
+  /* sticky inside its column (the page's grid item, which runs the height of the page), never taller than the
+     window, scrolling inside itself with Send pinned at its bottom edge */
+  .vd .rq-wo {
+    position: sticky; top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: 18px 22px 0;
+    scrollbar-width: thin;
+    scroll-padding-top: 12px; scroll-padding-bottom: 118px;
+  }
+  .vd .rq-wo.done { padding-bottom: 18px; }
+  .vd .rq-h { gap: 10px; }
+  .vd .rq-face { width: 36px; height: 36px; border-radius: 10px; }
+  .vd .rq-h h2 { font-size: 27px; }
+  .vd .rq-steps { margin-top: 12px; gap: 4px; }
+  .vd .rq-steps li { gap: 9px; font-size: 14px; line-height: 1.3; }
+  .vd .rq-st { width: 24px; height: 24px; margin-top: -3px; }
+  .vd .rq-st .ic { font-size: 13px; }
+  .vd .rq-steps::before { left: 11.5px; top: 12px; bottom: 12px; }
+  .vd .rq-perf { margin: 12px -22px 12px; }
+  .vd .rq-perf::before, .vd .rq-perf::after { display: none; }
+
+  /* everything at once: both steps show; once a job is picked the tiles fold into "For: job / Change" */
+  .vd .rq-wo.rq-js[data-step] .rq-step1 { display: block; }
+  .vd .rq-wo.rq-js[data-step] .rq-step2 { display: grid; margin-top: 12px; }
+  .vd .rq-wo.rq-js[data-step] .rq-picked { display: none; }
+  .vd .rq-wo.rq-js.has-job:not(.show-tiles) .rq-step1 { display: none; }
+  .vd .rq-wo.rq-js.has-job:not(.show-tiles) .rq-step2 { margin-top: 0; }
+  .vd .rq-wo.rq-js.has-job:not(.show-tiles) .rq-picked {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 6px 6px 12px; border-radius: 12px;
+    background: var(--wo-2);
+    font: 400 14px/1.3 var(--text); color: var(--tx-2);
+  }
+  .vd .rq-change { min-height: 36px; font-size: 14px; }
+  .vd .rq-change::after { inset: -5px 0; } /* 34 inside its border + 2 x 5: 44 to a pointer */
+
+  .vd .rq-step1 > legend { font-size: 15px; }
+  .vd .rq-tiles { margin-top: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .vd .rq-wo:not(.is-sheet) .rq-tile > span { min-height: 46px; padding: 7px 10px; gap: 2px; border-radius: 10px; }
+  .vd .rq-tile b { font-size: 14px; line-height: 1.24; }
+  .vd .rq-tile small { font-size: 13px; }
+  .vd .rq-wo:not(.is-sheet) .rq-tile--ns > span { min-height: 44px; }
+  .vd .rq-tile--ns.p2 { grid-column: auto; }
+  .vd .rq-tile--ns.d2 { grid-column: span 2; }
+  .vd .rq-tile--ns.d3 { grid-column: 1 / -1; }
+  /* 2, 5 or 8 services: the last one takes two cells, "Not sure" its own row: no hole, no three-line squeeze */
+  .vd .rq-step1 > .rq-tiles > .rq-tile:nth-child(3n+2):nth-last-child(2) { grid-column: span 2; }
+  .vd .rq-more > summary { position: relative; min-height: 36px; font-size: 14px; }
+  .vd .rq-more > summary::after { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; }
+
+  .vd .rq-step2 { gap: 10px; }
+  .vd .rq-note { grid-template-columns: 30px minmax(0, 1fr); column-gap: 8px; }
+  .vd .rq-note.noface { grid-template-columns: minmax(0, 1fr); }
+  .vd .rq-note-face { width: 30px; height: 30px; border-radius: 8px; }
+  .vd .rq-note blockquote { padding: 8px 12px; font-size: 16px; line-height: 1.35; }
+  .vd .rq-note figcaption { font-size: 13px; }
+  .vd .rq-fld { gap: 5px; }
+  .vd .rq-fld > label, .vd .rq-fld > legend { font-size: 14px; }
+  .vd fieldset.rq-fld > legend { padding-bottom: 5px; }
+  .vd .rq-inp { min-height: 44px; padding: 9px 12px; font-size: 15px; } /* 44, not 42: a field is a target too */
+  .vd textarea.rq-inp { min-height: 64px; height: 64px; }
+  .vd .rq-help { font-size: 14px; line-height: 1.35; }
+  .vd .rq-err { font-size: 14px; line-height: 1.35; }
+  .vd .rq-chips { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+  .vd .rq-chip span { flex: none; min-height: 36px; padding: 0 13px; border-radius: 999px; font-size: 14px; }
+  .vd .rq-chip::after { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; }
+  .vd .rq-pair { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vd .rq-email > summary { position: relative; min-height: 34px; font-size: 14px; }
+  .vd .rq-email > summary::after { content: ""; position: absolute; left: 0; right: 0; top: -5px; bottom: -5px; }
+
+  .vd .rq-send-bar {
+    position: sticky; bottom: 0; z-index: 2;
+    margin: 0 -22px; padding: 10px 22px 14px; gap: 6px;
+    background: var(--wo);
+    border-top: 1px solid var(--wo-line);
+    box-shadow: 0 -10px 14px -10px rgba(70, 54, 8, .25);
+  }
+  /* softens the words sliced while she scrolls the rail; short, so at rest it never greys out a whole control */
+  .vd .rq-send-bar::before {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 14px; pointer-events: none;
+    background: linear-gradient(rgba(251, 244, 216, 0), var(--wo));
+  }
+  .vd .rq-send-err:empty { margin-bottom: -6px; }
+  .vd .rq-send-err, .vd .rq-fix-note, .vd .rq-noscript { font-size: 14px; }
+  .vd .rq-send { min-height: 48px; padding-top: 4px; padding-bottom: 4px; }
+  .vd .rq-send .cta-ic { width: 38px; height: 38px; }
+  .vd .rq-foot { font-size: 14px; }
+
+  .vd .rq-dock { display: none !important; }
+}
+/* a short laptop window (1366x768, 1280x720, a MacBook Air's ~790px): the steps go and the box shrinks, so her name
+   and number sit above the pinned Send when the rail first shows */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .vd .rq-wo { top: 8px; max-height: calc(100vh - 16px); }
+  .vd .rq-steps, .vd .rq-perf { display: none; }
+  .vd .rq-h { margin-bottom: 12px; }
+  .vd .rq-h h2 { font-size: 24px; }
+  .vd .rq-note { grid-template-columns: minmax(0, 1fr); }
+  .vd .rq-note-face { display: none; }
+  .vd .rq-note figcaption { grid-column: 1; }
+  .vd textarea.rq-inp { min-height: 62px; height: 62px; }
+  .vd .rq-step2 { gap: 8px; }
+}
+/* a narrow laptop rail: tiles two across, so a long service name is never squeezed into three lines */
+@media (min-width: 1024px) and (max-width: 1100px) {
+  .vd .rq-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vd .rq-tile--ns.d2, .vd .rq-tile--ns.d3 { grid-column: auto; }
+  .vd .rq-tile--ns.p2 { grid-column: 1 / -1; }
+  .vd .rq-step1 > .rq-tiles > .rq-tile:nth-child(3n+2):nth-last-child(2) { grid-column: auto; }
+}
+
+/* a pointer: everything she can click answers it */
+@media (hover: hover) and (pointer: fine) {
+  .vd .rq-tile > span:hover, .vd .rq-chip span:hover { border-color: rgba(20, 23, 26, .45); }
+  .vd .rq-tile input:checked + span:hover, .vd .rq-chip input:checked + span:hover { border-color: var(--tx); }
+  .vd .rq-more > summary:hover, .vd .rq-email > summary:hover, .vd .rq-fix:hover, .vd .rq-change:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .vd .rq-another:hover { background: rgba(20, 23, 26, .05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vd .rq-wo.is-sheet, .vd .rq-scrim, .vd .rq-wo.rq-flash { animation: none; }
+  .vd .rq-dock, .vd .rq-tile > span, .vd .rq-inp, .vd .rq-wo.is-sheet.settle { transition: none; }
+}
