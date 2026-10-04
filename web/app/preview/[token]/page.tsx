@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import Storefront from '@/components/Storefront';
 import { loadPreviewPage } from '@/lib/pageData';
 import '@/app/[slug]/profile.css';
+import '@/app/[slug]/vandoor.css';
+import '@/app/[slug]/vandoor-body.css';
 
 // PRIVATE PREVIEW  ::  trymyku.com/preview/<token>
 //

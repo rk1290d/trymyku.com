@@ -12,6 +12,10 @@ import type { PageGap, PageGapKey } from '@/lib/gaps';
 import type { PageData } from '@/lib/pageData';
 import { isSampleId, pitchSamples, samplePrice } from '@/lib/samples';
 import Hero from '@/components/vd/Hero';
+import { BodySections, Footer, SampleNotice } from '@/components/vd/Body';
+import Viewer from '@/components/vd/Viewer';
+import { vdSign, vdText, vdVoice } from '@/components/vd/fonts';
+import { MONTHS, month as vdMonth, moneyOrNull, type BodyInput } from '@/lib/vd/body';
 import { planHero, T as VD, type HeroInput, type ProofCell, type WorkType } from '@/lib/vd/hero';
 
 // The smallest confirmed-job count the fact strip will print. Mirrors
@@ -1593,6 +1597,98 @@ export default function Storefront({
   const heroPlan = planHero(heroInput);
   const heroTitle = `${heroInput.biz ?? page.full_name}${cityShort ? ` | Mechanic in ${cityShort}` : ''}`;
 
+  /* ── THE VAN DOOR BODY (2026-10-04, stage 2) ─────────────────────────────
+     Same rule as the hero: built only from values derived above, so the honesty
+     rules this file enforces carry over (samples only on a pitch page and always
+     labelled, the record only on a page he claimed, counts from rows rendered). */
+  const svcByName = new Map(services.map((x) => [x.label.toLowerCase(), x.label]));
+  const vdTickets: BodyInput['tickets'] = shared.map((j) => {
+    const sample = isSampleId(j.id);
+    const price = sample ? null : j.price_label?.trim() || null;
+    return {
+      key: j.id,
+      vehicle: j.vehicle?.trim() || 'Vehicle',
+      service: j.service?.trim() || null,
+      price,
+      priceIsNum: Boolean(price && /^\$[\d,]+$/.test(price)),
+      when: sample ? null : vdMonth(j.done_on),
+      town: sample ? null : j.town?.trim() || null,
+      caption: sample ? null : j.caption?.trim() || null,
+      photo: sample || unclaimed ? null : j.photo_url || null,
+      sample,
+      askService: j.service ? svcByName.get(j.service.trim().toLowerCase()) ?? null : null,
+    };
+  });
+  const vdLedgerRows = unclaimed
+    ? []
+    : verified.slice(0, 12).map((v) => ({
+        key: v.id,
+        vehicle: v.vehicle?.trim() || 'Vehicle',
+        job: [v.service?.trim(), v.town?.trim()].filter(Boolean).join(', ') || null,
+        amount: moneyOrNull(v.price),
+        when: vdMonth(v.completed_at),
+      }));
+  const createdMs = page.created_at ? new Date(page.created_at).getTime() : NaN;
+  const vdSince =
+    !unclaimed && Number.isFinite(createdMs) && Date.now() - createdMs >= 100 * 86_400_000
+      ? `On Myku since ${MONTHS[new Date(createdMs).getMonth()]} ${new Date(createdMs).getFullYear()}`
+      : null;
+  const bodyInput: BodyInput = {
+    first,
+    name: page.full_name,
+    claimed: !unclaimed,
+    tickets: vdTickets,
+    ledger: vdLedgerRows.length ? { rows: vdLedgerRows, total: verified.length } : null,
+    services,
+    myku:
+      hasRating && !sampleReviews
+        ? {
+            rating: ratingNum,
+            count: reviewCount,
+            reviews: reviews.map((r) => ({ key: r.id, rating: r.rating, text: r.text, by: vdMonth(r.created_at) ?? '' })),
+          }
+        : null,
+    google: google
+      ? {
+          rating: google.rating,
+          count: google.count,
+          url: google.url,
+          reviews: google.reviews.map((r, i) => ({
+            key: `g${i}`,
+            rating: r.rating ?? 0,
+            text: r.text?.trim() || null,
+            author: r.author?.trim() || null,
+            authorUrl: r.author && r.authorUrl && /^https:\/\//.test(r.authorUrl) ? r.authorUrl : null,
+            by: r.author?.trim()
+              ? r.when
+                ? ` on Google, ${r.when}`
+                : ' on Google'
+              : r.when
+                ? `A Google user, ${r.when}`
+                : 'A Google user',
+          })),
+        }
+      : null,
+    publicRating: unclaimed ? publicRating : null,
+    sampleReviews: sampleReviews
+      ? reviews.map((r) => ({ key: r.id, rating: r.rating, text: r.text, by: 'Sample' }))
+      : [],
+    meet: {
+      face: !unclaimed && showPortrait && page.photo_url ? page.photo_url : null,
+      bio: bioParas,
+      years: page.years_experience ?? null,
+      area: heroPlan.area,
+      hours: heroPlan.hours,
+      workType: vdWorkType,
+      city,
+      certs,
+      insurance: !unclaimed && Boolean(page.has_insurance),
+      socials: links.map((l) => ({ key: l.key, label: l.label, url: l.url })),
+    },
+    since: vdSince,
+  };
+  const vdFonts = `${vdSign.variable} ${vdText.variable} ${vdVoice.variable}`;
+
   return (
     <>
       {/* Live only. A preview is not a public business listing, so it
@@ -1656,7 +1752,6 @@ export default function Storefront({
             that opens by asking a stranger to claim it reads as a stub. */}
 
         <Hero input={heroInput} plan={heroPlan} pageUrl={`${SITE_URL}/${page.slug}`} pageTitle={heroTitle} />
-        <StorefrontFx bare />
 
         {/* HIS OWN AD, on an unclaimed pitch page only (2026-09-22). Kept from the earlier hero: the view
             returns ad_image_url only while the page is unclaimed, and only from our own storage. */}
@@ -1670,822 +1765,53 @@ export default function Storefront({
           ) : null}
         </div>
 
-        {/* ============ WORK ============ */}
-        {/* THE SECTION THE SPARSE PAGE USED TO SWALLOW WHOLE. With no jobs the
-            page simply omitted its most valuable band and re-numbered around
-            it so smoothly that nothing hinted the section existed. That is
-            graceful degradation hiding the gap from the one person who could
-            close it, and it is the reason this feature was asked for. */}
-        {wall.length > 0 || gap('work') ? (
-          <section
-            className={`mp-work${wall.length === 0 ? ' mp-gap-sec' : ''}`}
-            id="work"
-          >
-            <div className="mp-wrap">
-              <div className="mp-sec-head mp-rv">
-                {/* The real numbering does not move. A ghost section takes no
-                    number, because the numbers count the sections a visitor
-                    gets, and lending one to an example would make the preview
-                    disagree with the page it is previewing. */}
-                {numWork ? (
-                  <span className="mp-sec-num">{numWork}</span>
-                ) : (
-                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
-                )}
-                <h2>The work</h2>
-                <span className="mp-rule" aria-hidden="true" />
-                <span className="mp-sec-meta tnum">{wall.length} listed</span>
-              </div>
-              <div className="mp-cards">
-                {wall.slice(0, 10).map(jobCard)}
-                {gap('work')
-                  ? GHOST_JOBS.slice(wall.length, GAP_JOBS_MIN).map((j) =>
-                      ghostJobCard(
-                        j,
-                        wall.length === 0
-                          ? 'Example'
-                          : `Example · Add ${GAP_JOBS_MIN - wall.length} more`
-                      )
-                    )
-                  : null}
-              </div>
-              {wall.length > 10 ? (
-                // Native <details>. Zero JavaScript, so the overflow opens
-                // with scripting disabled.
-                <details className="mp-more">
-                  <summary>Show all {wall.length} jobs</summary>
-                  <div className="mp-cards">{wall.slice(10).map(jobCard)}</div>
-                </details>
-              ) : null}
-              {gapFix(
-                'work',
-                'Three jobs is when this section starts to carry the page. Add past work:'
+        {/* ============ THE VAN DOOR BODY (stage 2) ============ */}
+        <div className={`vd vd-body ${vdFonts}`}>
+          <div className="vd-page">
+            <div className="vd-main">
+              <SampleNotice show={unclaimed && (sampleCount > 0 || sampleReviews)} />
+              <BodySections b={bodyInput} />
+            </div>
+            <aside className="vd-rail" aria-label={`Get a price from ${first}`}>
+              <span className="vd-anchor" id="quote" aria-hidden="true" />
+              {mode === 'preview' ? (
+                <div className="vd-inert">
+                  <h2>{`Get a price from ${first}`}</h2>
+                  <p>Requests turn on when you publish. Visitors pick the job and leave a number here, and it lands in your Myku inbox.</p>
+                  {requestNote ? <p className="vd-inert-note">{requestNote}</p> : null}
+                </div>
+              ) : (
+                <div className="mp vd-legacy-ask">
+                  <section className="mp-ink mp-quote" id="ask">
+                    <div className="mp-wrap">
+                      <div className="mp-composer">
+                        <QuoteForm
+                          mechanicId={page.id}
+                          slug={page.slug}
+                          mechanicFirstName={first}
+                          unclaimed={unclaimed}
+                          sectionNum={numAsk}
+                          services={services.map((x) => ({ name: x.label, priceFrom: x.priceFrom }))}
+                        />
+                      </div>
+                    </div>
+                  </section>
+                </div>
               )}
-            </div>
-          </section>
-        ) : null}
-
-        {/* ============ ABOUT ============ */}
-        {hasAbout || hasAboutGhost ? (
-          <section className={`mp-ink mp-bio${hasAbout ? '' : ' mp-gap-sec'}`}>
-            <svg className="mp-bio-mark" viewBox="0 0 400 400" aria-hidden="true">
-              <g fill="none" stroke="#F97316" strokeWidth="1">
-                <circle cx="200" cy="200" r="196" />
-                <circle cx="200" cy="200" r="150" />
-                <circle cx="200" cy="200" r="104" />
-                <circle cx="200" cy="200" r="58" />
-                <g strokeWidth="2">
-                  <path d="M200 4v22M200 374v22M4 200h22M374 200h22" />
-                  <path d="M62 62l16 16M338 62l-16 16M62 338l16-16M338 338l-16-16" />
-                </g>
-              </g>
-            </svg>
-            <div className="mp-wrap">
-              {/* "About {first}", never "Who you get". The second is the
-                  language of an assignment: it says Myku is sending you this
-                  person and presupposes the job will happen. */}
-              <div className="mp-sec-head mp-rv" style={{ color: '#fff' }}>
-                {numAbout ? (
-                  <span className="mp-sec-num">{numAbout}</span>
-                ) : (
-                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
-                )}
-                <h2>About {first}</h2>
-                <span className="mp-rule" aria-hidden="true" />
-              </div>
-
-              <div className="mp-bio-inner">
-                <div>
-                  {bioParas.length > 0 ? (
-                    <div className="mp-rv">
-                      {bioParas.map((p, i) => (
-                        <p className="mp-bio-p" key={i}>
-                          {p}
-                        </p>
-                      ))}
-                      {/* AFTER the words, not before: the drop cap belongs to
-                          the first paragraph, and a qualification reads best
-                          in the same breath as the thing it qualifies. Only on
-                          an unclaimed page, where these are not his words to
-                          Myku but a listing Myku copied. */}
-                      {bioSource ? <p className="mp-bio-src">{bioSource}</p> : null}
-                    </div>
-                  ) : null}
-
-                  {/* THIRD PERSON, and it says so out loud: "a short bio reads
-                      like this". The bio is the one block on this page written
-                      in the first person, so an example in his voice would be
-                      words put in his mouth on his own page, which is the
-                      failure the unclaimed-page rules were written about. No
-                      name, no town, no trade claimed as his. */}
-                  {gap('bio') ? (
-                    <div className="mp-gap-only">
-                      <div className="mp-gap mp-gap-block">
-                        {gapTag()}
-                        <p className="mp-bio-p mp-gap-bio">
-                          A short bio reads like this: ten years on brakes, suspension and
-                          check-engine diagnostics; comes to the driveway with the tools for most
-                          jobs; no work starts before the price is agreed.
-                        </p>
-                      </div>
-                      {gapFix('bio', 'Write yours:')}
-                    </div>
-                  ) : null}
-
-                  {/* Paperwork. The qualification sits adjacent to the claim,
-                      same size, same breath. That adjacency IS the feature:
-                      never render one without the other. */}
-                  {credentials.length > 0 ? (
-                    <div className="mp-rv mp-rv-d1">
-                      <div className="mp-cred">
-                        <DocCheck />
-                        <span>{credentials.join(' · ')}</span>
-                      </div>
-                      <p className="mp-qual">
-                        Myku checked these documents. That is not a recommendation.
-                      </p>
-                    </div>
-                  ) : null}
-
-                  {/* The paperwork line he does not have yet. It carries an
-                      INFO mark, not the DocCheck the real row uses: a tick
-                      beside the words "ID verified" is the page stating a
-                      checked fact, and it must never appear next to something
-                      Myku has not checked, even inside a dashed box. */}
-                  {gap('verify') ? (
-                    <div className="mp-gap-only">
-                      <div className="mp-cred mp-gap">
-                        <InfoMark />
-                        <span>
-                          {gapTag()}
-                          <br />
-                          ID verified · Insurance on file
-                        </span>
-                      </div>
-                      {gapFix('verify', 'Send your documents:')}
-                    </div>
-                  ) : null}
-
-                  {/* Every href here passed the per-platform host allowlist
-                      in socialLinks(); the label is Myku's word for where the
-                      link goes, so the host must actually be that place. */}
-                  {links.length > 0 ? (
-                    <div className="mp-rv mp-rv-d1 mp-find">
-                      <span className="k">Find {first} online</span>
-                      <span className="v">
-                        {links.map((l, i) => (
-                          <span key={l.key}>
-                            {i > 0 ? <span className="sep"> · </span> : null}
-                            <a href={l.url} rel="noopener nofollow ugc" target="_blank">
-                              {l.label}
-                            </a>
-                          </span>
-                        ))}
-                      </span>
-                    </div>
-                  ) : null}
-
-                  {/* PLAIN TEXT, never anchors. Every real link on this page
-                      passed a per-platform host allowlist, and a sample cannot
-                      pass anything: an <a> here would be a live control that
-                      goes nowhere, on the page whose whole job is not being
-                      broken in front of a customer. */}
-                  {gap('links') ? (
-                    <div className="mp-gap-only">
-                      <div className="mp-find mp-gap mp-gap-block">
-                        {gapTag()}
-                        <span className="k">Find {first} online</span>
-                        <span className="v">Instagram · Facebook</span>
-                      </div>
-                      {gapFix('links', 'Add yours:')}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div>
-                  {hasArea || hasAreaGhost ? (
-                    <div className={`mp-area mp-rv mp-rv-d2${hasArea ? '' : ' mp-gap-only'}`}>
-                      <div className="mp-area-head">
-                        <span className="k">Service area</span>
-                        <span className="mp-rule" aria-hidden="true" />
-                      </div>
-
-                      <div className="mp-area-in">
-                        <div className="mp-radar" aria-hidden="true">
-                          <svg viewBox="0 0 220 220" preserveAspectRatio="xMidYMid meet" role="presentation" focusable="false">
-                            <defs>
-                              {/* Knocks the rings and crosshair out from
-                                  behind the labels so the geometry never
-                                  strikes through the words. */}
-                              <mask id="mp-rlab" maskUnits="userSpaceOnUse" x="0" y="0" width="220" height="220">
-                                <rect width="220" height="220" fill="#fff" />
-                                {cityUpper ? (
-                                  <rect
-                                    x={110 - cityLabelBox(cityUpper).w / 2}
-                                    y={126}
-                                    width={cityLabelBox(cityUpper).w}
-                                    height="13"
-                                    rx="6"
-                                    fill="#000"
-                                  />
-                                ) : null}
-                                {townPins.map((p, i) => (
-                                  <rect
-                                    key={`${p.label}-${i}`}
-                                    x={p.lx - p.w / 2}
-                                    y={p.ly - p.h / 2}
-                                    width={p.w}
-                                    height={p.h}
-                                    rx="6"
-                                    fill="#000"
-                                  />
-                                ))}
-                              </mask>
-                              <pattern id="mp-rdots" width="13" height="13" patternUnits="userSpaceOnUse">
-                                <circle cx="1.3" cy="1.3" r="1" fill="rgba(214,222,232,.16)" />
-                              </pattern>
-                              <clipPath id="mp-rclip">
-                                <circle cx="110" cy="110" r="92" />
-                              </clipPath>
-                            </defs>
-
-                            <g clipPath="url(#mp-rclip)">
-                              <rect x="0" y="0" width="220" height="220" fill="url(#mp-rdots)" />
-                            </g>
-
-                            <g mask="url(#mp-rlab)">
-                              {/* The crosshair, the ticks and the brackets are
-                                  the plate itself: they locate a centre and
-                                  claim no distance, so they draw on every page.
-                                  The three RINGS are the radius (R_OUTER is it,
-                                  to scale), so they draw only when there is a
-                                  radius and a centre to measure from. See
-                                  `toScale` above for why. */}
-                              <path className="fld dr d1" pathLength="100" d="M110 20v70M110 130v70M20 110h70M130 110h70" />
-                              {toScale ? (
-                                <>
-                                  <circle className="ring dr d2" pathLength="100" cx="110" cy="110" r="88" />
-                                  <circle className="ring dash fade" cx="110" cy="110" r="62" />
-                                  <circle className="ring dr d3" pathLength="100" cx="110" cy="110" r="36" />
-                                </>
-                              ) : null}
-                            </g>
-
-                            {/* Knocked out behind the labels like the rings
-                                are. These two groups sit at r 86 to 96 and r
-                                133, which is exactly where a name pushed
-                                towards the edge of the plate ends up, and
-                                without the mask a stroke ran behind the
-                                letters. */}
-                            <g className="fld fade" strokeWidth="1.4" mask="url(#mp-rlab)">
-                              <path d="M110 14v10M110 196v10M14 110h10M196 110h10" />
-                            </g>
-                            <g className="fld fade" strokeWidth="1.2" opacity=".7" mask="url(#mp-rlab)">
-                              <path d="M16 32V16h16M188 16h16v16M204 188v16h-16M32 204H16v-16" />
-                            </g>
-
-                            <g className="fade">
-                              {townPins.map((p, i) => (
-                                <g key={`${p.label}-${i}`}>
-                                  {/* The dot is the claim. The leader is what
-                                      keeps the name attached to it once the
-                                      name has had to move to stay legible. */}
-                                  {p.leader ? (
-                                    <line
-                                      className="ldr"
-                                      x1={p.leader.x1}
-                                      y1={p.leader.y1}
-                                      x2={p.leader.x2}
-                                      y2={p.leader.y2}
-                                    />
-                                  ) : null}
-                                  <circle className="twn" cx={p.x} cy={p.y} r="2.8" />
-                                  <text
-                                    className="lbl-s"
-                                    x={p.lx}
-                                    y={p.baseline}
-                                    textAnchor="middle"
-                                    fontSize="7.5"
-                                  >
-                                    {p.lines.map((line, li) => (
-                                      <tspan key={`${line}-${li}`} x={p.lx} dy={li === 0 ? 0 : LINE_H}>
-                                        {line}
-                                      </tspan>
-                                    ))}
-                                  </text>
-                                </g>
-                              ))}
-                            </g>
-
-                            <circle className="halo fade" cx="110" cy="110" r="15" strokeDasharray="2 5" />
-                            <g className="acc" transform="translate(110,110) scale(.92) translate(-12,-13)">
-                              <path className="dr d4" pathLength="100" d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z" />
-                              <circle className="dr d4" pathLength="100" cx="12" cy="10" r="2.7" />
-                            </g>
-                            {cityUpper ? (
-                              <text className="lbl-t fade" x="110" y="134" textAnchor="middle" fontSize="9">
-                                {cityUpper}
-                              </text>
-                            ) : null}
-                          </svg>
-                        </div>
-
-                        <div className="mp-area-rows">
-                          {/* The FULL city string, not the short form. */}
-                          {city ? (
-                            <div className="mp-arow">
-                              <span className="k">Based in</span>
-                              <span className="v">
-                                <PinGlyph /> {city}
-                              </span>
-                            </div>
-                          ) : null}
-                          {/* NO TOWN AND NO METRO IN ANY SAMPLE. A real place
-                              name in a dashed box on a page about a specific
-                              mechanic is the one example a reader could take
-                              for a fact about him, and the site never declares
-                              geography of its own anyway. */}
-                          {gap('city') ? (
-                            <div className="mp-arow mp-gap">
-                              <span className="k">Based in {gapTag()}</span>
-                              <span className="v">
-                                <PinGlyph /> Your city
-                              </span>
-                              {gapFix('city', 'Set it:')}
-                            </div>
-                          ) : null}
-                          {work ? (
-                            <div className="mp-arow">
-                              <span className="k">How {first} works</span>
-                              <span className="v">
-                                <VanGlyph /> {work}
-                              </span>
-                            </div>
-                          ) : null}
-                          {workTypeGhost ? (
-                            <div className="mp-arow mp-gap">
-                              <span className="k">
-                                How {first} works {gapTag()}
-                              </span>
-                              <span className="v">
-                                <VanGlyph /> Mobile
-                              </span>
-                              {gapFix('numbers', 'Pick how you work:')}
-                            </div>
-                          ) : null}
-                          {/* Both labelled as HIS listing on a published page,
-                              like the certifications row: typed hours and typed
-                              towns are his claims, not Myku's confirmation. On
-                              an unclaimed page the author is Myku, so the label
-                              drops his name rather than lying about who wrote
-                              it. Built above. */}
-                          {hours ? (
-                            <div className="mp-arow">
-                              <span className="k">{hoursLabel}</span>
-                              <span className="v">{hours}</span>
-                            </div>
-                          ) : null}
-                          {gap('hours') ? (
-                            <div className="mp-arow mp-gap">
-                              <span className="k">
-                                {hoursLabel} {gapTag()}
-                              </span>
-                              <span className="v">Mon to Fri 8am to 6pm, Sat by appointment</span>
-                              {gapFix('hours', 'Set yours:')}
-                            </div>
-                          ) : null}
-                          {towns.length > 0 ? (
-                            <div className="mp-arow">
-                              <span className="k">{townsLabel}</span>
-                              <span className="v">{listOf(towns)}</span>
-                            </div>
-                          ) : null}
-                          {years > 0 && !yearsInStrip ? (
-                            <div className="mp-arow">
-                              <span className="k">Years working</span>
-                              <span className="v tnum">
-                                {years} {years === 1 ? 'year' : 'years'}
-                              </span>
-                            </div>
-                          ) : null}
-                          {/* Radius is a ROW, never a ring. The drawing places
-                              every pin at its real distance and real bearing,
-                              which is the whole point of it, so it gets no
-                              sample rings and no sample pins: a drawn ring on
-                              a page with no distance set is the page claiming
-                              coverage nobody entered. */}
-                          {gap('radius') ? (
-                            <div className="mp-arow mp-gap">
-                              <span className="k">Travels up to {gapTag()}</span>
-                              <span className="v tnum">25 miles</span>
-                              {gapFix(
-                                'radius',
-                                'With a distance set, the drawing above shows rings to scale and the real towns inside them. Set it:'
-                              )}
-                            </div>
-                          ) : null}
-                          {yearsGhost ? (
-                            <div className="mp-arow mp-gap">
-                              <span className="k">Years working {gapTag()}</span>
-                              <span className="v tnum">12 years</span>
-                              {gapFix('numbers', 'Confirm your numbers:')}
-                            </div>
-                          ) : null}
-                          {certs.length > 0 ? (
-                            <div className="mp-arow">
-                              {/* Labelled as HIS claim. The paperwork line in
-                                  the other column is the only place Myku says
-                                  it reviewed anything, and these typed names
-                                  are not that. */}
-                              <span className="k">Certifications {first} lists</span>
-                              <span className="v">{certs.join(', ')}</span>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      {/* The one sentence that stops a range ring reading as
-                          a coverage guarantee. Job provenance is NOT restated
-                          here: the cards and the How Myku Works block already
-                          carry it, and a third repetition made the page sound
-                          like it was apologizing for its own mechanic. */}
-                      {/* ATTRIBUTION IS LOAD-BEARING, not decoration. The ring
-                          renders coverage he CLAIMS, where the old pins were
-                          derived from jobs on the page. That stays inside the
-                          trust rules only because this sentence names whoever
-                          the distance came from, exactly like his hours. If the
-                          source clause is ever dropped, the ring silently
-                          becomes a Myku assertion about where he works. On an
-                          unclaimed page the distance came off the listing with
-                          everything else, so the sentence says so instead of
-                          crediting a man who never set it. */}
-                      <p className="mp-area-note">
-                        {toScale && radiusMi && areaCentre ? (
-                          <>
-                            Drawn to scale around {areaCentre.name}, at the distance{' '}
-                            {unclaimed ? 'in the listing' : `${first} lists`}.{' '}
-                            {townPins.length > 0
-                              ? 'The towns are real places inside it, not a promise he covers each one. '
-                              : ''}
-                          </>
-                        ) : (
-                          'A drawing, not a live map. '
-                        )}
-                        Ask {first} about your address.
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
-        {/* ============ SERVICES ============ */}
-        {services.length > 0 || gap('services') ? (
-          <section
-            className={`mp-services mp-grain${services.length === 0 ? ' mp-gap-sec' : ''}`}
-            id="services"
-          >
-            <div className="mp-wrap" style={{ position: 'relative' }}>
-              <div className="mp-sec-head mp-rv">
-                {numServices ? (
-                  <span className="mp-sec-num">{numServices}</span>
-                ) : (
-                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
-                )}
-                <h2>What {first} does</h2>
-                <span className="mp-rule" aria-hidden="true" />
-              </div>
-              <div className="mp-srv-list">
-                {/* A row with no price prints the name alone. The two kinds sit
-                    together without apology, and the page never invents a
-                    "Quoted". On a published page a missing price means the
-                    mechanic chose not to name one; on an unclaimed page it
-                    means the listing Myku copied did not carry one. Neither
-                    reading is printed, because the source line below the list
-                    already says which page this is. */}
-                {shownServices.map((s) => (
-                  <div className={s.priceFrom ? 'mp-srv mp-rv' : 'mp-srv np mp-rv'} key={s.label}>
-                    <span className="n">{s.label}</span>
-                    <span className="dots" aria-hidden="true" />
-                    {s.priceFrom ? (
-                      <span className="p">
-                        from <b>${s.priceFrom}</b>
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-                {/* Sample rows, AFTER his own: enough to fill a short list to
-                    three, or one priced line under a list with no prices on
-                    it. Prices are round numbers on ordinary jobs, so nothing
-                    here can be mistaken for a figure he set: the row it sits in
-                    is dashed and tagged, and the real ones above it are not. */}
-                {ghostServiceRows.map((s) => (
-                  <div className="mp-srv mp-gap" key={`g-${s.label}`}>
-                    <span className="n">{s.label}</span>
-                    <span className="dots" aria-hidden="true" />
-                    <span className="p">
-                      from <b>${s.priceFrom}</b> {gapTag()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {/* AFTER the rows, not before, and inside the same section: a
-                  qualification reads best in the same breath as the thing it
-                  qualifies, which is where the bio's source line and the
-                  paperwork qualification both sit. Unclaimed only. */}
-              {servicesSource ? <p className="mp-srv-src">{servicesSource}</p> : null}
-              {/* "One is enough" is load-bearing. Prices are optional per
-                  service, and without it he reads the marker as "price every
-                  row", which is a rule the page does not have. */}
-              {servicesGap?.sub.reason === 'unpriced'
-                ? gapFix(
-                    'services',
-                    'Add a starting price in the app:',
-                    'None of your services shows a price yet. One is enough.'
-                  )
-                : gapFix('services', 'Add what you do and what it starts at:')}
-            </div>
-          </section>
-        ) : null}
-
-        {/* ============ HIS REVIEWS ELSEWHERE (Google, or a rating summary) ============ */}
-        {externalReviews ? (
-          <section className="mp-reviews" id="reviews">
-            <div className="mp-wrap">
-              <div className="mp-sec-head mp-rv">
-                {numReviews ? <span className="mp-sec-num">{numReviews}</span> : null}
-                <h2>What people said</h2>
-                <span className="mp-rule" aria-hidden="true" />
-                <span className="mp-sec-meta tnum">
-                  {google
-                    ? `${google.rating.toFixed(1)} out of 5 · ${google.count} reviews on Google`
-                    : publicRating
-                      ? `${publicRating.rating.toFixed(1)} out of 5 · ${publicRating.count} reviews on ${publicRating.source}`
-                      : null}
-                </span>
-              </div>
-              {google ? (
-                <>
-                  <div className="mp-rev-list">
-                    {google.reviews.map((r, i) => (
-                      <div className="mp-rev mp-rv mp-grev" key={`g-${i}`}>
-                        <QuoteGlyph />
-                        <p className="mp-grev-text">{r.text}</p>
-                        <div className="att">
-                          {`${r.rating ?? '?'} out of 5${r.when ? ` · ${r.when}` : ''} · `}
-                          {r.author ? (
-                            r.authorUrl && /^https:\/\//.test(r.authorUrl) ? (
-                              <a href={r.authorUrl} target="_blank" rel="nofollow noopener noreferrer">{r.author}</a>
-                            ) : (
-                              r.author
-                            )
-                          ) : null}
-                          {' on Google'}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mp-bio-src">
-                    Reviews from Google, shown as Google returns them.{' '}
-                    {google.url ? (
-                      <a href={google.url} target="_blank" rel="nofollow noopener noreferrer">
-                        See all {google.count} on Google
-                        <span className="mp-arrow" aria-hidden="true">&#8594;</span>
-                      </a>
-                    ) : null}
-                  </p>
-                </>
-              ) : publicRating ? (
-                <div className="mp-rev-list">
-                  <div className="mp-rev mp-rv">
-                    {publicRating.highlights.length ? (
-                      <ul className="mp-grev-highlights">
-                        {publicRating.highlights.map((h) => <li key={h}>{h}</li>)}
-                      </ul>
-                    ) : null}
-                    <div className="att">
-                      <a href={publicRating.url} target="_blank" rel="nofollow noopener noreferrer">
-                        Read his reviews on {publicRating.source}
-                        <span className="mp-arrow" aria-hidden="true">&#8594;</span>
-                      </a>
-                    </div>
-                  </div>
-                  <p className="mp-bio-src">A summary written by Myku from his public reviews, not quotes.</p>
-                </div>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        {/* ============ REVIEWS ============ */}
-        {reviews.length > 0 || gap('reviews') ? (
-          <section
-            className={`mp-reviews${reviews.length === 0 ? ' mp-gap-sec' : ''}`}
-            id="reviews"
-          >
-            <div className="mp-wrap">
-              <div className="mp-sec-head mp-rv">
-                {numReviews ? (
-                  <span className="mp-sec-num">{numReviews}</span>
-                ) : (
-                  <span className="mp-sec-num mp-gap-num">{gapTag()}</span>
-                )}
-                <h2>What people said</h2>
-                <span className="mp-rule" aria-hidden="true" />
-                {hasRating ? (
-                  <span className="mp-sec-meta tnum">
-                    {ratingNum.toFixed(1)} out of 5 · {reviewCount} review
-                    {reviewCount === 1 ? '' : 's'}
-                  </span>
-                ) : sampleRating > 0 ? (
-                  <span className="mp-sec-meta tnum">
-                    {sampleRating.toFixed(1)} out of 5 · {reviewCount} sample reviews
-                  </span>
-                ) : null}
-              </div>
-              <div className="mp-rev-list">
-                {reviews.slice(0, 5).map(reviewCard)}
-                {/* The one gap he cannot close by typing, so it must not read
-                    as something he forgot to enter. No link either: there is
-                    no editor to open, and a marker pointing at nothing is
-                    worse than no marker. */}
-                {gap('reviews') ? (
-                  <div className="mp-rev mp-gap">
-                    {gapTag()}
-                    <p>Showed up on time, explained the problem, price matched the quote.</p>
-                    <div className="att">5 out of 5 · 2 weeks ago</div>
-                  </div>
-                ) : null}
-              </div>
-              {gapFix(
-                'reviews',
-                'Reviews arrive on their own: when a job runs through Myku, the customer is asked to rate it. There is nothing to type.'
-              )}
-              {reviews.length > 5 ? (
-                // A DELTA: the header counts the same rows this list holds,
-                // so "Show 15 more" under "20 reviews" adds up on the page.
-                <details className="mp-more">
-                  <summary>Show {reviews.length - 5} more reviews</summary>
-                  <div className="mp-rev-list">{reviews.slice(5).map(reviewCard)}</div>
-                </details>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
-        {/* ============ THE ASK ============ */}
-        <section className="mp-ink mp-quote" id="ask">
-          <span className="mp-anchor" id="quote" aria-hidden="true" />
-          <div className="mp-glow" aria-hidden="true" />
-          <div className="mp-wrap">
-            {/* An unclaimed page used to render a "This page is not live yet"
-                box here instead of the form. Removed 2026-09-23: the page is
-                the pitch and must read live. It takes requests the honest way
-                it was already built for: QuoteForm words every line for an
-                unclaimed page ("Myku passes the request to <first>"), and
-                notify-lead routes an unclaimed page's request to every admin
-                channel (push, email, in-app notice), so a customer who does
-                use it reaches a person, and that person can forward it to the
-                mechanic as the best pitch there is. */}
-            {mode === 'preview' ? (
-              // The mechanic's own preview of a published-shaped page. Same
-              // number, same heading, so he sees the shape of what visitors
-              // get, but no live form: a preview takes no requests.
-              <div className="mp-composer mp-composer-inert" aria-disabled="true">
-                {/* His request note, in the same slot the live page puts it:
-                    above the section number, because the live branch prints it
-                    before QuoteForm and QuoteForm owns that number. It is the
-                    one line on the page he wrote himself for the people who
-                    fill in the form, and the preview is the only place he can
-                    check it before he shares the link. Missing here, a saved
-                    note and a broken save look identical. */}
-                {requestNote ? (
-                  <p className="mp-note">
-                    <span className="k">A note from {first}</span> {requestNote}
-                  </p>
-                ) : null}
-                {gap('note') ? (
-                  <div className="mp-gap-only">
-                    <p className="mp-note mp-gap mp-gap-block">
-                      <span className="k">A note from you {gapTag()}</span> Send the year, make and
-                      model, and a photo of the part if you have one. Replies come the same day.
-                    </p>
-                    {gapFix('note', 'Write yours:')}
-                  </div>
-                ) : null}
-                {numAsk ? <span className="mp-sec-num">{numAsk} · Your quote</span> : null}
-                <h2>Get a price from {first}</h2>
-                <p className="mp-lead">
-                  Requests turn on when you publish. Visitors will pick the job and leave a
-                  number here, and it lands in your Myku inbox.
-                </p>
-              </div>
-            ) : (
-              <div className="mp-composer">
-                {/* His own words above the form. Live branch only: a page
-                    that takes no requests has no business printing a note
-                    about how to send one. */}
-                {requestNote && !unclaimed ? (
-                  <p className="mp-note">
-                    <span className="k">A note from {first}</span> {requestNote}
-                  </p>
-                ) : null}
-                {/* The heading and sub-line live INSIDE QuoteForm so the sent
-                    state swaps the whole ask at once. Left here they would sit
-                    above "Request sent." telling the visitor to fill in a form
-                    that no longer exists. */}
-                <QuoteForm
-                  mechanicId={page.id}
-                  slug={page.slug}
-                  mechanicFirstName={first}
-                  unclaimed={unclaimed}
-                  sectionNum={numAsk}
-                  services={services.map((s) => ({ name: s.label, priceFrom: s.priceFrom }))}
-                />
-              </div>
-            )}
-
-            <div className="mp-trust">
-              <div className="mp-trust-h">
-                {/* Info mark, never a shield or a check: this panel says Myku
-                    does NOT vouch, and a protection badge would assert the
-                    opposite of the sentence it introduces. */}
-                <InfoMark w={1.9} />
-                <h2>How Myku works</h2>
-              </div>
-              {howParas.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
+            </aside>
           </div>
-
-          <div className="mp-wrap mp-ft">
-            {/* No disclaimer down here. Ending the page on "does not endorse
-                or guarantee" made the last word a warning, which reads as
-                shady exactly where a visitor decides whether to trust the
-                page. The full statement lives once, in How Myku Works,
-                directly above. The footer just says whose page this is. */}
-            <div className="note">
-              {page.full_name}
-              {cityShort ? ` · ${cityShort}` : ''}.{' '}
-              {/* "His page" is an ownership claim, so a preview he has not
-                  claimed cannot say it. */}
-              {unclaimed ? 'Hosted by ' : `${first}’s page, hosted by `}
-              <Link href="/">Myku</Link>.
-            </div>
-            {/* No App Store badge on a mechanic's storefront. A customer's
-                first job must never hit a download pitch: it costs the
-                conversion, and the mechanic stops sharing a link that loses
-                him work. The app is pitched on the customer's SECOND job.
-                No phone number and no tel: link either. Contact runs through
-                the composer. */}
-            <div className="links">
-              <Link href="/privacy">Privacy</Link>
-              <Link href="/terms">Terms</Link>
-              <Link href="/support">Support</Link>
-              {/* A disclosure, not a bare mailto. On a machine with no mail app a mailto
-                  click does visibly nothing, and this link's text was "Report this page",
-                  so a failed click left the visitor with no address and no door: the same
-                  lesson the claim buttons above already learned (see claimHref). The panel
-                  spells the address out so the action works even when the link cannot,
-                  and the mailto stays as the convenience path. Native <details>, like the
-                  two overflow disclosures: zero JavaScript, opens with scripting disabled. */}
-              <details className="mp-report">
-                <summary>Report this page</summary>
-                <p>
-                  Something wrong here? Write to <a href={reportMailto}>{SUPPORT_EMAIL}</a> with the page
-                  address, <span className="mp-report-url">trymyku.com/{page.slug}</span>, and what is
-                  wrong. If this page is about you and you did not ask for it, say so.
-                </p>
-              </details>
-            </div>
-          </div>
-        </section>
-
-        {/* Sticky ask. Hidden whenever the hero or the composer is on screen,
-            hidden entirely on desktop and after a successful send, and never
-            rendered on a preview page, which takes no requests. It carries no
-            numbers: the labor rate is the mechanic's own figure and must not
-            repeat down the whole page in Myku's voice. */}
-        {!unclaimed && mode === 'live' ? (
-          <div className="mp-dock" id="mp-dock">
-            <span className="note">
-              Free to send
-              <br />
-              No account
-            </span>
-            <a className="mp-btn mp-btn-o" href="#quote">
-              <span className="lbl">
-                Get a quote
-                <span className="mp-arrow" aria-hidden="true">
-                  &#8594;
-                </span>
-              </span>
-            </a>
-          </div>
-        ) : null}
+          <Footer b={bodyInput}>
+            <details className="ft-report">
+              <summary>Report this page</summary>
+              <p>
+                Something wrong here? Write to <a href={reportMailto}>{SUPPORT_EMAIL}</a> with the page address,{' '}
+                <span className="nw">trymyku.com/{page.slug}</span>, and what is wrong. If this page is about you and
+                you did not ask for it, say so.
+              </p>
+            </details>
+          </Footer>
+          <Viewer />
+        </div>
       </main>
     </>
   );

@@ -6,6 +6,7 @@ import { loadPublicPage } from '@/lib/pageData';
 import { firstName } from '@/lib/format';
 import './profile.css';
 import './vandoor.css';
+import './vandoor-body.css';
 
 export const revalidate = 60;
 
