@@ -239,17 +239,25 @@ function Services({ b }: { b: BodyInput }) {
       <li key={s.label}>
         <a className="brow" href={`?service=${encodeURIComponent(s.label)}#quote`} data-ask="" data-ask-service={s.label}>
           <span className="brow-n">{s.label}</span>
-          <span className="brow-dots" aria-hidden="true" />
-          <span className="brow-p">
-            {price ? (
-              <>
-                <small>from</small>
-                <b>{price}</b>
-              </>
-            ) : (
-              <span className="ask">Ask for a price</span>
-            )}
-          </span>
+          {/* With no price anywhere on his list, "Ask for a price" on every row only crowds the names: the board is
+              then a clean list of what he does, and each row is still a door into the request. */}
+          {priced ? (
+            <>
+              <span className="brow-dots" aria-hidden="true" />
+              <span className="brow-p">
+                {price ? (
+                  <>
+                    <small>from</small>
+                    <b>{price}</b>
+                  </>
+                ) : (
+                  <span className="ask">Ask for a price</span>
+                )}
+              </span>
+            </>
+          ) : (
+            <span className="brow-fill" aria-hidden="true" />
+          )}
           <span className="brow-go">
             <Icon name="caret-right" />
           </span>

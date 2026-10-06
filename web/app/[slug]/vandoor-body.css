@@ -466,3 +466,4 @@
 
 /* where his bio came from is Myku's line, never in his voice face (the type is provenance) */
 .vd .bio .src-line { font: 400 16px/1.45 var(--text); color: var(--tx-2); }
+.vd .brow-fill { flex: 1 1 0; }
