@@ -320,3 +320,149 @@
 @media (prefers-reduced-motion: reduce) {
   .vd .row, .vd .disc > summary .ic { transition: none; }
 }
+
+/* ==========================================================================
+   FINISH (2026-10-06): "it looks bland... missing the classy taste."
+   The body moves from cool grey to a warm ivory with a little grain, the boxes
+   give way to rules and whitespace where a box was only decoration, his services
+   hang on a dark price board, ratings are gold, and each section opens with a
+   small label over its heading. One warm grey family throughout.
+   ========================================================================== */
+.vd {
+  --paper: #F3EEE4;
+  --paper-2: #EAE3D5;
+  --card: #FBF8F1;
+  --line: rgba(64, 46, 24, .12);
+  --line-2: rgba(64, 46, 24, .22);
+  --tx: #1B1814;
+  --tx-2: #554C42;
+  --tx-3: #6E6458;
+  --grain-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .24 0 0 0 0 .18 0 0 0 0 .1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --shadow-card: 0 1px 0 rgba(64, 46, 24, .05), 0 18px 32px -24px rgba(64, 40, 16, .5);
+}
+.vd.vd-body {
+  background:
+    var(--grain-light),
+    radial-gradient(80% 40% at 50% 0%, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 70%),
+    var(--paper);
+}
+
+/* section openings: a small brass-ruled label, then the heading with real presence */
+.vd .kicker {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+  font: 600 12px/1 var(--text);
+  letter-spacing: .18em; text-transform: uppercase;
+  color: #8C6A34;
+}
+.vd .kicker::before { content: ""; width: 22px; height: 1px; background: var(--brass); }
+.vd .sec { padding-top: 46px; }
+.vd .sec-h h2 { font-size: 38px; line-height: .98; letter-spacing: .002em; }
+.vd .src-line { color: var(--tx-2); }
+
+/* the sample notice: a quiet line between rules, not a grey box */
+.vd .notice { background: none; border-radius: 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.vd .notice .ic { color: #8C6A34; }
+
+/* his work: cards of good stock that lift a little under a finger or a pointer */
+.vd .tk { background: var(--card); border-color: var(--line); box-shadow: var(--shadow-card); transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+.vd .tk-ph { background: #D9D2C4; }
+.vd .tk-perf::before, .vd .tk-perf::after { background: var(--paper); }
+.vd .tk-when { letter-spacing: .04em; }
+.vd a.tk:active { transform: scale(.99); }
+@media (hover: hover) {
+  .vd a.tk:hover { transform: translateY(-3px); box-shadow: 0 1px 0 rgba(64, 46, 24, .05), 0 26px 40px -26px rgba(64, 40, 16, .6); }
+}
+.vd .sample-tag { border-color: rgba(140, 106, 52, .45); color: #6B5126; background: var(--card); }
+
+/* the Myku record: teal, and set like a receipt (tabular figures, hairlines) */
+.vd .ledger { box-shadow: var(--shadow-card); }
+.vd .lg-amt, .vd .lg-n, .vd .lg-when { font-variant-numeric: tabular-nums; }
+
+/* the price board: his list hangs on the wall like a shop board, ink with a brass inner frame. Every row is still
+   a door into the request (44px and more), the name wraps inside its own room, and the leader dots run to the price */
+.vd .board {
+  position: relative;
+  margin-top: 18px;
+  padding: 12px 20px 10px;
+  border-radius: 20px;
+  background:
+    var(--grain-dark),
+    radial-gradient(110% 70% at 0% 0%, rgba(255, 190, 120, .09) 0%, rgba(255, 190, 120, 0) 60%),
+    #131211;
+  color: #EFE8DA;
+  box-shadow: 0 26px 44px -30px rgba(40, 24, 8, .75), 0 2px 0 rgba(0, 0, 0, .04);
+}
+.vd .board::before {
+  content: ""; position: absolute; inset: 7px; pointer-events: none;
+  border: 1px solid rgba(201, 160, 92, .3); border-radius: 14px;
+}
+.vd .board-rows { position: relative; }
+.vd .board-rows > li + li { border-top: 1px solid rgba(255, 240, 220, .08); }
+.vd .brow {
+  display: flex; align-items: baseline; gap: 10px;
+  min-height: 54px; padding: 15px 2px 13px;
+  color: inherit; text-decoration: none;
+  transition: color .2s var(--ease);
+}
+.vd .brow-n { flex: 0 1 auto; min-width: 0; font: 600 17px/1.3 var(--text); color: #F6F0E4; overflow-wrap: anywhere; text-wrap: balance; }
+.vd .brow-dots { flex: 1 1 24px; min-width: 18px; border-bottom: 2px dotted rgba(243, 236, 222, .26); transform: translateY(-5px); }
+.vd .brow-p { flex: none; display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+.vd .brow-p small { font: 500 13px/1 var(--text); color: rgba(243, 236, 222, .62); }
+.vd .brow-p b { font: 800 27px/1 var(--sign); color: #FFF8EC; font-variant-numeric: tabular-nums; font-variation-settings: 'opsz' 72; }
+.vd .brow-p .ask { font: 500 14px/1.2 var(--text); color: rgba(243, 236, 222, .78); }
+.vd .brow-go { flex: none; align-self: center; color: var(--brass); display: grid; place-items: center; transition: transform .2s var(--ease); }
+.vd .brow-go .ic { font-size: 17px; }
+.vd .brow:active { color: #FFFFFF; }
+@media (hover: hover) {
+  .vd .brow:hover .brow-go { transform: translateX(3px); }
+  .vd .brow:hover .brow-n { color: #FFFFFF; }
+}
+.vd .board-more { margin: 0; border-top: 1px solid rgba(255, 240, 220, .08); }
+.vd .board-more > summary { color: #EFE8DA; padding-left: 2px; }
+.vd .board-more > .board-rows > li:first-child { border-top: 1px solid rgba(255, 240, 220, .08); }
+
+/* reviews: no grey boxes. A big number, gold stars, the source; then the reviews, given room */
+.vd .rv-head, .vd .rv-block--myku .rv-head { background: none; padding: 0 0 14px; border-radius: 0; border-bottom: 1px solid var(--line); }
+.vd .rv-num { font-size: 62px; line-height: .86; font-variant-numeric: tabular-nums; }
+.vd .stars { color: var(--star); }
+.vd .stars .st-off, .vd .rv-head .stars .st-off { color: rgba(64, 46, 24, .18); }
+.vd .rv { padding: 18px 0 16px; }
+.vd .rv .rv-t { font-size: 17px; line-height: 1.55; }
+.vd .rv .rv-by { color: var(--tx-3); }
+
+/* meet him: his first paragraph leads, the facts are a ruled list, not a grid of tiles */
+.vd .bio > p:first-child, .vd .bio .bio-head { font-size: 21px; line-height: 1.42; }
+.vd .meet-ph { box-shadow: 0 0 0 1px rgba(64, 46, 24, .1), 0 24px 40px -28px rgba(40, 24, 8, .6); }
+.vd .facts-grid { display: block; margin-top: 18px; border-top: 1px solid var(--line); }
+.vd .fct, .vd .fct.wide {
+  display: grid; grid-template-columns: minmax(7.5rem, 34%) minmax(0, 1fr); column-gap: 14px; align-items: baseline;
+  padding: 13px 0; background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
+}
+.vd .fct-k { font-size: 14px; color: var(--tx-3); }
+.vd .fct-v { margin-top: 0; }
+.vd .soc { background: var(--card); border-color: var(--line-2); }
+
+/* the footer: ink, with the band's brass pinstripe along its top edge */
+.vd .ft { background: var(--grain-dark), #0E1012; box-shadow: inset 0 1px 0 var(--brass-line), inset 0 5px 0 #0E1012, inset 0 6px 0 rgba(243, 236, 222, .1); }
+
+/* the request sits on the warmer ground */
+.vd .vd-rail { --rq-ground: var(--paper); }
+
+/* sections come up gently as they scroll in, where the browser can tie motion to scrolling. Where it cannot, or for
+   anyone who asked for less motion, they are simply there */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .vd .vd-main > .sec { animation: vdRise linear both; animation-timeline: view(); animation-range: entry 0% entry 30%; }
+  }
+}
+
+@media (min-width: 1024px) {
+  .vd .sec { padding-top: 64px; }
+  .vd .sec-h h2 { font-size: 48px; }
+  .vd .facts-grid { display: block; }
+  .vd .fct.wide { grid-column: auto; }
+}
+
+/* where his bio came from is Myku's line, never in his voice face (the type is provenance) */
+.vd .bio .src-line { font: 400 16px/1.45 var(--text); color: var(--tx-2); }

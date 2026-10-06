@@ -470,3 +470,83 @@ html:has(.vd), body:has(.vd) { background: #0E1012; }
   .vd .band.tmd2 .fact-hours { display: none; } .vd .band.tmd2 .area-l { display: none; } .vd .band.tmd2 .area-s { display: block; }
   .vd .band.dsmd .area-s .ds-sep, .vd .band.lsmd .lettering .ds-sep { display: none; } .vd .band.dsmd .area-s .ds-a, .vd .band.lsmd .lettering .ds-a { display: block; }
 }
+
+/* ==========================================================================
+   FINISH (2026-10-06). Rohaan, on the stage-2 preview: "better than the
+   previous version, but it looks bland... missing the taste. The classy
+   taste." Paint only in this block: colour, light, material and a short
+   entrance. Nothing here changes a size, a margin or a line, because the
+   phone hero's geometry is computed on the server (lib/vd/hero.ts) and the
+   button's place on screen one depends on it.
+   ========================================================================== */
+.vd {
+  /* film grain, light specks for the ink and dark specks for paper (vandoor-body.css) */
+  --grain-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .96 0 0 0 0 .9 0 0 0 .075 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --brass: #C9A05C;
+  --brass-line: rgba(201, 160, 92, .5);
+  --star: #E0AA3E;
+}
+/* the shop light: a warm lamp up and to the left, a cool rim low on the right, grain over all of it */
+.vd .band {
+  background:
+    var(--grain-dark),
+    linear-gradient(112deg, rgba(255, 255, 255, 0) 34%, rgba(255, 244, 228, .045) 46%, rgba(255, 244, 228, .012) 52%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(100% 62% at 6% -14%, rgba(255, 184, 108, .26) 0%, rgba(255, 184, 108, .08) 40%, rgba(255, 184, 108, 0) 68%),
+    radial-gradient(70% 45% at 104% 108%, rgba(120, 150, 170, .12) 0%, rgba(120, 150, 170, 0) 62%),
+    linear-gradient(180deg, #17161A 0%, #0F1013 55%, #0B0C0E 100%);
+}
+/* a coachbuilder's pinstripe: one brass line over one cream hairline */
+.vd .band::after { border-top-color: rgba(214, 172, 102, .78); border-bottom-color: rgba(243, 236, 222, .16); }
+.vd .band--nocover::before, .vd .door::before { border-top-color: rgba(243, 236, 222, .14); border-bottom-color: var(--brass-line); }
+/* his name in sign enamel: cream catching the light, with the shadow a painted letter throws */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .vd .biz {
+    background: linear-gradient(180deg, #FFFDF8 0%, #F4EDDF 46%, #DCD2BF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* the sign painter's drop shade: a brass offset shadow, the way lettering on a van door is done, then a soft cast */
+    filter: drop-shadow(.055em .055em 0 rgba(158, 104, 40, .92)) drop-shadow(0 14px 26px rgba(0, 0, 0, .42));
+  }
+}
+/* his face, framed: an ink mat and a brass hairline */
+.vd .face { box-shadow: 0 0 0 3px var(--ink), 0 0 0 4px rgba(201, 160, 92, .45), 0 16px 34px -12px rgba(0, 0, 0, .75); }
+.vd .cover::after {
+  background: linear-gradient(180deg, rgba(14, 16, 18, .55) 0%, rgba(14, 16, 18, 0) 30%, rgba(14, 16, 18, 0) 48%, rgba(20, 15, 10, .62) 80%, var(--ink) 100%);
+}
+.vd .headline { color: #F1EBDD; }
+.vd .pf-n, .vd .nums b { font-variant-numeric: tabular-nums; }
+.vd .pf-n .ic { color: var(--star); }
+.vd .pfl .ic { color: var(--star); }
+.vd .pfl--jobs .ic, .vd .pf--jobs .pf-n .ic { color: var(--teal-ink); }
+.vd .lettering { color: #D9D1C2; }
+.vd .lettering .ic { color: var(--brass); }
+.vd .cta { box-shadow: 0 1px 0 rgba(255, 255, 255, .32) inset, 0 -2px 0 rgba(120, 45, 0, .18) inset, 0 14px 30px -14px rgba(249, 115, 22, .75); }
+@media (hover: hover) {
+  .vd .cta:hover { filter: brightness(1.04) saturate(1.04); }
+}
+@media (min-width: 1024px) {
+  .vd .band {
+    background:
+      var(--grain-dark),
+      linear-gradient(112deg, rgba(255, 255, 255, 0) 30%, rgba(255, 244, 228, .04) 44%, rgba(255, 244, 228, .01) 50%, rgba(255, 255, 255, 0) 58%),
+      radial-gradient(55% 75% at 14% -10%, rgba(255, 184, 108, .24) 0%, rgba(255, 184, 108, .07) 40%, rgba(255, 184, 108, 0) 70%),
+      radial-gradient(45% 60% at 100% 110%, rgba(120, 150, 170, .09) 0%, rgba(120, 150, 170, 0) 62%),
+      linear-gradient(180deg, #141416 0%, #0E1012 55%, #0B0C0E 100%);
+  }
+}
+/* the entrance: the sign settles, then what he does, then the proof, then the ask. Backwards fill only, so nothing
+   stays held once it has played, and nothing plays for anyone who asked for less motion */
+@keyframes vdRise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes vdSettle { from { opacity: 0; transform: scale(1.045); } }
+@media (prefers-reduced-motion: no-preference) {
+  .vd .band .cover .cv { animation: vdSettle 1.1s cubic-bezier(.16, 1, .3, 1) backwards; }
+  .vd .band .cover .cv:nth-child(2) { animation-delay: .06s; }
+  .vd .band .cover .cv:nth-child(3) { animation-delay: .12s; }
+  .vd .band .ident, .vd .band .door > .biz { animation: vdRise .7s cubic-bezier(.16, 1, .3, 1) .05s backwards; }
+  .vd .band .who, .vd .band .door > .person, .vd .band .facts, .vd .band .lettering, .vd .band .door-sub { animation: vdRise .7s cubic-bezier(.16, 1, .3, 1) .14s backwards; }
+  .vd .band .headline { animation: vdRise .7s cubic-bezier(.16, 1, .3, 1) .22s backwards; }
+  .vd .band .proof, .vd .band .pf-lines, .vd .band .listing-note, .vd .band .nums { animation: vdRise .7s cubic-bezier(.16, 1, .3, 1) .3s backwards; }
+  .vd .band .hero-ask, .vd .band .cta-note { animation: vdRise .7s cubic-bezier(.16, 1, .3, 1) .38s backwards; }
+}

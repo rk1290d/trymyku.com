@@ -171,6 +171,7 @@ function Work({ b }: { b: BodyInput }) {
   return (
     <section className="sec work" id="work" aria-labelledby="work-h">
       <div className="sec-h">
+        <p className="kicker">{real.length || b.ledger ? 'The work' : 'Examples'}</p>
         <h2 id="work-h">{real.length || b.ledger ? `${b.first}’s work` : 'Sample work'}</h2>
         {src ? <SrcLine icon={src.icon}>{src.text}</SrcLine> : null}
         {!real.length && samples.length ? (
@@ -236,9 +237,10 @@ function Services({ b }: { b: BodyInput }) {
     const price = moneyOrNull(s.priceFrom);
     return (
       <li key={s.label}>
-        <a className="row" href={`?service=${encodeURIComponent(s.label)}#quote`} data-ask="" data-ask-service={s.label}>
-          <span className="row-n">{s.label}</span>
-          <span className="row-p">
+        <a className="brow" href={`?service=${encodeURIComponent(s.label)}#quote`} data-ask="" data-ask-service={s.label}>
+          <span className="brow-n">{s.label}</span>
+          <span className="brow-dots" aria-hidden="true" />
+          <span className="brow-p">
             {price ? (
               <>
                 <small>from</small>
@@ -248,7 +250,7 @@ function Services({ b }: { b: BodyInput }) {
               <span className="ask">Ask for a price</span>
             )}
           </span>
-          <span className="row-go">
+          <span className="brow-go">
             <Icon name="caret-right" />
           </span>
         </a>
@@ -260,6 +262,7 @@ function Services({ b }: { b: BodyInput }) {
   return (
     <section className="sec svc" id="services" aria-labelledby="svc-h">
       <div className="sec-h">
+        <p className="kicker">{priced ? 'Price list' : 'Services'}</p>
         <h2 id="svc-h">{priced ? 'Services and prices' : `What ${b.first} does`}</h2>
         {!b.claimed ? (
           <SrcLine icon="info">From public listings. Myku has not confirmed them.</SrcLine>
@@ -269,12 +272,14 @@ function Services({ b }: { b: BodyInput }) {
           <SrcLine icon="tag">{`Tap one to ask ${b.first} for a price.`}</SrcLine>
         )}
       </div>
-      <ul className={`rows${head.length % 2 ? ' odd' : ''}`}>{head.map(row)}</ul>
-      {rest.length ? (
-        <Disclosure closed={`All ${b.services.length} services`} opened="Show fewer">
-          <ul className="rows">{rest.map(row)}</ul>
-        </Disclosure>
-      ) : null}
+      <div className="board">
+        <ul className="board-rows">{head.map(row)}</ul>
+        {rest.length ? (
+          <Disclosure closed={`All ${b.services.length} services`} opened="Show fewer" className="more board-more">
+            <ul className="board-rows">{rest.map(row)}</ul>
+          </Disclosure>
+        ) : null}
+      </div>
     </section>
   );
 }
@@ -417,6 +422,7 @@ function Reviews({ b }: { b: BodyInput }) {
   return (
     <section className="sec rv-sec" id="reviews" aria-labelledby="rv-h">
       <div className="sec-h">
+        <p className="kicker">Reviews</p>
         <h2 id="rv-h">{b.myku || b.google ? 'What customers said' : 'Reviews'}</h2>
       </div>
       <div className="reviews-cols">{blocks}</div>
@@ -532,6 +538,7 @@ function Meet({ b }: { b: BodyInput }) {
   return (
     <section className="sec meet" id="about" aria-labelledby="meet-h">
       <div className="sec-h">
+        <p className="kicker">{personal ? 'About' : 'Where and when'}</p>
         <h2 id="meet-h">{personal ? `Meet ${b.first}` : tiles[0]?.k ?? 'Area'}</h2>
       </div>
       {m.face || bio ? (
